@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
-import Type from '../components/Type.astro';
-import { species, pokeUrl, iconUrl } from '../lib/data';
+import DexTable from '../components/DexTable.astro';
+import { species } from '../lib/data';
 import { TYPES } from '../lib/types';
 ---
 <Base description="Every Pokémon with stats, types, EV yields and Cobbleverse spawns.">
@@ -12,23 +12,7 @@ import { TYPES } from '../lib/types';
     <label class="note"><input type="checkbox" id="forms" /> Show forms</label>
   </div>
   <p class="note" id="count"></p>
-  <table class="data sortable" id="dex">
-    <thead><tr><th data-sort="num">#</th><th></th><th data-sort="text">Name</th><th>Type</th><th data-sort="text">EV yield</th>
-      <th data-sort="num">HP</th><th data-sort="num">Atk</th><th data-sort="num">Def</th><th data-sort="num">SpA</th><th data-sort="num">SpD</th><th data-sort="num">Spe</th><th data-sort="num">Total</th></tr></thead>
-    <tbody>
-      {species.map((s) => (
-        <tr data-q={`${s.name} ${s.num} ${Object.values(s.abilities).join(' ')}`.toLowerCase()} data-t={s.types.join(' ')} data-form={s.forme ? 1 : 0}>
-          <td class="n soft" data-v={s.num}>{String(s.num).padStart(4, '0')}</td>
-          <td><img class="sprite" src={iconUrl(s.art)} alt="" loading="lazy" width="40" height="40" /></td>
-          <td><a href={pokeUrl(s)}>{s.name}</a></td>
-          <td><div class="chips">{s.types.map((t: string) => <Type type={t} small />)}</div></td>
-          <td class="tgt">{s.ev.join(', ')}</td>
-          {['hp', 'atk', 'def', 'spa', 'spd', 'spe'].map((k) => <td class="n">{s.stats[k]}</td>)}
-          <td class="n"><b>{s.bst}</b></td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
+  <DexTable list={species} />
   <script>
     const q = document.getElementById('q') as HTMLInputElement, t = document.getElementById('t') as HTMLSelectElement, f = document.getElementById('forms') as HTMLInputElement;
     const rows = [...(document.getElementById('dex') as HTMLTableElement).tBodies[0].rows];

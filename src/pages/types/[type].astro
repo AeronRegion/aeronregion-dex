@@ -1,0 +1,102 @@
+---
+import Base from '../../layouts/Base.astro';
+import Type from '../../components/Type.astro';
+import Cat from '../../components/Cat.astro';
+import DexTable from '../../components/DexTable.astro';
+import { species, moves, moveUrl } from '../../lib/data';
+import { TYPES, CHART, typeColors } from '../../lib/types';
+export function getStaticPaths() {
+  return TYPES.map((t) => ({ params: { type: t.toLowerCase() }, props: { t } }));
+}
+const { t } = Astro.props as { t: string };
+const atk = (m: number) => TYPES.filter((d) => (CHART[t][d] ?? 1) === m);
+const def = (m: number) => TYPES.filter((a) => (CHART[a][t] ?? 1) === m);
+const mons = species.filter((s) => s.types.includes(t));
+const pure = mons.filter((s) => s.types.length === 1 && !s.forme).length;
+const catOrder: Record<string, number> = { Physical: 0, Special: 1, Status: 2 };
+const typeMoves = moves.filter((m) => m.type === t).sort((a, b) => catOrder[a.cat] - catOrder[b.cat] || a.name.localeCompare(b.name));
+const row = (label: string, list: string[], none = 'None') => ({ label, list, none });
+---
+<Base title={`${t} type`} description={`${t}-type Pokémon, moves and type matchups.`}>
+  <h1><span class="sw" style={`background:${typeColors[t]}`}></span>{t} type</h1>
+  <div class="two">
+    <div>
+      <h3 class="sec">Attacking with {t}</h3>
+      {[row('Super effective against', atk(2)), row('Not very effective against', atk(0.5)), row('No effect on', atk(0))].map((r) => (
+        <div class="mrow"><span>{r.label}</span><div class="chips">{r.list.length ? r.list.map((x) => <Type type={x} small />) : <span class="soft">{r.none}</span>}</div></div>
+      ))}
+    </div>
+    <div>
+      <h3 class="sec">Defending as {t}</h3>
+      {[row('Weak to', def(2)), row('Resists', def(0.5)), row('Immune to', def(0))].map((r) => (
+        <div class="mrow"><span>{r.label}</span><div class="chips">{r.list.length ? r.list.map((x) => <Type type={x} small />) : <span class="soft">{r.none}</span>}</div></div>
+      ))}
+    </div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="mons">Pokémon ({mons.filter((s) => !s.forme).length})</button>
+    <button role="tab" aria-selected="false" data-tab="moves">Moves ({typeMoves.length})</button>
+  </div>
+
+  <section data-panel="mons">
+    <div class="controls">
+      <input class="field" id="q" placeholder="Filter by name or ability…" style="flex:1;min-width:220px" />
+      <div class="seg" id="only"><button aria-pressed="true" data-o="all">All {t} types</button><button aria-pressed="false" data-o="pure">Pure {t} ({pure})</button></div>
+      <label class="note"><input type="checkbox" id="forms" /> Show forms</label>
+    </div>
+    <p class="note" id="count"></p>
+    <DexTable list={mons} />
+  </section>
+
+  <section data-panel="moves" hidden>
+    <table class="data sortable" style="margin-top:1rem">
+      <thead><tr><th data-sort="text">Move</th><th data-sort="num" class="sorted asc">Cat.</th><th data-sort="num">Pwr</th><th data-sort="num">Acc</th><th data-sort="num">PP</th><th data-sort="num" class="pri">Priority</th><th data-sort="text">Target</th><th>Effect</th></tr></thead>
+      <tbody>
+        {typeMoves.map((m) => (
+          <tr>
+            <td><a href={moveUrl(m)}>{m.name}</a></td>
+            <td data-v={catOrder[m.cat]}><Cat cat={m.cat} /></td>
+            <td class="n">{m.power ?? '—'}</td><td class="n">{m.acc ?? '—'}</td><td class="n">{m.pp}</td>
+            <td class={`n pri ${m.pri > 0 ? 'pos' : m.pri < 0 ? 'neg' : 'zero'}`} data-v={m.pri}>{m.pri > 0 ? `+${m.pri}` : m.pri}</td>
+            <td class="tgt">{m.target}</td><td class="tgt">{m.short}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+</Base>
+<script>
+  const tabs = document.querySelectorAll<HTMLButtonElement>('[data-tab]');
+  tabs.forEach((b) => b.addEventListener('click', () => {
+    tabs.forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+    document.querySelectorAll<HTMLElement>('[data-panel]').forEach((p) => (p.hidden = p.dataset.panel !== b.dataset.tab));
+  }));
+  const q = document.getElementById('q') as HTMLInputElement, f = document.getElementById('forms') as HTMLInputElement;
+  let pure = false;
+  const rows = [...document.querySelector<HTMLTableElement>('.dextable')!.tBodies[0].rows];
+  const run = () => {
+    const v = q.value.trim().toLowerCase(); let n = 0;
+    for (const r of rows) {
+      const ok = (!v || r.dataset.q!.includes(v)) && (f.checked || r.dataset.form === '0') && (!pure || !r.dataset.t!.includes(' '));
+      r.hidden = !ok; if (ok) n++;
+    }
+    document.getElementById('count')!.textContent = `${n} Pokémon`;
+  };
+  document.querySelectorAll<HTMLButtonElement>('#only button').forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll('#only button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    pure = b.dataset.o === 'pure'; run();
+  }));
+  [q, f].forEach((el) => el.addEventListener('input', run)); run();
+</script>
+<style>
+  h1 { display: flex; align-items: center; gap: .8rem; }
+  .sw { width: 1.1em; height: 1.1em; border: 3px solid rgb(0 0 0 / .3); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 2.2rem; }
+  .mrow { display: grid; grid-template-columns: 200px 1fr; gap: .6rem; padding: .45rem 0; border-bottom: 1px solid #e2c3bf; align-items: center; }
+  .mrow > span { color: var(--ink-soft); font-weight: 500; font-size: .95rem; }
+  .tabs { display: flex; border-bottom: 3px solid var(--ink); margin-top: 2rem; }
+  .tabs button { font: inherit; font-weight: 700; font-size: 1.05rem; padding: .5rem 1.6rem; background: none; border: 3px solid transparent; border-bottom: 0; margin-bottom: -3px; cursor: pointer; color: var(--ink); }
+  .tabs button[aria-selected='true'] { border-color: var(--ink); background: #fff7f5; }
+  @media (max-width: 800px) { .two { grid-template-columns: 1fr; gap: 0; } .mrow { grid-template-columns: 1fr; } }
+</style>

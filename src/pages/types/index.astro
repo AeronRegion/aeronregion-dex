@@ -1,15 +1,15 @@
 ---
-import Base from '../layouts/Base.astro';
-import { TYPES, CHART, typeColors, effLabel, effColor } from '../lib/types';
+import Base from '../../layouts/Base.astro';
+import { TYPES, CHART, typeColors, effLabel, effColor } from '../../lib/types';
 ---
 <Base title="Type chart" description="Pokémon type effectiveness chart.">
   <h1>Type chart</h1>
-  <p class="note">Attacking type down the side, defending type across the top. Blank = 1×.</p>
+  <p class="note">Attacking type down the side, defending type across the top. Blank = 1×. Click a type to see every Pokémon and move of that type.</p>
   <div class="scroll">
     <table class="tchart">
-      <tr><th class="corner">ATK ↓<br />DEF →</th>{TYPES.map((t) => <th id={t.toLowerCase()}><span style={`background:${typeColors[t]}`} title={t}>{t.slice(0, 3).toUpperCase()}</span></th>)}</tr>
+      <tr><th class="corner">ATK ↓<br />DEF →</th>{TYPES.map((t) => <th id={t.toLowerCase()}><a href={`/types/${t.toLowerCase()}/`} style={`background:${typeColors[t]}`} title={t}>{t.slice(0, 3).toUpperCase()}</a></th>)}</tr>
       {TYPES.map((a) => (
-        <tr><th><span style={`background:${typeColors[a]}`} title={a}>{a.slice(0, 3).toUpperCase()}</span></th>
+        <tr><th><a href={`/types/${a.toLowerCase()}/`} style={`background:${typeColors[a]}`} title={a}>{a.slice(0, 3).toUpperCase()}</a></th>
           {TYPES.map((d) => { const m = String(CHART[a][d] ?? 1); return <td title={`${a} → ${d}: ${m}×`} style={effColor[m] ? `background:${effColor[m]};color:#fff` : ''}>{effLabel[m]}</td>; })}
         </tr>
       ))}
@@ -20,7 +20,7 @@ import { TYPES, CHART, typeColors, effLabel, effColor } from '../lib/types';
   .scroll { overflow-x: auto; margin-top: 1rem; }
   .tchart { border-collapse: separate; border-spacing: 2px; width: auto; margin: 0 auto; }
   .tchart td, .tchart th { width: 54px; height: 34px; text-align: center; font-weight: 700; font-size: .82rem; padding: 0; }
-  .tchart th span { display: block; color: #fff; padding: .45rem 0; text-shadow: 0 1px 0 rgb(0 0 0 / .4); }
+  .tchart th a { display: block; color: #fff; text-decoration: none; padding: .45rem 0; text-shadow: 0 1px 0 rgb(0 0 0 / .4); }
   .tchart td { background: #fff7f5; border: 1px solid #e2c3bf; }
   .tchart tr:hover td { outline: 1px solid var(--ink-soft); }
   .corner { font-size: .68rem !important; color: var(--ink-soft); line-height: 1.15; }

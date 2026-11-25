@@ -80,7 +80,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
         {variants.map((v, i) => (
           <div class="dt" data-v={i} hidden={i > 0}>
             {TYPES.map((t, j) => { const m = v.cells[j]; const bg = effBg(m); return (
-              <div class="tc"><a href={`/types/#${t.toLowerCase()}`} style={`background:${typeColors[t]}`}>{t.slice(0, 3).toUpperCase()}</a><b class:list={{ chg: m !== plain[j] }} title={m !== plain[j] ? `Changed by ${v.names.join(' / ')} (normally ${effText(plain[j]) || '1'}×)` : undefined} style={bg ? `background:${bg};color:#fff` : ''}>{effText(m)}</b></div>
+              <div class="tc"><a href={`/types/${t.toLowerCase()}/`} style={`background:${typeColors[t]}`}>{t.slice(0, 3).toUpperCase()}</a><b class:list={{ chg: m !== plain[j] }} title={m !== plain[j] ? `Changed by ${v.names.join(' / ')} (normally ${effText(plain[j]) || '1'}×)` : undefined} style={bg ? `background:${bg};color:#fff` : ''}>{effText(m)}</b></div>
             ); })}
           </div>
         ))}
@@ -109,7 +109,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
 
     <h3 class="sec">Where to find</h3>
     <table class="loc">
-      <tr class="cv"><th>Cobbleverse {meta.cobbleverse ?? ''}<br /><span class="soft" style="font-weight:400;font-size:.8rem">Spawns from the pack's own files</span></th><td>
+      <tr class="cv"><th><span class="cvname"><img src="/cobbleverse.png" alt="" width="28" height="28" />Cobbleverse {meta.cobbleverse ?? ''}</span><span class="soft" style="font-weight:400;font-size:.8rem">Spawns from the pack's own files</span></th><td>
         {!meta.cobbleverse ? <span class="soft">Spawn data is being added.</span>
           : !s.cobbleverse ? <span class="soft">Not in Cobbleverse.</span>
           : spawns.length === 0 ? <span class="soft">Doesn't spawn naturally. Evolve, breed, or check special encounters.</span>
@@ -302,6 +302,8 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .loc td { padding: .5rem 0; border-bottom: 1px solid #e2c3bf; vertical-align: top; }
   .loc .cv th, .loc .cv td { background: #fff7f5; }
   .loc .cv th { border-left: 6px solid var(--teal); padding-left: .7rem; }
+  .cvname { display: flex; align-items: center; gap: .45rem; }
+  .cvname img { width: 28px; height: 28px; }
   .spawn { display: grid; grid-template-columns: auto 1fr auto 1fr; gap: .1rem 1.2rem; font-size: .9rem; padding: .2rem .6rem .4rem 0; }
   .spawn + .spawn { border-top: 1px dashed #e2c3bf; padding-top: .4rem; }
   .spawn span { color: var(--ink-soft); }
