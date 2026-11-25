@@ -1,0 +1,34 @@
+---
+import Base from '../layouts/Base.astro';
+const STATS = ['Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed'];
+// rows = raised stat, columns = lowered stat
+const N = [
+  ['Hardy', 'Lonely', 'Adamant', 'Naughty', 'Brave'],
+  ['Bold', 'Docile', 'Impish', 'Lax', 'Relaxed'],
+  ['Modest', 'Mild', 'Bashful', 'Rash', 'Quiet'],
+  ['Calm', 'Gentle', 'Careful', 'Quirky', 'Sassy'],
+  ['Timid', 'Hasty', 'Jolly', 'Naive', 'Serious'],
+];
+---
+<Base title="Natures" description="Nature chart: which stat each nature raises and lowers.">
+  <h1>Natures</h1>
+  <p class="note">Rows show the stat a nature raises by 10%, columns the stat it lowers by 10%. Natures on the diagonal change nothing.</p>
+  <div class="scroll">
+    <table class="nat">
+      <tr><th class="corner">Raises ↓<br />Lowers →</th>{STATS.map((s) => <th class="down">−{s}</th>)}</tr>
+      {N.map((row, i) => (
+        <tr><th class="up">+{STATS[i]}</th>{row.map((n, j) => <td class:list={{ neutral: i === j }}>{n}</td>)}</tr>
+      ))}
+    </table>
+  </div>
+</Base>
+<style>
+  .scroll { overflow-x: auto; margin-top: 1rem; }
+  .nat { width: auto; border-collapse: separate; border-spacing: 3px; }
+  .nat th, .nat td { padding: .6rem 1rem; text-align: center; min-width: 110px; }
+  .nat td { background: #fff7f5; border: 2px solid var(--ink); font-weight: 700; font-size: 1.02rem; }
+  .nat td.neutral { background: transparent; border-color: #d9b9b4; color: var(--ink-soft); font-weight: 500; }
+  .nat th.up { background: #3f8f5a; color: #fff; text-align: left; }
+  .nat th.down { background: #b0443b; color: #fff; }
+  .corner { font-size: .75rem; color: var(--ink-soft); line-height: 1.2; text-align: left !important; }
+</style>

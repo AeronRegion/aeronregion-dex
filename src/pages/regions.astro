@@ -1,0 +1,36 @@
+---
+import Base from '../layouts/Base.astro';
+import { groups, pokeUrl, iconUrl } from '../lib/data';
+const GENS = [
+  { gen: 1, region: 'Kanto', from: 1, to: 151 }, { gen: 2, region: 'Johto', from: 152, to: 251 },
+  { gen: 3, region: 'Hoenn', from: 252, to: 386 }, { gen: 4, region: 'Sinnoh', from: 387, to: 493 },
+  { gen: 5, region: 'Unova', from: 494, to: 649 }, { gen: 6, region: 'Kalos', from: 650, to: 721 },
+  { gen: 7, region: 'Alola', from: 722, to: 809 }, { gen: 8, region: 'Galar & Hisui', from: 810, to: 905 },
+  { gen: 9, region: 'Paldea', from: 906, to: 1025 },
+];
+const bases = groups.map((g) => g[0]);
+---
+<Base title="Pokémon by generation" description="Every Pokémon grouped by the generation and region it was introduced in.">
+  <h1>Pokémon by generation</h1>
+  <p class="note">Every Pokémon, grouped by the generation it was introduced in.</p>
+  <nav class="jump">{GENS.map((g) => <a href={`#gen-${g.gen}`}>Gen {g.gen}</a>)}</nav>
+  {GENS.map((g) => { const list = bases.filter((s) => s.num >= g.from && s.num <= g.to); return (
+    <section id={`gen-${g.gen}`}>
+      <h3 class="sec">Generation {g.gen} <span class="soft">· {g.region} · #{String(g.from).padStart(4, '0')}–{String(g.to).padStart(4, '0')} · {list.length} Pokémon</span></h3>
+      <div class="grid">
+        {list.map((s) => <a href={pokeUrl(s)} title={`#${String(s.num).padStart(4, '0')} ${s.name}`}><img src={iconUrl(s.art)} alt="" width="56" height="56" loading="lazy" /><span>{s.name}</span></a>)}
+      </div>
+    </section>
+  ); })}
+</Base>
+<style>
+  .jump { display: flex; flex-wrap: wrap; gap: .3rem 1.2rem; padding: .7rem 1rem; background: #fff7f5; border: 2px solid var(--ink); margin: .8rem 0 .5rem; position: sticky; top: 64px; z-index: 5; }
+  .jump a { font-weight: 600; text-decoration: none; }
+  section { scroll-margin-top: 130px; }
+  .sec .soft { font-weight: 500; font-size: .9rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: .2rem; }
+  .grid a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--ink); padding: .2rem 0 .4rem; }
+  .grid a:hover { background: #fff7f5; outline: 1px solid #e2c3bf; }
+  .grid img { width: 56px; height: 56px; object-fit: contain; image-rendering: pixelated; }
+  .grid span { font-size: .78rem; text-align: center; line-height: 1.15; }
+</style>

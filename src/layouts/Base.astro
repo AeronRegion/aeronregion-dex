@@ -9,9 +9,14 @@ const nav = [
   { href: '/moves/', label: 'Moves', match: (p: string) => p.startsWith('/moves/') },
   { href: '/abilities/', label: 'Abilities', match: (p: string) => p.startsWith('/abilities/') },
   { href: '/items/', label: 'Items', match: (p: string) => p.startsWith('/items/') },
-  { href: '/types/', label: 'Type chart', match: (p: string) => p.startsWith('/types/') },
   { href: '/search/', label: 'Moveset search', match: (p: string) => p.startsWith('/search/') },
 ];
+const more = [
+  { href: '/types/', label: 'Type chart' },
+  { href: '/natures/', label: 'Natures' },
+  { href: '/regions/', label: 'Pokémon by generation' },
+];
+const moreActive = more.some((m) => path.startsWith(m.href));
 ---
 <!doctype html>
 <html lang="en">
@@ -34,6 +39,10 @@ const nav = [
         <form class="find" action="/pokedex/" role="search"><input id="find" placeholder="Search Pokémon, moves, abilities…" autocomplete="off" aria-label="Search" /></form>
         <nav class="nav">
           {nav.map((n) => <a href={n.href} class:list={['link', { active: n.match(path) }]}>{n.label}</a>)}
+          <details class="more">
+            <summary class:list={['link', { active: moreActive }]}>More ▾</summary>
+            <div class="menu">{more.map((m) => <a href={m.href}>{m.label}</a>)}</div>
+          </details>
           <a href="https://aeronregion.net" class="link home">aeronregion.net ↗</a>
         </nav>
       </div>
@@ -65,6 +74,7 @@ const nav = [
           if (hit) location.href = hit[1];
         });
       }
+      document.addEventListener('click', (e) => { document.querySelectorAll('details.more[open]').forEach((d) => { if (!d.contains(e.target as Node)) d.removeAttribute('open'); }); });
       // Any <table class="data sortable">: click a header with data-sort to sort by it.
       // Cells can carry data-v for the sort value; numbers sort high→low first.
       document.querySelectorAll<HTMLTableElement>('table.sortable').forEach((table) => {
@@ -103,6 +113,12 @@ const nav = [
   .link:hover { color: var(--on-brick); }
   .link.active { color: var(--on-brick); border-bottom-color: var(--blossom); }
   .link.home { font-size: .9rem; opacity: .85; }
+  .more { position: relative; }
+  .more summary { list-style: none; cursor: pointer; }
+  .more summary::-webkit-details-marker { display: none; }
+  .menu { position: absolute; right: 0; top: calc(100% + .7rem); min-width: 220px; background: var(--brick-deep); border: 2px solid #000; padding: .3rem; display: grid; z-index: 70; }
+  .menu a { padding: .5rem .7rem; text-decoration: none; color: var(--on-brick); font-weight: 600; }
+  .menu a:hover { background: var(--brick); outline: 2px solid #fff; outline-offset: -2px; }
   .menu-btn { display: none; background: none; border: 0; color: var(--on-brick); font-size: 1.6rem; cursor: pointer; }
   main { padding: 1.4rem 0 1rem; }
   .site-footer { border-top: 4px solid var(--brick-deep); padding: 1.6rem 0 .6rem; margin-top: 4rem; font-size: .88rem; }
@@ -111,5 +127,6 @@ const nav = [
     .find { margin: 0 .8rem; }
     .nav { display: none; position: absolute; top: 64px; left: 0; right: 0; flex-direction: column; align-items: flex-start; gap: .9rem; padding: 1.2rem; background: var(--brick); border-bottom: 4px solid var(--brick-deep); }
     .nav.open { display: flex; }
+    .menu { position: static; margin-top: .5rem; }
   }
 </style>
