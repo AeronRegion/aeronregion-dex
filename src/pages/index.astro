@@ -7,11 +7,7 @@ const tiles = [
   { href: '/pokedex/', name: 'Pokédex', icon: 'poke-ball', text: `All ${groups.length} Pokémon` },
   { href: '/moves/', name: 'Moves', icon: 'tm-normal', text: `${moves.length} moves, filter by category or tag` },
   { href: '/abilities/', name: 'Abilities', icon: 'ability-capsule', text: `${abilities.length} abilities and who has them` },
-  { href: '/items/', name: 'Items', icon: 'leftovers', text: `${items.length} held items, berries, Mega Stones` },
   { href: '/search/', name: 'Moveset search', icon: 'poke-radar', text: 'Who learns these moves together' },
-  { href: '/types/', name: 'Type chart', icon: null, text: 'Matchups and a page per type' },
-  { href: '/natures/', name: 'Natures', icon: 'adamant-mint', text: 'Which stat goes up and down' },
-  { href: '/regions/', name: 'By generation', icon: 'town-map', text: 'Every Pokémon by region' },
 ];
 const _tries = [['Garchomp', '/pokemon/garchomp/'], ['Fake Out', '/moves/fake-out/'], ['Intimidate', '/abilities/intimidate/'], ['Choice Scarf', '/items/choice-scarf/']];
 ---
@@ -75,7 +71,7 @@ const _tries = [['Garchomp', '/pokemon/garchomp/'], ['Fake Out', '/moves/fake-ou
     document.getElementById('pnum')!.textContent = '#' + String(num).padStart(4, '0');
     document.getElementById('pname')!.textContent = name;
     document.getElementById('ptypes')!.innerHTML = types.map((t) => `<a href="/types/${t.toLowerCase()}/" style="background:${TC[t]};color:${LIGHT.has(t) ? '#2e1a20' : '#fff'}">${t}</a>`).join('');
-    (document.getElementById('part') as HTMLImageElement).src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${art}.png`;
+    (document.getElementById('part') as HTMLImageElement).src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${art}.png`;
     const labels = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'];
     document.getElementById('pstats')!.innerHTML = stats.map((v, i) => `<span class="ps"><span>${labels[i]}</span><b>${v}</b><i><u style="width:${Math.min(100, v / 1.6)}%;background:${col(v)}"></u></i></span>`).join('') + `<span class="ps tot"><span>Total</span><b>${stats.reduce((a, b) => a + b, 0)}</b><i></i></span>`;
     document.getElementById('pab')!.innerHTML = 'Abilities ' + abil.map((a) => `<a href="/abilities/${slug(a)}/">${a}</a>`).join(', ') + (hidden ? ` · <a href="/abilities/${slug(hidden)}/">${hidden}</a> <span class="hid">(hidden)</span>` : '');
@@ -97,7 +93,7 @@ const _tries = [['Garchomp', '/pokemon/garchomp/'], ['Fake Out', '/moves/fake-ou
   .big input:focus { outline: none; }
   .big button { font: inherit; font-weight: 800; font-size: 1.05rem; background: #59c4fb; color: #07142a; border: 0; border-left: 3px solid #07142a; padding: 0 1.5rem; cursor: pointer; }
   .big button:hover { background: #7fd3ff; }
-  .tiles { display: grid; grid-template-columns: repeat(8, 1fr); gap: .8rem; margin-top: -3.4rem; position: relative; }
+  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; max-width: 900px; margin-left: auto; margin-right: auto; margin-top: -3.4rem; position: relative; }
   .tile { display: flex; flex-direction: column; align-items: center; gap: .3rem; padding: .9rem .3rem .8rem; background: #fff7f5; border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); text-decoration: none; color: var(--ink); text-align: center; transition: transform .08s, box-shadow .08s; }
   .tile:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); color: var(--ink); }
   .tile img { width: 56px; height: 56px; image-rendering: pixelated; margin: -4px 0; }
@@ -107,11 +103,14 @@ const _tries = [['Garchomp', '/pokemon/garchomp/'], ['Fake Out', '/moves/fake-ou
   .potd { display: grid; grid-template-columns: 250px 1fr 290px; align-items: center; gap: 1.4rem; margin-top: 2.2rem; min-height: 230px; color: #fff; text-decoration: none; border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); background: var(--brick); overflow: hidden; }
   .potd a { color: #fff; }
   .potd a:hover { color: #fff; text-decoration: underline; }
+  .pab :global(a), .pty :global(a) { color: #fff !important; }
   .pab :global(a) { font-weight: 700; text-decoration: none; }
+  .pab :global(a:hover) { text-decoration: underline; }
   .pa { text-decoration: none !important; align-self: stretch; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgb(255 255 255 / .24), transparent 66%); }
-  .pa img { width: 220px; height: 220px; object-fit: contain; filter: drop-shadow(0 10px 10px rgb(0 0 0 / .35)); animation: drift 6s ease-in-out infinite; }
+  .pa img { width: 210px; height: 210px; object-fit: contain; animation: drift 6s ease-in-out infinite; will-change: transform; backface-visibility: hidden; }
+  .pa { filter: drop-shadow(0 10px 10px rgb(0 0 0 / .35)); }
   /* small slow loop: a few pixels around a circle */
-  @keyframes drift { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(2px, -2px); } 50% { transform: translate(0, -4px); } 75% { transform: translate(-2px, -2px); } }
+  @keyframes drift { 0%, 100% { transform: translate3d(0, 0, 0); } 25% { transform: translate3d(2px, -2px, 0); } 50% { transform: translate3d(0, -4px, 0); } 75% { transform: translate3d(-2px, -2px, 0); } }
   .pl { display: block; font-size: .85rem; font-weight: 700; opacity: .85; }
   .pn { display: inline-block; text-decoration: none; font-size: 2.6rem; font-weight: 800; line-height: 1.05; margin: .15rem 0 .5rem; }
   .pty { display: flex; gap: .3rem; }
@@ -128,6 +127,6 @@ const _tries = [['Garchomp', '/pokemon/garchomp/'], ['Fake Out', '/moves/fake-ou
   .about { text-align: center; margin-top: 2.4rem; }
   .about p { max-width: 60ch; margin: 0 auto .5rem; color: var(--ink-soft); }
   @media (prefers-reduced-motion: reduce) { .pa img { animation: none; } }
-  @media (max-width: 1000px) { .tiles { grid-template-columns: repeat(4, 1fr); } .potd { grid-template-columns: 180px 1fr; } .pa img { width: 160px; height: 160px; } .pstats { grid-column: 1 / -1; margin: 0 1.2rem 1.2rem; } }
+  @media (max-width: 1000px) { .potd { grid-template-columns: 180px 1fr; } .pa img { width: 160px; height: 160px; } .pstats { grid-column: 1 / -1; margin: 0 1.2rem 1.2rem; } }
   @media (max-width: 560px) { .tiles { grid-template-columns: repeat(2, 1fr); } .potd { grid-template-columns: 1fr; text-align: center; } .pty, .pinfo { justify-content: center; } .pm { padding: 0 1rem; } }
 </style>

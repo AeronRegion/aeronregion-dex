@@ -15,24 +15,28 @@ const mons = species.filter((s) => s.types.includes(t));
 const pure = mons.filter((s) => s.types.length === 1 && !s.forme).length;
 const catOrder: Record<string, number> = { Physical: 0, Special: 1, Status: 2 };
 const typeMoves = moves.filter((m) => m.type === t).sort((a, b) => catOrder[a.cat] - catOrder[b.cat] || a.name.localeCompare(b.name));
-const row = (label: string, list: string[], none = 'None') => ({ label, list, none });
+const row = (m: string, title: string, list: string[]) => ({ m, title, list });
+const BADGE: Record<string, string> = { '2×': '#4caf50', '½×': '#d9534f', '0×': '#2b2b2b' };
+const SWORD = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M6.9 14.3 3 18.2 5.8 21l3.9-3.9 1.6 1.6 1.4-1.4-1.6-1.6L21 5.8V3h-2.8L8.3 12.9l-1.6-1.6-1.4 1.4zM19 4.4v.6l-8.9 8.9-.6-.6L18.4 4.4z"/></svg>';
+const SHIELD = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5zm0 2.2 6 2.2V11c0 3.9-2.5 7.4-6 8.9z"/></svg>';
 ---
 <Base title={`${t} type`} description={`${t}-type Pokémon, moves and type matchups.`}>
   <h1><span class="sw" style={`background:${typeColors[t]}`}></span>{t} type</h1>
   <div class="two">
     <div>
-      <h3 class="sec">Attacking with {t}</h3>
-      {[row('Super effective against', atk(2)), row('Not very effective against', atk(0.5)), row('No effect on', atk(0))].map((r) => (
-        <div class="mrow"><span>{r.label}</span><div class="chips">{r.list.length ? r.list.map((x) => <Type type={x} small />) : <span class="soft">{r.none}</span>}</div></div>
+      <h3 class="sec"><span class="ico" set:html={SWORD} /> {t} attacking</h3>
+      {[row('2×', `Super effective against`, atk(2)), row('½×', `Not very effective against`, atk(0.5)), row('0×', `No effect on`, atk(0))].map((r) => (
+        <div class="mrow" title={r.title}><span class="mx" style={`background:${BADGE[r.m]}`}>{r.m}</span><div class="chips">{r.list.length ? r.list.map((x) => <Type type={x} />) : <span class="soft">—</span>}</div></div>
       ))}
     </div>
     <div>
-      <h3 class="sec">Defending as {t}</h3>
-      {[row('Weak to', def(2)), row('Resists', def(0.5)), row('Immune to', def(0))].map((r) => (
-        <div class="mrow"><span>{r.label}</span><div class="chips">{r.list.length ? r.list.map((x) => <Type type={x} small />) : <span class="soft">{r.none}</span>}</div></div>
+      <h3 class="sec"><span class="ico" set:html={SHIELD} /> {t} defending</h3>
+      {[row('2×', 'Weak to', def(2)), row('½×', 'Resists', def(0.5)), row('0×', 'Immune to', def(0))].map((r) => (
+        <div class="mrow" title={r.title}><span class="mx" style={`background:${BADGE[r.m]}`}>{r.m}</span><div class="chips">{r.list.length ? r.list.map((x) => <Type type={x} />) : <span class="soft">—</span>}</div></div>
       ))}
     </div>
   </div>
+  <p class="note">Numbers show the damage multiplier: <b>2×</b> super effective, <b>½×</b> not very effective, <b>0×</b> no effect.</p>
 
   <div class="tabs" role="tablist">
     <button role="tab" aria-selected="true" data-tab="mons">Pokémon ({mons.filter((s) => !s.forme).length})</button>
@@ -93,10 +97,12 @@ const row = (label: string, list: string[], none = 'None') => ({ label, list, no
   h1 { display: flex; align-items: center; gap: .8rem; }
   .sw { width: 1.1em; height: 1.1em; border: 3px solid rgb(0 0 0 / .3); }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 2.2rem; }
-  .mrow { display: grid; grid-template-columns: 200px 1fr; gap: .6rem; padding: .45rem 0; border-bottom: 1px solid #e2c3bf; align-items: center; }
-  .mrow > span { color: var(--ink-soft); font-weight: 500; font-size: .95rem; }
+  .mrow { display: grid; grid-template-columns: 56px 1fr; gap: .8rem; padding: .5rem 0; border-bottom: 1px solid #e2c3bf; align-items: center; }
+  .mx { color: #fff; font-weight: 800; font-size: 1rem; text-align: center; padding: .2rem 0; }
+  .sec { display: flex; align-items: center; gap: .45rem; }
+  .ico { display: inline-flex; }
   .tabs { display: flex; border-bottom: 3px solid var(--ink); margin-top: 2rem; }
   .tabs button { font: inherit; font-weight: 700; font-size: 1.05rem; padding: .5rem 1.6rem; background: none; border: 3px solid transparent; border-bottom: 0; margin-bottom: -3px; cursor: pointer; color: var(--ink); }
   .tabs button[aria-selected='true'] { border-color: var(--ink); background: #fff7f5; }
-  @media (max-width: 800px) { .two { grid-template-columns: 1fr; gap: 0; } .mrow { grid-template-columns: 1fr; } }
+  @media (max-width: 800px) { .two { grid-template-columns: 1fr; gap: 0; } }
 </style>
