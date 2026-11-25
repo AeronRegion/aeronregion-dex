@@ -94,7 +94,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
 
     {s.evo.length > 0 && <>
       <h3 class="sec">Evolution</h3>
-      <div class="evos">
+      <div class:list={["evos", { branch: s.evo.some((st: any[]) => st.length > 2) }]}>
         {s.evo.map((stage: any[], i: number) => <>
           {i > 0 && <span class="arr">{stage.length === 1 && stage[0].how && <em>{stage[0].how}</em>}<span>→</span></span>}
           <div class:list={["stage", { many: stage.length > 2 }]}>{stage.map((e) => (
@@ -293,8 +293,8 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .abilrow .lab { font-weight: 600; font-size: .85rem; color: var(--ink-soft); }
   .tc b.chg { outline: 2px solid var(--ink); outline-offset: -2px; }
   .tc b { height: 26px; line-height: 26px; font-size: .8rem; background: #fff7f5; border: 1px solid #e2c3bf; border-top: 0; }
-  .evos { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-  .stage { display: flex; flex-direction: column; gap: .6rem; }
+  .evos { display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+  .stage { display: flex; flex-direction: column; align-items: center; gap: .6rem; }
   .stage.many { display: grid; grid-template-columns: repeat(4, minmax(110px, 1fr)); gap: .4rem .6rem; }
   .evo { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--ink); padding: .3rem .6rem; border: 2px solid transparent; }
   .evo.cur b { text-decoration: underline; text-decoration-thickness: 3px; text-decoration-color: #59c4fb; text-underline-offset: 4px; }
@@ -302,6 +302,8 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .evo em { font-style: normal; font-size: .75rem; background: var(--petal-deep); padding: 0 .4rem; }
   .evo b { font-weight: 700; }
   .arr { display: flex; flex-direction: column; align-items: center; gap: .1rem; color: var(--ink-soft); font-size: 1.4rem; line-height: 1; margin-top: -2.2rem; max-width: 9rem; text-align: center; }
+  .evos.branch { flex-direction: column; }
+  .evos.branch .arr { margin-top: 0; transform: rotate(90deg); }
   .arr em { font-style: normal; font-size: .75rem; font-weight: 600; color: var(--ink); background: var(--petal-deep); padding: .05rem .45rem; line-height: 1.4; }
   .loc { font-size: .95rem; }
   .loc th { text-align: left; font-weight: 700; padding: .4rem 1rem .4rem 0; width: 200px; vertical-align: top; }
