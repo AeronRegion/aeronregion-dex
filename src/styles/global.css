@@ -139,3 +139,9 @@ h1 .kind { font-style: italic; font-weight: 400; font-size: .5em; color: var(--i
   .controls .field { min-width: 0 !important; flex: 1 1 100%; }
   h1 { font-size: 2rem; }
 }
+/* EV yield badges, colored by stat */
+.evs { display: inline-flex; gap: .3rem; flex-wrap: wrap; }
+.evb { display: inline-block; font-weight: 800; font-size: .85rem; padding: .05rem .5rem; border: 2px solid var(--ink); color: var(--ink); text-decoration: none; line-height: 1.35; }
+a.evb:hover { filter: brightness(1.06); color: var(--ink); }
+.ev-HP { background: #ff8a8a; } .ev-Atk { background: #f5ac78; } .ev-Def { background: #fae078; }
+.ev-SpA { background: #9db7f5; } .ev-SpD { background: #a7db8d; } .ev-Spe { background: #fa92b2; }
