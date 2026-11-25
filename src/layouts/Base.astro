@@ -15,11 +15,7 @@ const menus: any[] = [
   { label: 'Mechanics', icon: 'gear', match: ['/types/', '/natures/'], items: [
     { href: '/types/', label: 'Type chart' }, { href: '/natures/', label: 'Natures' },
   ] },
-  { label: 'Aeron Region', icon: '/icon-96.png', match: [], items: [
-    { href: '/', label: 'ARdex home' }, { href: 'https://aeronregion.net', label: 'aeronregion.net' },
-    { href: 'https://aeronregion.net/league/', label: 'Gym League' }, { href: 'https://aeronregion.net/tournaments/', label: 'Tournaments' },
-    { href: 'https://discord.gg/zC4YKx5sDx', label: 'Discord' },
-  ] },
+  { label: 'Home', icon: '/icon-96.png', href: '/', match: [] },
 ];
 const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x));
 ---

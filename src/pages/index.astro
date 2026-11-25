@@ -23,7 +23,7 @@ const tools = [
       <img class="mascot" src="/icon-96.png" alt="" width="104" height="104" />
       <div class="hero-text">
         <h1 class="logo"><span class="ar">AR</span><span class="dx">dex</span></h1>
-        <p class="lede">Welcome to ARdex, the Aeron Region Pokédex! Every spawn and movepool here is pulled straight from Cobbleverse {meta.cobbleverse}, so what you see is exactly what you'll find in game.</p>
+        <p class="lede">Welcome to ARdex, the Aeron Region Pokédex! Whether you're hunting, training or building a team for competitive battles, every spawn and movepool here is pulled straight from Cobbleverse {meta.cobbleverse}, so what you see is exactly what you'll find in game.</p>
         <form class="big" role="search">
           <input class="field" data-find placeholder="Search a Pokémon, move, ability or item…" autocomplete="off" aria-label="Search" />
           <button class="block" type="submit">Search</button>
@@ -67,18 +67,18 @@ const tools = [
         <dt>Pokémon Showdown</dt><dd>Stats, types, abilities, move and item effects, learnsets.</dd>
         <dt>PokéAPI</dt><dd>EV yields, catch rates, egg cycles, dex entries, game locations.</dd>
       </dl>
-      <p class="note">Updated {meta.built}. Spotted a mistake? Tell us in the <a href="https://discord.gg/zC4YKx5sDx">Aeron Region Discord</a>.</p>
+      <p class="note">ARdex is part of <a href="https://aeronregion.net">Aeron Region</a>. Updated {meta.built}. Spotted a mistake? Tell us in the <a href="https://discord.gg/zC4YKx5sDx">Aeron Region Discord</a>.</p>
     </div>
   </div>
 </Base>
 <style>
-  .hero { margin: -1.4rem calc(50% - 50vw) 0; padding: 2.6rem 0 2.4rem; border-bottom: 4px solid var(--brick-deep); border-top: 3px solid var(--brick-deep);
-    background: radial-gradient(circle at 12% 30%, rgb(89 196 251 / .16), transparent 45%), var(--brick); }
+  .hero { margin: -1.4rem calc(50% - 50vw) 0; padding: 3.2rem 0 3rem; border-bottom: 4px solid var(--brick-deep); border-top: 3px solid var(--brick-deep);
+    background: linear-gradient(90deg, rgb(53 24 32 / .94) 0%, rgb(53 24 32 / .82) 45%, rgb(53 24 32 / .35) 100%), url(/hero-battle.webp) center 40% / cover no-repeat, var(--brick); }
   .hero-in { width: min(100% - 2.5rem, 1180px); margin: 0 auto; display: grid; grid-template-columns: 120px 1fr; gap: 1.8rem; align-items: start; }
   .mascot { width: 104px; height: 104px; image-rendering: pixelated; filter: drop-shadow(4px 4px 0 rgb(0 0 0 / .35)); margin-top: .3rem; }
   .logo { font-size: clamp(3rem, 7vw, 4.4rem); margin: 0 0 .5rem; -webkit-text-stroke: 7px #07142a; paint-order: stroke fill; letter-spacing: .02em; line-height: 1; }
   .ar { color: #59c4fb; } .dx { color: #f6e7e2; }
-  .lede { font-size: 1.15rem; max-width: 60ch; color: var(--on-brick); margin: 0 0 1.2rem; }
+  .lede { font-size: 1.15rem; max-width: 60ch; color: var(--on-brick); margin: 0 0 1.2rem; text-shadow: 0 1px 2px rgb(0 0 0 / .6); }
   .big { display: flex; gap: .6rem; max-width: 640px; position: relative; }
   .big .field { flex: 1; font-size: 1.05rem; padding: .75rem .9rem; border-color: var(--brick-deep); }
   .stats { margin: .9rem 0 0; font-size: .88rem; color: var(--on-brick-soft); }
