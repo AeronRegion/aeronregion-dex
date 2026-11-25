@@ -29,3 +29,29 @@ export const CHART: Record<string, Record<string, number>> = {
 export const eff = (atk: string, defs: string[]) => defs.reduce((m, d) => m * (CHART[atk][d] ?? 1), 1);
 export const effLabel: Record<string, string> = { '4': '4', '2': '2', '1': '', '0.5': '½', '0.25': '¼', '0': '0' };
 export const effColor: Record<string, string> = { '4': '#1f8f3a', '2': '#4caf50', '0.5': '#d9534f', '0.25': '#a3262a', '0': '#2b2b2b' };
+
+// Abilities that change how much damage a Pokémon takes from a type (defending side).
+// Numbers multiply the normal type chart; 'se' applies only to super-effective hits.
+export const ABILITY_DEF: Record<string, Record<string, number> & { se?: number; wonder?: number }> = {
+  'Levitate': { Ground: 0 }, 'Earth Eater': { Ground: 0 },
+  'Water Absorb': { Water: 0 }, 'Storm Drain': { Water: 0 }, 'Dry Skin': { Water: 0, Fire: 1.25 },
+  'Volt Absorb': { Electric: 0 }, 'Lightning Rod': { Electric: 0 }, 'Motor Drive': { Electric: 0 },
+  'Flash Fire': { Fire: 0 }, 'Well-Baked Body': { Fire: 0 }, 'Sap Sipper': { Grass: 0 },
+  'Thick Fat': { Fire: 0.5, Ice: 0.5 }, 'Heatproof': { Fire: 0.5 }, 'Water Bubble': { Fire: 0.5 },
+  'Purifying Salt': { Ghost: 0.5 }, 'Fluffy': { Fire: 2 },
+  'Filter': { se: 0.75 }, 'Solid Rock': { se: 0.75 }, 'Prism Armor': { se: 0.75 },
+  'Wonder Guard': { wonder: 1 },
+  'Desolate Land': { Water: 0 }, 'Primordial Sea': { Fire: 0 },
+};
+export const effWith = (atk: string, defs: string[], ability?: string) => {
+  let m = eff(atk, defs);
+  const a = ability ? ABILITY_DEF[ability] : undefined;
+  if (!a) return m;
+  if (a.wonder) return m > 1 ? m : 0;
+  if (a[atk] !== undefined) m *= a[atk];
+  if (a.se && m > 1) m *= a.se;
+  return m;
+};
+const FRAC: Record<string, string> = { '0': '0', '0.125': '⅛', '0.25': '¼', '0.5': '½', '0.625': '⅝', '1': '', '1.25': '1¼', '1.5': '1½', '2': '2', '2.5': '2½', '3': '3', '4': '4' };
+export const effText = (m: number) => FRAC[String(m)] ?? String(+m.toFixed(2));
+export const effBg = (m: number) => m === 1 ? '' : m === 0 ? '#2b2b2b' : m >= 4 ? '#1f8f3a' : m > 1 ? '#4caf50' : m <= 0.25 ? '#a3262a' : '#d9534f';

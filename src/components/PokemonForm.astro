@@ -2,7 +2,7 @@
 import Type from './Type.astro';
 import Cat from './Cat.astro';
 import { moveById, pokeUrl, moveUrl, artUrl, STATS, statRange, GAMES, meta, formSlug, formLabel } from '../lib/data';
-import { TYPES, eff, effLabel, effColor, typeColors } from '../lib/types';
+import { TYPES, typeColors, effWith, effText, effBg, ABILITY_DEF } from '../lib/types';
 import learnData from '../data/learn.json';
 
 const { s, first } = Astro.props as { s: any; first: boolean };
@@ -20,6 +20,15 @@ const hasCobble = learn.some(([, src]) => src.some((c) => c[0] === 'C'));
 const pri = (p: number) => p > 0 ? `+${p}` : String(p);
 const priClass = (p: number) => p > 0 ? 'pos' : p < 0 ? 'neg' : 'zero';
 const defs = s.types;
+// Damage-taken variants by ability, merged when abilities give the same chart (PokemonDB style).
+const allAbil = [s.abilities['0'], s.abilities['1'], s.abilities.H, s.abilities.S].filter(Boolean) as string[];
+const variants: { names: string[]; cells: number[] }[] = [];
+for (const a of allAbil) {
+  const cells = TYPES.map((t) => effWith(t, defs, a));
+  const v = variants.find((x) => x.cells.join() === cells.join());
+  if (v) v.names.push(a); else variants.push({ names: [a], cells });
+}
+const affecting = allAbil.filter((a) => ABILITY_DEF[a]);
 const spawns = s.cobbleverse?.spawns ?? [];
 ---
 <div class="form" data-form={formSlug(s)} hidden={!first}>
@@ -60,12 +69,22 @@ const spawns = s.cobbleverse?.spawns ?? [];
       </div>
       <div>
         <h3 class="sec">Damage taken</h3>
-        <div class="dt">
-          {TYPES.map((t) => { const m = String(eff(t, defs)); return (
-            <div class="tc"><a href={`/types/#${t.toLowerCase()}`} style={`background:${typeColors[t]}`}>{t.slice(0, 3).toUpperCase()}</a><b style={effColor[m] ? `background:${effColor[m]};color:#fff` : ''}>{effLabel[m]}</b></div>
-          ); })}
-        </div>
-        <p class="note" style="margin-top:.5rem">Before abilities. <a href="/types/">Full type chart</a></p>
+        {variants.length > 1 && (
+          <div class="seg abil" style="margin-bottom:.5rem">
+            {variants.map((v, i) => <button aria-pressed={i === 0 ? 'true' : 'false'} data-v={i}>{v.names.join(' / ')}</button>)}
+          </div>
+        )}
+        {variants.map((v, i) => (
+          <div class="dt" data-v={i} hidden={i > 0}>
+            {TYPES.map((t, j) => { const m = v.cells[j]; const bg = effBg(m); return (
+              <div class="tc"><a href={`/types/#${t.toLowerCase()}`} style={`background:${typeColors[t]}`}>{t.slice(0, 3).toUpperCase()}</a><b style={bg ? `background:${bg};color:#fff` : ''}>{effText(m)}</b></div>
+            ); })}
+          </div>
+        ))}
+        <p class="note" style="margin-top:.5rem">
+          {variants.length === 1 && affecting.length > 0 ? <>Includes {affecting.join(', ')}. </> : variants.length > 1 ? <>Pick an ability to see its effect. </> : null}
+          <a href="/types/">Full type chart</a>
+        </p>
       </div>
     </div>
 
@@ -165,6 +184,10 @@ const spawns = s.cobbleverse?.spawns ?? [];
   });
 
   for (const form of document.querySelectorAll<HTMLElement>('.form')) {
+    form.querySelectorAll<HTMLButtonElement>('.abil button').forEach((b) => b.addEventListener('click', () => {
+      form.querySelectorAll('.abil button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      form.querySelectorAll<HTMLElement>('.dt').forEach((d) => (d.hidden = d.dataset.v !== b.dataset.v));
+    }));
     const tabs = form.querySelectorAll<HTMLButtonElement>('[data-tab]');
     form.addEventListener('show-tab', ((e: CustomEvent) => {
       tabs.forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === e.detail)));
@@ -255,10 +278,10 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .bar { height: 12px; background: #ead1cd; } .bar i { display: block; height: 100%; }
   .mm { color: var(--ink-soft); font-size: .82rem; text-align: right; }
   .tot { border-top: 2px solid var(--ink); margin-top: .3rem; }
-  .dt { display: grid; grid-template-columns: repeat(9, 1fr); gap: 3px; }
-  .tc { display: flex; flex-direction: column; text-align: center; font-weight: 700; font-size: .75rem; }
-  .tc a { color: #fff; padding: .15rem 0; text-decoration: none; text-shadow: 0 1px 0 rgb(0 0 0 / .35); }
-  .tc b { padding: .2rem 0; background: #fff7f5; border: 1px solid #e2c3bf; min-height: 1.7rem; }
+  .dt { display: grid; grid-template-columns: repeat(9, 38px); gap: 10px 2px; }
+  .tc { display: flex; flex-direction: column; text-align: center; font-weight: 700; font-size: .7rem; }
+  .tc a { color: #fff; height: 24px; line-height: 24px; text-decoration: none; text-shadow: 0 1px 0 rgb(0 0 0 / .4); }
+  .tc b { height: 26px; line-height: 26px; font-size: .78rem; background: #fff7f5; border: 1px solid #e2c3bf; border-top: 0; }
   .evos { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
   .stage { display: flex; flex-direction: column; gap: .6rem; }
   .evo { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--ink); padding: .3rem .6rem; border: 2px solid transparent; }
@@ -281,7 +304,6 @@ const spawns = s.cobbleverse?.spawns ?? [];
   @media (max-width: 900px) {
     .hd { grid-template-columns: 1fr; } .art { width: 160px; height: 160px; }
     .two { grid-template-columns: 1fr; }
-    .dt { grid-template-columns: repeat(6, 1fr); }
   .mtable .tgt, .mtable th:nth-child(8) { display: none; }
   }
 </style>
