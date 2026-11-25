@@ -4,46 +4,43 @@ import { moves, abilities, items, meta, groups } from '../lib/data';
 import { TYPES, typeColors } from '../lib/types';
 const ITEM = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/';
 const tiles = [
-  { href: '/pokedex/', name: 'Pokédex', icon: 'poke-ball', text: `All ${groups.length} Pokémon` },
-  { href: '/moves/', name: 'Moves', icon: 'tm-normal', text: `${moves.length} moves, filter by category or tag` },
-  { href: '/abilities/', name: 'Abilities', icon: 'ability-capsule', text: `${abilities.length} abilities and who has them` },
-  { href: '/types/', name: 'Type chart', icon: null, text: 'Matchups and a page per type' },
+  { href: '/pokedex/', name: 'Pokédex', icon: 'poke-ball', text: `${groups.length} Pokémon` },
+  { href: '/moves/', name: 'Moves', icon: 'tm-normal', text: `${moves.length} moves` },
+  { href: '/abilities/', name: 'Abilities', icon: 'ability-capsule', text: `${abilities.length} abilities` },
+  { href: '/types/', name: 'Type chart', icon: null, text: 'Matchups' },
 ];
 const _tries = [['Garchomp', '/pokemon/garchomp/'], ['Fake Out', '/moves/fake-out/'], ['Intimidate', '/abilities/intimidate/'], ['Choice Scarf', '/items/choice-scarf/']];
 ---
 <Base description="ARdex: the Aeron Region Pokédex, with Cobbleverse spawns and movepools.">
-  <section class="hero">
-    <div class="blur" aria-hidden="true"></div>
+  <section class="hero" id="potd">
     <div class="hero-in">
-      <h1 class="logo"><span class="word"><img src="/icon-96.png" alt="" width="76" height="76" />ARdex</span></h1>
-      <p class="tag">The Aeron Region Pokédex</p>
-      <form class="big" role="search">
-        <input data-find placeholder="Search a Pokémon, move, ability or item…" autocomplete="off" aria-label="Search" />
-        <button type="submit">Search</button>
-      </form>
+      <div class="left">
+        <h1>Welcome to ARdex, the Aeron Region Pokédex</h1>
+        <form class="big" role="search">
+          <input data-find placeholder="Search a Pokémon, move, ability or item…" autocomplete="off" aria-label="Search" />
+          <button type="submit">Search</button>
+        </form>
+        <span class="pl">Pokémon of the day · <span id="pnum"></span></span>
+        <a class="pn" id="pname" href="/pokedex/">&nbsp;</a>
+        <span class="pty" id="ptypes"></span>
+        <span class="pinfo"><span id="pev"></span><span id="pspawn"></span></span>
+        <span class="pab" id="pab"></span>
+      </div>
+      <div class="right">
+        <a class="pa" id="partlink" href="/pokedex/"><img id="part" alt="" /></a>
+        <span class="pstats" id="pstats"></span>
+      </div>
     </div>
   </section>
 
   <div class="tiles">
     {tiles.map((t) => (
       <a href={t.href} class="tile">
-        {t.icon ? <img src={ITEM + t.icon + '.png'} alt="" width="56" height="56" />
+        {t.icon ? <img src={ITEM + t.icon + '.png'} alt="" width="48" height="48" />
           : <span class="mini">{TYPES.slice(0, 9).map((x) => <i style={`background:${typeColors[x]}`}></i>)}</span>}
-        <b>{t.name}</b>
+        <span><b>{t.name}</b><small>{t.text}</small></span>
       </a>
     ))}
-  </div>
-
-  <div class="potd" id="potd">
-    <a class="pa" id="partlink" href="/pokedex/"><img id="part" alt="" /></a>
-    <span class="pm">
-      <span class="pl">Pokémon of the day · <span id="pnum"></span></span>
-      <a class="pn" id="pname" href="/pokedex/">&nbsp;</a>
-      <span class="pty" id="ptypes"></span>
-      <span class="pinfo"><span id="pev"></span><span id="pspawn"></span></span>
-      <span class="pab" id="pab"></span>
-    </span>
-    <span class="pstats" id="pstats"></span>
   </div>
 
   <div class="about">
@@ -67,7 +64,7 @@ const _tries = [['Garchomp', '/pokemon/garchomp/'], ['Fake Out', '/moves/fake-ou
     const c = TC[types[0]];
     (document.getElementById('partlink') as HTMLAnchorElement).href = url;
     (document.getElementById('pname') as HTMLAnchorElement).href = url;
-    card.style.background = `linear-gradient(110deg, ${c}, ${shade(c, .55)} 60%, ${shade(c, .35)})`;
+    card.style.background = `radial-gradient(circle at 78% 42%, rgb(255 255 255 / .16), transparent 38%), linear-gradient(110deg, ${c}, ${shade(c, .55)} 58%, ${shade(c, .32)})`;
     document.getElementById('pnum')!.textContent = '#' + String(num).padStart(4, '0');
     document.getElementById('pname')!.textContent = name;
     document.getElementById('ptypes')!.innerHTML = types.map((t) => `<a href="/types/${t.toLowerCase()}/" style="background:${TC[t]};color:${LIGHT.has(t) ? '#2e1a20' : '#fff'}">${t}</a>`).join('');
@@ -81,52 +78,46 @@ const _tries = [['Garchomp', '/pokemon/garchomp/'], ['Fake Out', '/moves/fake-ou
 </script>
 
 <style>
-  .hero { position: relative; overflow: hidden; margin: -1.4rem calc(50% - 50vw) 0; padding: 3.4rem 1.2rem 6rem; text-align: center; color: var(--on-brick); background: var(--brick-deep); }
-  .blur { position: absolute; inset: 0; background: linear-gradient(rgb(53 24 32 / .84), rgb(53 24 32 / .84)), url(/hero-battle.webp) center 35% / cover; }
-  .hero-in { position: relative; }
-  .logo { margin: 0; font-size: clamp(3.4rem, 8vw, 4.8rem); font-weight: 800; line-height: 1; color: #f6e7e2; }
-  .word { position: relative; display: inline-block; }
-  .word img { position: absolute; right: calc(100% + .2em); top: 50%; transform: translateY(-50%); width: 1.05em; height: 1.05em; image-rendering: pixelated; }
-  .tag { margin: .6rem 0 1.5rem; font-size: 1.1rem; opacity: .85; }
-  .big { display: flex; max-width: 640px; margin: 0 auto; background: #fff7f5; border: 3px solid #07142a; box-shadow: 5px 5px 0 #07142a; position: relative; text-align: left; }
-  .big input { flex: 1; border: 0; background: none; font: inherit; font-size: 1.1rem; padding: .9rem 1rem; color: var(--ink); min-width: 0; }
+  .hero { margin: -1.4rem calc(50% - 50vw) 0; padding: 2.8rem 1.25rem 5.4rem; color: #fff; background: linear-gradient(110deg, #5a2731, #351820); min-height: 520px; }
+  .hero-in { width: min(100%, 1180px); margin: 0 auto; display: grid; grid-template-columns: 1fr 420px; gap: 2rem; align-items: center; }
+  .hero a { color: #fff; }
+  h1 { font-size: 1.45rem; font-weight: 600; margin: 0 0 1.1rem; opacity: .95; text-shadow: 0 1px 3px rgb(0 0 0 / .3); }
+  .big { display: flex; max-width: 580px; background: #fff7f5; border: 3px solid #07142a; box-shadow: 5px 5px 0 #07142a; position: relative; margin-bottom: 2.2rem; }
+  .big input { flex: 1; border: 0; background: none; font: inherit; font-size: 1.08rem; padding: .85rem 1rem; color: var(--ink); min-width: 0; }
   .big input:focus { outline: none; }
-  .big button { font: inherit; font-weight: 800; font-size: 1.05rem; background: #59c4fb; color: #07142a; border: 0; border-left: 3px solid #07142a; padding: 0 1.5rem; cursor: pointer; }
+  .big button { font: inherit; font-weight: 800; font-size: 1.05rem; background: #59c4fb; color: #07142a; border: 0; border-left: 3px solid #07142a; padding: 0 1.4rem; cursor: pointer; }
   .big button:hover { background: #7fd3ff; }
-  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; max-width: 900px; margin-left: auto; margin-right: auto; margin-top: -3.4rem; position: relative; }
-  .tile { display: flex; flex-direction: column; align-items: center; gap: .3rem; padding: .9rem .3rem .8rem; background: #fff7f5; border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); text-decoration: none; color: var(--ink); text-align: center; transition: transform .08s, box-shadow .08s; }
-  .tile:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); color: var(--ink); }
-  .tile img { width: 56px; height: 56px; image-rendering: pixelated; margin: -4px 0; }
-  .tile b { font-size: .95rem; }
-  .mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; width: 38px; height: 38px; margin: 5px 0; }
-  .mini i { display: block; border: 1px solid rgb(0 0 0 / .25); }
-  .potd { display: grid; grid-template-columns: 250px 1fr 290px; align-items: center; gap: 1.4rem; margin-top: 2.2rem; min-height: 230px; color: #fff; text-decoration: none; border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); background: var(--brick); overflow: hidden; }
-  .potd a { color: #fff; }
-  .potd a:hover { color: #fff; text-decoration: underline; }
-  .pab :global(a), .pty :global(a) { color: #fff !important; }
-  .pab :global(a) { font-weight: 700; text-decoration: none; }
-  .pab :global(a:hover) { text-decoration: underline; }
-  .pa { text-decoration: none !important; align-self: stretch; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgb(255 255 255 / .24), transparent 66%); }
-  .pa img { width: 210px; height: 210px; object-fit: contain; animation: drift 6s ease-in-out infinite; will-change: transform; backface-visibility: hidden; }
-  .pa { filter: drop-shadow(0 10px 10px rgb(0 0 0 / .35)); }
-  /* small slow loop: a few pixels around a circle */
-  @keyframes drift { 0%, 100% { transform: translate3d(0, 0, 0); } 25% { transform: translate3d(2px, -2px, 0); } 50% { transform: translate3d(0, -4px, 0); } 75% { transform: translate3d(-2px, -2px, 0); } }
   .pl { display: block; font-size: .85rem; font-weight: 700; opacity: .85; }
-  .pn { display: inline-block; text-decoration: none; font-size: 2.6rem; font-weight: 800; line-height: 1.05; margin: .15rem 0 .5rem; }
+  .pn { display: inline-block; font-size: clamp(2.8rem, 6vw, 4rem); font-weight: 800; line-height: 1; margin: .15rem 0 .55rem; text-decoration: none; text-shadow: 0 2px 6px rgb(0 0 0 / .3); }
+  .pn:hover { text-decoration: underline; }
   .pty { display: flex; gap: .3rem; }
-  .pty :global(a) { text-decoration: none !important;  font-size: .78rem; font-weight: 700; padding: .05rem .55rem; border: 1px solid rgb(0 0 0 / .3); }
-  .pinfo { display: flex; gap: 1.4rem; flex-wrap: wrap; margin-top: 1rem; font-size: .9rem; }
+  .pty :global(a) { font-size: .8rem; font-weight: 700; padding: .05rem .6rem; border: 1px solid rgb(0 0 0 / .3); text-decoration: none; color: #fff !important; }
+  .pinfo { display: flex; gap: 1.4rem; flex-wrap: wrap; margin-top: 1rem; font-size: .95rem; }
   .pinfo > span { display: flex; align-items: center; gap: .4rem; }
-  .pab { display: block; margin-top: .55rem; font-size: .9rem; }
+  .pab { display: block; margin-top: .5rem; font-size: .95rem; }
+  .pab :global(a) { font-weight: 700; text-decoration: none; color: #fff !important; }
+  .pab :global(a:hover) { text-decoration: underline; }
   .pab :global(.hid) { opacity: .75; }
-  .pstats { background: rgb(0 0 0 / .28); padding: .8rem 1rem; margin-right: 1.4rem; }
+  .right { display: flex; flex-direction: column; align-items: center; gap: .6rem; }
+  .pa { display: block; filter: drop-shadow(0 14px 14px rgb(0 0 0 / .35)); }
+  .pa img { width: 340px; height: 340px; object-fit: contain; animation: drift 6s ease-in-out infinite; will-change: transform; }
+  @keyframes drift { 0%, 100% { transform: translate3d(0, 0, 0); } 25% { transform: translate3d(2px, -2px, 0); } 50% { transform: translate3d(0, -4px, 0); } 75% { transform: translate3d(-2px, -2px, 0); } }
+  .pstats { width: 300px; background: rgb(0 0 0 / .28); padding: .7rem .9rem; }
   .pstats :global(.ps) { display: grid; grid-template-columns: 42px 36px 1fr; gap: .4rem; align-items: center; font-size: .85rem; margin: .1rem 0; }
-  .pstats :global(.ps i) { height: 7px; background: rgb(255 255 255 / .15); }
+  .pstats :global(.ps i) { height: 7px; background: rgb(255 255 255 / .18); }
   .pstats :global(.ps.tot i) { background: none; }
   .pstats :global(.ps u) { display: block; height: 100%; }
+  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: -2.8rem; position: relative; }
+  .tile { display: flex; gap: .8rem; align-items: center; padding: .9rem 1rem; background: #fff7f5; border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); text-decoration: none; color: var(--ink); transition: transform .08s, box-shadow .08s; }
+  .tile:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); color: var(--ink); }
+  .tile img { width: 48px; height: 48px; image-rendering: pixelated; margin: -4px; flex: none; }
+  .tile b { display: block; font-size: 1.05rem; }
+  .tile small { display: block; color: var(--ink-soft); font-size: .84rem; line-height: 1.3; }
+  .mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; width: 34px; height: 34px; margin: 3px; flex: none; }
+  .mini i { display: block; border: 1px solid rgb(0 0 0 / .25); }
   .about { text-align: center; margin-top: 2.4rem; }
   .about p { max-width: 60ch; margin: 0 auto .5rem; color: var(--ink-soft); }
   @media (prefers-reduced-motion: reduce) { .pa img { animation: none; } }
-  @media (max-width: 1000px) { .potd { grid-template-columns: 180px 1fr; } .pa img { width: 160px; height: 160px; } .pstats { grid-column: 1 / -1; margin: 0 1.2rem 1.2rem; } }
-  @media (max-width: 560px) { .tiles { grid-template-columns: repeat(2, 1fr); } .potd { grid-template-columns: 1fr; text-align: center; } .pty, .pinfo { justify-content: center; } .pm { padding: 0 1rem; } }
+  @media (max-width: 960px) { .hero-in { grid-template-columns: 1fr; } .right { order: -1; } .pa img { width: 220px; height: 220px; } .tiles { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 520px) { .tiles { grid-template-columns: 1fr; } .big { margin-bottom: 1.4rem; } }
 </style>
