@@ -1,26 +1,74 @@
 ---
 import Base from '../layouts/Base.astro';
-import DexTable from '../components/DexTable.astro';
-import { species } from '../lib/data';
-import { TYPES } from '../lib/types';
+import { species, moves, abilities, items, meta, groups } from '../lib/data';
+const spawning = species.filter((s) => s.cobbleverse?.spawns?.length).length;
+const tools = [
+  { href: '/pokedex/', name: 'Pokédex', text: `All ${groups.length} Pokémon with their forms and Megas. Stats, EV yields, matchups with abilities applied, and where each one spawns.` },
+  { href: '/search/', name: 'Moveset search', text: 'Pick up to four moves and see every Pokémon that can learn all of them. Good for finding niche picks.' },
+  { href: '/moves/', name: 'Moves', text: `All ${moves.length} moves, sortable by category, power, accuracy and priority, with who can learn each one.` },
+  { href: '/abilities/', name: 'Abilities', text: `All ${abilities.length} abilities, what they do in battle, and which Pokémon have them.` },
+  { href: '/items/', name: 'Items', text: `Held items, berries and Mega Stones: ${items.length} in total.` },
+  { href: '/types/', name: 'Type chart', text: 'The full chart, plus a page for each type with every Pokémon and move of that type.' },
+];
 ---
-<Base description="Every Pokémon with stats, types, EV yields and Cobbleverse spawns.">
-  <h1>Pokédex</h1>
-  <div class="controls">
-    <input class="field" id="q" placeholder="Search by name, number or ability…" style="flex:1;min-width:240px" autofocus />
-    <select class="field" id="t"><option value="">All types</option>{TYPES.map((t) => <option>{t}</option>)}</select>
-    <label class="note"><input type="checkbox" id="forms" /> Show forms</label>
+<Base description="ARdex: the Aeron Region Pokédex, with Cobbleverse spawns and movepools.">
+  <section class="hero">
+    <img src="/icon-96.png" alt="" width="88" height="88" />
+    <div>
+      <h1><span class="ar">AR</span>dex</h1>
+      <p class="lede">The Pokédex for Aeron Region. Every Pokémon, move, ability and item, with spawn locations and movepools taken from Cobbleverse {meta.cobbleverse} itself, so what you read here is what you'll find on the server.</p>
+      <form class="big" role="search" id="homefind">
+        <input class="field" list="find-list" placeholder="Search a Pokémon, move, ability or item…" autocomplete="off" aria-label="Search" />
+        <button class="block" type="submit">Search</button>
+      </form>
+    </div>
+  </section>
+
+  <h3 class="sec">What it's for</h3>
+  <div class="why">
+    <p>ARdex is built for team building and hunting. Check a Pokémon's EV yield before you go training, see exactly which biome and time of day it spawns in, and find which Pokémon can learn the moves you want, using the same movepools Cobbleverse uses.</p>
+    <p>It's a neutral reference tool. Nothing here is for sale, and it works the same whether or not you play on Aeron Region.</p>
   </div>
-  <p class="note" id="count"></p>
-  <DexTable list={species} />
-  <script>
-    const q = document.getElementById('q') as HTMLInputElement, t = document.getElementById('t') as HTMLSelectElement, f = document.getElementById('forms') as HTMLInputElement;
-    const rows = [...(document.getElementById('dex') as HTMLTableElement).tBodies[0].rows];
-    const run = () => {
-      const v = q.value.trim().toLowerCase(); let n = 0;
-      for (const r of rows) { const ok = (!v || r.dataset.q!.includes(v)) && (!t.value || r.dataset.t!.includes(t.value)) && (f.checked || r.dataset.form === '0'); r.hidden = !ok; if (ok) n++; }
-      document.getElementById('count')!.textContent = `${n} Pokémon`;
-    };
-    [q, t, f].forEach((el) => el.addEventListener('input', run)); run();
-  </script>
+
+  <h3 class="sec">Tools</h3>
+  <div class="tools">
+    {tools.map((t) => <a href={t.href} class="tool"><b>{t.name}</b><span>{t.text}</span></a>)}
+  </div>
+
+  <h3 class="sec">Where the data comes from</h3>
+  <table class="kv src">
+    <tr><th>Cobbleverse {meta.cobbleverse}</th><td>Spawns ({spawning} Pokémon), drops and movepools, read from the Cobblemon, Mega Showdown and Cobbleverse datapack files.</td></tr>
+    <tr><th>Pokémon Showdown</th><td>Stats, types, abilities, move and item effects, and learnsets for every main game.</td></tr>
+    <tr><th>PokéAPI</th><td>EV yields, catch rates, growth rates, egg cycles, Pokédex entries and main-game locations.</td></tr>
+  </table>
+  <p class="note">Last updated {meta.built}. Spotted something wrong? Let us know in the <a href="https://discord.gg/zC4YKx5sDx">Aeron Region Discord</a>.</p>
 </Base>
+<script>
+  // The big search reuses the header search's list and jump logic.
+  const form = document.getElementById('homefind') as HTMLFormElement;
+  const header = document.getElementById('find') as HTMLInputElement;
+  const input = form.querySelector('input')!;
+  input.addEventListener('focus', () => header.dispatchEvent(new Event('focus')), { once: true });
+  const go = () => { header.value = input.value; header.dispatchEvent(new Event('change')); };
+  input.addEventListener('change', go);
+  form.addEventListener('submit', (e) => { e.preventDefault(); go(); });
+</script>
+<style>
+  .hero { display: grid; grid-template-columns: 88px 1fr; gap: 1.6rem; align-items: start; padding: 1.4rem 0 .6rem; }
+  .hero img { image-rendering: pixelated; margin-top: .4rem; }
+  h1 { font-size: clamp(2.6rem, 6vw, 3.6rem); margin: 0 0 .4rem; }
+  .ar { color: #2a9bd8; }
+  .lede { font-size: 1.15rem; max-width: 62ch; margin: 0 0 1.2rem; }
+  .big { display: flex; gap: .6rem; max-width: 640px; }
+  .big .field { flex: 1; font-size: 1.05rem; padding: .7rem .9rem; }
+  .why { max-width: 72ch; }
+  .tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; }
+  .tool { display: flex; flex-direction: column; gap: .3rem; padding: 1rem 1.1rem; background: #fff7f5; border: 2px solid var(--ink); text-decoration: none; color: var(--ink); }
+  .tool:hover { background: var(--petal-deep); color: var(--ink); }
+  .tool b { font-size: 1.15rem; }
+  .tool span { color: var(--ink-soft); font-size: .95rem; line-height: 1.45; }
+  .src { max-width: 880px; }
+  .src th { width: 200px; font-weight: 600; color: var(--ink); }
+  @media (max-width: 900px) { .tools { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .tools { grid-template-columns: 1fr; } .hero { grid-template-columns: 1fr; } .hero img { width: 64px; height: 64px; } }
+</style>
