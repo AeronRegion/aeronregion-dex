@@ -5,14 +5,20 @@ const { title, description = 'Pokédex, moves, items, type chart and moveset sea
 const fullTitle = title ? `${title} · ARdex` : 'ARdex · Aeron Region Pokédex';
 const path = Astro.url.pathname;
 // Top menu. Entries with `items` open a dropdown; `quick` adds a small "Quick links" part under it.
-const menus = [
-  { label: 'Pokédex', match: ['/pokedex/', '/pokemon/', '/moves/', '/abilities/', '/search/', '/regions/'], items: [
+const ITEM = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/';
+const menus: any[] = [
+  { label: 'Pokédex', icon: ITEM + 'poke-ball.png', match: ['/pokedex/', '/pokemon/', '/moves/', '/abilities/', '/search/', '/regions/'], items: [
     { href: '/pokedex/', label: 'All Pokémon' }, { href: '/moves/', label: 'Moves' },
     { href: '/abilities/', label: 'Abilities' }, { href: '/search/', label: 'Moveset search' },
   ], quick: [{ href: '/regions/', label: 'Pokémon by generation' }, { href: '/moves/?tag=Multi-hit', label: 'Multi-hit moves' }, { href: '/moves/?tag=Priority', label: 'Priority moves' }] },
-  { label: 'Items', href: '/items/', match: ['/items/'] },
-  { label: 'Mechanics', match: ['/types/', '/natures/'], items: [
+  { label: 'Items', icon: ITEM + 'leftovers.png', href: '/items/', match: ['/items/'] },
+  { label: 'Mechanics', icon: 'gear', match: ['/types/', '/natures/'], items: [
     { href: '/types/', label: 'Type chart' }, { href: '/natures/', label: 'Natures' },
+  ] },
+  { label: 'Aeron Region', icon: '/icon-96.png', match: [], items: [
+    { href: '/', label: 'ARdex home' }, { href: 'https://aeronregion.net', label: 'aeronregion.net' },
+    { href: 'https://aeronregion.net/league/', label: 'Gym League' }, { href: 'https://aeronregion.net/tournaments/', label: 'Tournaments' },
+    { href: 'https://discord.gg/zC4YKx5sDx', label: 'Discord' },
   ] },
 ];
 const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x));
@@ -33,21 +39,23 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
   <body>
     <header class="site-header band">
       <div class="wrap bar">
-        <a href="/" class="brand"><img src="/icon-96.png" alt="" width="36" height="36" /> <span><i>AR</i><em>dex</em></span></a>
-        <button class="menu-btn" aria-label="Open menu" aria-expanded="false">☰</button>
-        <form class="find" action="/pokedex/" role="search"><input id="find" placeholder="Search Pokémon, moves, abilities…" autocomplete="off" aria-label="Search" /></form>
-        <nav class="nav">
-          {menus.map((m) => m.items ? (
-            <div class="more">
-              <button type="button" class:list={['link', { active: isOn(m) }]} aria-haspopup="true">{m.label} <span class="car">▾</span></button>
-              <div class="menu">
-                {m.items.map((x) => <a href={x.href}>{x.label}</a>)}
-                {m.quick && <><span class="qh">Quick links</span>{m.quick.map((x) => <a href={x.href}>{x.label}</a>)}</>}
+        <nav class="nav" aria-label="Main">
+          {menus.map((m) => {
+            const icon = m.icon === 'gear'
+              ? <svg class="ic" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.3 2.9a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7 1L11 21h4l.3-2.9a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg>
+              : <img class="ic" src={m.icon} alt="" width="28" height="28" />;
+            return m.items ? (
+              <div class:list={['more', 'tab', { on: isOn(m) }]}>
+                <button type="button" aria-haspopup="true">{icon}<span class="tl">{m.label}</span><span class="car">▾</span></button>
+                <div class="menu">
+                  {m.items.map((x: any) => <a href={x.href}>{x.label}</a>)}
+                  {m.quick && <><span class="qh">Quick links</span>{m.quick.map((x: any) => <a href={x.href}>{x.label}</a>)}</>}
+                </div>
               </div>
-            </div>
-          ) : <a href={m.href} class:list={['link', { active: isOn(m) }]}>{m.label}</a>)}
-          <a href="https://aeronregion.net" class="link home">aeronregion.net ↗</a>
+            ) : <a href={m.href} class:list={['tab', { on: isOn(m) }]}>{icon}<span class="tl">{m.label}</span></a>;
+          })}
         </nav>
+        <form class="find" action="/pokedex/" role="search"><input id="find" placeholder="Search Pokémon, moves, abilities…" autocomplete="off" aria-label="Search" /></form>
       </div>
     </header>
     <main class="wrap"><slot /></main>
@@ -58,10 +66,6 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
       </div>
     </footer>
     <script>
-      document.querySelector('.menu-btn')?.addEventListener('click', (e) => {
-        const open = document.querySelector('.nav')?.classList.toggle('open');
-        (e.currentTarget as HTMLElement).setAttribute('aria-expanded', String(!!open));
-      });
       // Header search (and any input with data-find): themed suggestions, jump to the page on pick/enter.
       import { autocomplete } from '../lib/ac';
       let names: Promise<[string, string, string, string?, string?][]> | null = null;
@@ -108,42 +112,36 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
   </body>
 </html>
 <style>
-  .site-header { position: sticky; top: 0; z-index: 50; border-bottom: 4px solid var(--brick-deep); }
-  .bar { display: flex; align-items: center; justify-content: space-between; height: 60px; }
-  .brand { display: flex; align-items: center; gap: .5rem; font-weight: 800; font-size: 1.3rem; text-decoration: none; color: var(--on-brick); }
-  .brand > span { -webkit-text-stroke: 4px #07142a; paint-order: stroke fill; letter-spacing: .02em; }
-  .brand i { font-style: normal; color: #59c4fb; }
-  .brand em { font-style: normal; color: var(--on-brick); }
-  .brand img { image-rendering: pixelated; }
-  .nav { display: flex; align-items: center; gap: 1.3rem; }
-  .find { flex: 1; max-width: 320px; margin: 0 1.4rem; position: relative; }
-  .find input { width: 100%; font: inherit; font-size: .92rem; padding: .35rem .7rem; border: 2px solid var(--brick-deep); background: #fff7f5; color: var(--ink); }
-  .link { font-weight: 600; color: var(--on-brick-soft); text-decoration: none; padding: .2rem 0; border-bottom: 3px solid transparent; }
-  .link:hover { color: var(--on-brick); }
-  .link.active { color: var(--on-brick); border-bottom-color: var(--blossom); }
-  .link.home { font-size: .9rem; opacity: .85; }
-  .more { position: relative; }
-  .more > button { font: inherit; font-weight: 600; background: none; padding: .2rem 0; border: 0; border-bottom: 3px solid transparent; cursor: pointer; }
-  .more > button.active { border-bottom-color: var(--blossom); }
-  .more::after { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: .8rem; }
+  .site-header { position: sticky; top: 0; z-index: 50; }
+  .bar { display: flex; align-items: flex-end; gap: 1rem; height: 58px; }
+  .nav { flex: 1; display: flex; align-items: flex-end; gap: .3rem; height: 100%; }
+  .tab { flex: 1; position: relative; height: 48px; display: flex; }
+  .tab > button, a.tab { flex: 1; font: inherit; display: flex; align-items: center; justify-content: center; gap: .5rem; height: 48px;
+    font-weight: 700; font-size: 1rem; color: var(--on-brick); text-decoration: none; background: none; cursor: pointer;
+    border: 2px solid transparent; border-bottom: 0; }
+  .tab > button:hover, a.tab:hover { background: rgb(255 255 255 / .07); color: var(--on-brick); }
+  .tab.on > button, a.tab.on { background: var(--petal); color: var(--ink); border-color: var(--brick-deep); }
+  .ic { width: 28px; height: 28px; image-rendering: pixelated; flex: none; }
+  img.ic { width: 38px; height: 38px; margin: -5px; }
+  .car { font-size: .7em; opacity: .7; }
+  .find { width: 280px; flex: none; align-self: center; position: relative; }
+  .find input { width: 100%; font: inherit; font-size: .92rem; padding: .4rem .7rem; border: 2px solid var(--brick-deep); background: #fff7f5; color: var(--ink); }
   .more > .menu { display: none; }
   .more.open > .menu, .more:focus-within > .menu { display: grid; }
-  @media (hover: hover) and (min-width: 861px) { .more:hover > .menu { display: grid; } }
-  .car { font-size: .75em; opacity: .8; }
-  .qh { font-size: .7rem; font-weight: 700; letter-spacing: .04em; color: var(--on-brick-soft); background: rgb(255 255 255 / .08); padding: .3rem .7rem; margin: .3rem -.3rem; }
-  .menu { position: absolute; left: 0; top: calc(100% + .7rem); min-width: 220px; background: var(--brick-deep); border: 2px solid #000; padding: .3rem; display: grid; z-index: 70; }
-  .menu a { padding: .5rem .7rem; text-decoration: none; color: var(--on-brick); font-weight: 600; }
+  @media (hover: hover) { .more:hover > .menu { display: grid; } }
+  .menu { position: absolute; left: 0; top: 100%; min-width: 100%; width: max-content; max-width: 280px; background: var(--brick-deep); border: 2px solid #000; padding: .3rem; z-index: 70; }
+  .menu a { padding: .5rem .8rem; text-decoration: none; color: var(--on-brick); font-weight: 600; white-space: nowrap; }
   .menu a:hover { background: var(--brick); outline: 2px solid #fff; outline-offset: -2px; }
-  .menu-btn { display: none; background: none; border: 0; color: var(--on-brick); font-size: 1.6rem; cursor: pointer; }
+  .qh { font-size: .7rem; font-weight: 700; letter-spacing: .04em; color: var(--on-brick-soft); background: rgb(255 255 255 / .08); padding: .3rem .8rem; margin: .3rem -.3rem; }
+  @media (max-width: 960px) { .find { width: 200px; } .tl { font-size: .92rem; } }
+  @media (max-width: 760px) {
+    .bar { flex-wrap: wrap; height: auto; padding-top: .5rem; gap: .4rem; }
+    .find { width: 100%; order: -1; }
+    .nav { height: 48px; }
+    .tl, .car { display: none; }
+    .menu { left: auto; right: 0; }
+    .tab:first-child .menu { left: 0; right: auto; }
+  }
   main { padding: 1.4rem 0 1rem; }
   .site-footer { border-top: 4px solid var(--brick-deep); padding: 1.6rem 0 .6rem; margin-top: 4rem; font-size: .88rem; }
-  @media (max-width: 860px) {
-    .menu-btn { display: block; }
-    .find { margin: 0 .8rem; }
-    .nav { display: none; position: absolute; top: 64px; left: 0; right: 0; flex-direction: column; align-items: flex-start; gap: .9rem; padding: 1.2rem; background: var(--brick); border-bottom: 4px solid var(--brick-deep); }
-    .nav.open { display: flex; }
-    .menu { position: static; margin-top: .5rem; }
-    .more > .menu { display: grid; }
-    .more::after { display: none; }
-  }
 </style>
