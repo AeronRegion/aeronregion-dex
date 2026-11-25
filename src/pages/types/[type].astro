@@ -24,13 +24,13 @@ const SHIELD = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentCol
   <h1><span class="sw" style={`background:${typeColors[t]}`}></span>{t} type</h1>
   <div class="two">
     <div>
-      <h3 class="sec"><span class="ico" set:html={SWORD} /> {t} attacking</h3>
+      <h3 class="sec"><span class="ico" set:html={SWORD} /> Attacking</h3>
       {[row('2×', `Super effective against`, atk(2)), row('½×', `Not very effective against`, atk(0.5)), row('0×', `No effect on`, atk(0))].map((r) => (
         <div class="mrow" title={r.title}><span class="mx" style={`background:${BADGE[r.m]}`}>{r.m}</span><div class="chips">{r.list.length ? r.list.map((x) => <Type type={x} />) : <span class="soft">—</span>}</div></div>
       ))}
     </div>
     <div>
-      <h3 class="sec"><span class="ico" set:html={SHIELD} /> {t} defending</h3>
+      <h3 class="sec"><span class="ico" set:html={SHIELD} /> Defending</h3>
       {[row('2×', 'Weak to', def(2)), row('½×', 'Resists', def(0.5)), row('0×', 'Immune to', def(0))].map((r) => (
         <div class="mrow" title={r.title}><span class="mx" style={`background:${BADGE[r.m]}`}>{r.m}</span><div class="chips">{r.list.length ? r.list.map((x) => <Type type={x} />) : <span class="soft">—</span>}</div></div>
       ))}
