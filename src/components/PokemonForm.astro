@@ -156,12 +156,12 @@ const spawns = s.cobbleverse?.spawns ?? [];
         {hasCobble && <option value="C">Cobbleverse {meta.cobbleverse}</option>}
         {gens.map((g) => <option value={g}>{GAMES[g]}</option>)}
       </select>
-      <div class="seg split"><button aria-pressed="true" data-split="1">By how it learns</button><button aria-pressed="false" data-split="0">One list</button></div>
+      <div class="seg split"><button aria-pressed="true" data-split="0">One list</button><button aria-pressed="false" data-split="1">By how it learns</button></div>
       <input class="field mfilter" placeholder="Filter moves or types…" style="margin-left:auto;min-width:240px" />
     </div>
     <p class="note mcount"></p>
     <div class="msplit"></div>
-    <table class="data sortable mtable" hidden>
+    <table class="data sortable mtable">
       <thead><tr><th data-sort="text">Move</th><th data-sort="text">Type</th><th data-sort="num" class="sorted asc">Cat.</th><th data-sort="num">Power</th><th data-sort="num">Acc</th><th data-sort="num">PP</th><th data-sort="num" class="pri">Priority</th><th data-sort="text">Target</th><th data-sort="num">How</th></tr></thead>
       <tbody>
         {rows.map(({ m, src }) => (
@@ -179,7 +179,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
         ))}
       </tbody>
     </table>
-    <p class="note" style="margin-top:.6rem">“All games” lists every move it can learn in any game, with the method from the newest game that has it.</p>
+    <p class="note" style="margin-top:.6rem">“All games” lists every move it can learn in any game.</p>
   </section>
 </div>
 
@@ -215,7 +215,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
     const rows = [...body.rows];
     const gameSel = form.querySelector<HTMLSelectElement>('select.game')!;
     let game = gameSel.value;
-    let split = true;
+    let split = false;
     const msplit = form.querySelector<HTMLElement>('.msplit')!;
     const howFor = (src: string[]) => {
       if (game === 'C') return parse(src.filter((c) => c[0] === 'C'));
@@ -346,7 +346,12 @@ const spawns = s.cobbleverse?.spawns ?? [];
     .spawn { grid-template-columns: 1fr; gap: .2rem; }
   .mtable .tgt, .mtable th:nth-child(8) { display: none; }
   }
-  .mtable td, .mtable th { padding-top: .18rem; padding-bottom: .18rem; }
+  .mtable { max-width: 860px; }
+  .mtable td, .mtable th { padding: .16rem .45rem; }
+  .mtable th:nth-child(8), .mtable td:nth-child(8), .mtable th:nth-child(9), .mtable td:nth-child(9) { display: none; }
+  .mtable td:nth-child(3), .mtable th:nth-child(3) { text-align: center; }
+  .mtable th:nth-child(n+4):nth-child(-n+6) { text-align: right; } .mtable th:nth-child(7), .mtable td:nth-child(7) { text-align: center; }
+  .mtable tbody tr:nth-child(even) { background: rgb(255 255 255 / .35); }
   .msplit { display: grid; grid-template-columns: 1fr 1fr; gap: 0 2.4rem; align-items: start; }
   .msplit:empty { display: none; }
   .msplit > :global(div) { min-width: 0; }
