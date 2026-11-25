@@ -3,6 +3,7 @@ import Type from './Type.astro';
 import Cat from './Cat.astro';
 import { abilityUrl, abilityByName, moveById, pokeUrl, moveUrl, artUrl, STATS, statRange, GAMES, meta, formSlug, formLabel } from '../lib/data';
 import { TYPES, typeColors, effWith, effText, effBg, ABILITY_DEF } from '../lib/types';
+const LIGHT = new Set(['Normal', 'Electric', 'Grass', 'Ice', 'Ground', 'Flying', 'Bug', 'Rock', 'Steel', 'Fairy']);
 import learnData from '../data/learn.json';
 
 const { s, first } = Astro.props as { s: any; first: boolean };
@@ -71,7 +72,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
         <div class="st tot"><span>Total</span><b>{s.bst}</b><span></span><span class="mm">Lv. 100 min–max</span></div>
       </div>
       <div>
-        <h3 class="sec">Damage taken</h3>
+        <h3 class="sec">Type defenses</h3>
         {variants.length > 1 && (
           <div class="abilrow"><span class="lab">Ability</span><div class="seg abil">
             {variants.map((v, i) => <button aria-pressed={i === 0 ? 'true' : 'false'} data-v={i}>{v.names.join(' / ')}</button>)}
@@ -80,13 +81,13 @@ const spawns = s.cobbleverse?.spawns ?? [];
         {variants.map((v, i) => (
           <div class="dt" data-v={i} hidden={i > 0}>
             {TYPES.map((t, j) => { const m = v.cells[j]; const bg = effBg(m); return (
-              <div class="tc"><a href={`/types/${t.toLowerCase()}/`} style={`background:${typeColors[t]}`}>{t.slice(0, 3).toUpperCase()}</a><b class:list={{ chg: m !== plain[j] }} title={m !== plain[j] ? `Changed by ${v.names.join(' / ')} (normally ${effText(plain[j]) || '1'}×)` : undefined} style={bg ? `background:${bg};color:#fff` : ''}>{effText(m)}</b></div>
+              <div class="tc"><a href={`/types/${t.toLowerCase()}/`} style={`background:${typeColors[t]};color:${LIGHT.has(t) ? '#2e1a20' : '#fff'}`}>{t.slice(0, 3).toUpperCase()}</a><b class:list={{ chg: m !== plain[j] }} title={m !== plain[j] ? `Changed by ${v.names.join(' / ')} (normally ${effText(plain[j]) || '1'}×)` : undefined} style={bg ? `background:${bg};color:#fff` : ''}>{effText(m)}</b></div>
             ); })}
           </div>
         ))}
         <p class="note" style="margin-top:.5rem">
           {variants.length === 1 && affecting.length > 0 ? <>Includes {affecting.join(', ')}. Outlined boxes are changed by the ability. </> : variants.length > 1 ? <>Outlined boxes are changed by the selected ability. </> : null}
-          <a href="/types/">Full type chart</a>
+          <a href="/types/">Type chart</a>
         </p>
       </div>
     </div>
@@ -267,8 +268,9 @@ const spawns = s.cobbleverse?.spawns ?? [];
 </script>
 
 <style>
-  .hd { display: grid; grid-template-columns: 200px 1fr 330px; gap: 1.6rem; align-items: start; }
-  .art { width: 200px; height: 200px; object-fit: contain; background: #fbe8e4; border: 2px solid var(--ink); }
+  .hd { display: grid; grid-template-columns: 200px 1fr 330px; gap: 1.6rem; align-items: start; height: 232px; }
+  .hd h1 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .art { width: 210px; height: 210px; object-fit: contain; margin-top: -6px; }
   .no { font-weight: 600; color: var(--ink-soft); }
   .ab { color: var(--ink); font-weight: 500; }
   h1 { margin: .1rem 0 .5rem; }
@@ -284,7 +286,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .tot { border-top: 2px solid var(--ink); margin-top: .3rem; }
   .dt { display: grid; grid-template-columns: repeat(9, 38px); gap: 10px 2px; }
   .tc { display: flex; flex-direction: column; text-align: center; font-weight: 700; font-size: .7rem; }
-  .tc a { color: #fff; height: 24px; line-height: 24px; text-decoration: none; text-shadow: 0 1px 0 rgb(0 0 0 / .4); }
+  .tc a { height: 24px; line-height: 24px; text-decoration: none; border: 1px solid rgb(0 0 0 / .25); }
   .abilrow { display: flex; align-items: center; gap: .6rem; margin-bottom: .6rem; flex-wrap: wrap; }
   .abilrow .lab { font-weight: 600; font-size: .85rem; color: var(--ink-soft); }
   .tc b.chg { outline: 2px solid var(--ink); outline-offset: -2px; }
@@ -292,7 +294,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .evos { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
   .stage { display: flex; flex-direction: column; gap: .6rem; }
   .evo { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--ink); padding: .3rem .6rem; border: 2px solid transparent; }
-  .evo.cur { border-color: var(--ink); background: #fff7f5; }
+  .evo.cur b { text-decoration: underline; text-decoration-thickness: 3px; text-decoration-color: #59c4fb; text-underline-offset: 4px; }
   .evo img { width: 84px; height: 84px; object-fit: contain; }
   .evo em { font-style: normal; font-size: .75rem; background: var(--petal-deep); padding: 0 .4rem; }
   .evo b { font-weight: 700; }
@@ -311,7 +313,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .dex td { padding: .45rem 0; border-bottom: 1px solid #e2c3bf; }
   :global(.data tr.group td) { background: var(--petal-deep) !important; font-weight: 700; padding-top: .6rem; }
   @media (max-width: 900px) {
-    .hd { grid-template-columns: 1fr; } .art { width: 160px; height: 160px; }
+    .hd { grid-template-columns: 1fr; height: auto; } .art { width: 160px; height: 160px; }
     .two { grid-template-columns: 1fr; }
   .mtable .tgt, .mtable th:nth-child(8) { display: none; }
   }

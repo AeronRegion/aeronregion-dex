@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import PokemonForm from '../../components/PokemonForm.astro';
-import { groups, slug, pokeUrl, formSlug, formLabel, iconUrl } from '../../lib/data';
+import { groups, slug, pokeUrl, formSlug, formLabel } from '../../lib/data';
 
 export function getStaticPaths() {
   return groups.map((forms, i) => ({
@@ -15,15 +15,13 @@ const num = (s: any) => '#' + String(s.num).padStart(4, '0');
 ---
 <Base title={base.name} description={`${base.name}: stats, type matchups, evolutions, where to find it and every move it learns.`}>
   <nav class="pn" aria-label="Previous and next Pokémon">
-    {prev ? <a href={pokeUrl(prev)} rel="prev"><span>◀</span> <img src={iconUrl(prev.art)} alt="" width="40" height="40" /><span><small>{num(prev)}</small>{prev.name}</span></a> : <span></span>}
-    {next ? <a href={pokeUrl(next)} rel="next" class="nx"><span><small>{num(next)}</small>{next.name}</span><img src={iconUrl(next.art)} alt="" width="40" height="40" /> <span>▶</span></a> : <span></span>}
+    {prev ? <a href={pokeUrl(prev)} rel="prev">← <span class="soft">{num(prev)}</span> {prev.name}</a> : <span></span>}
+    {next ? <a href={pokeUrl(next)} rel="next">{next.name} <span class="soft">{num(next)}</span> →</a> : <span></span>}
   </nav>
 
-  {forms.length > 1 && (
-    <div class="formtabs" role="tablist" aria-label="Forms">
-      {forms.map((s, i) => <button role="tab" aria-selected={i === 0 ? 'true' : 'false'} data-f={formSlug(s)}>{formLabel(s)}</button>)}
-    </div>
-  )}
+  <div class="formtabs" role="tablist" aria-label="Forms">
+    {forms.map((s, i) => <button role="tab" aria-selected={i === 0 ? 'true' : 'false'} data-f={formSlug(s)}>{formLabel(s)}</button>)}
+  </div>
 
   {forms.map((s, i) => <PokemonForm s={s} first={i === 0} />)}
 </Base>
@@ -57,13 +55,11 @@ const num = (s: any) => '#' + String(s.num).padStart(4, '0');
 </script>
 
 <style>
-  .pn { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
-  .pn a { display: flex; align-items: center; gap: .5rem; text-decoration: none; color: var(--ink); font-weight: 700; padding: .25rem .7rem .25rem .5rem; border: 2px solid var(--ink); background: #fff7f5; }
-  .pn a:hover { background: var(--petal-deep); color: var(--ink); }
-  .pn a.nx { padding: .25rem .5rem .25rem .7rem; text-align: right; }
-  .pn img { width: 40px; height: 40px; object-fit: contain; }
-  .pn small { display: block; font-weight: 500; color: var(--ink-soft); font-size: .75rem; line-height: 1; }
-  .formtabs { display: flex; flex-wrap: wrap; gap: 0; margin-bottom: 1rem; border-bottom: 3px solid var(--ink); }
+  .pn { display: flex; justify-content: space-between; gap: 1rem; margin: -.4rem 0 .8rem; padding-bottom: .5rem; border-bottom: 1px solid #e2c3bf; font-size: .95rem; }
+  .pn a { text-decoration: none; color: var(--ink); font-weight: 600; white-space: nowrap; }
+  .pn a:hover { text-decoration: underline; }
+  .formtabs { display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; gap: 0; margin-bottom: 1rem; border-bottom: 3px solid var(--ink); }
+  .formtabs button { white-space: nowrap; flex: none; }
   .formtabs button { font: inherit; font-weight: 600; font-size: .92rem; padding: .4rem 1rem; background: none; color: var(--ink-soft); border: 2px solid transparent; border-bottom: 0; cursor: pointer; margin-bottom: -3px; }
   .formtabs button:hover { color: var(--ink); }
   .formtabs button[aria-selected='true'] { color: var(--ink); background: var(--blossom); border-color: var(--ink); }
