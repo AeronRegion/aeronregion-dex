@@ -22,7 +22,7 @@ import { moves, GAMES, meta } from '../lib/data';
   <div class="cards" id="out"></div>
 </Base>
 <script>
-  type Index = { species: [string, string, string[], string | null, number][]; moves: Record<string, [string, string, string]>; learn: Record<string, number[]> };
+  type Index = { species: [string, string, string[], string | null, number, string][]; moves: Record<string, [string, string, string]>; learn: Record<string, number[]> };
   let idx: Index | null = null;
   const load = async () => (idx ??= await (await fetch('/search-index.json')).json());
   const toID = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -50,8 +50,8 @@ import { moves, GAMES, meta } from '../lib/data';
     title.hidden = false;
     title.textContent = `${list.length} Pokémon learn ${ids.length === 1 ? data.moves[ids[0]][0] : ids.length === 2 ? 'both moves' : `all ${ids.length} moves`}`;
     const SPR = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
-    out.innerHTML = list.map((i) => { const [, name, types, art, num] = data.species[i];
-      return `<a class="card" href="/pokemon/${slug(name)}/"><img src="${art ? SPR + art + '.png' : ''}" alt="" loading="lazy" width="52" height="52" /><div><b>${name}</b><small>#${String(num).padStart(4, '0')}</small><div class="chips">${types.map(chip).join(' ')}</div></div></a>`; }).join('');
+    out.innerHTML = list.map((i) => { const [, name, types, art, num, url] = data.species[i];
+      return `<a class="card" href="${url}"><img src="${art ? SPR + art + '.png' : ''}" alt="" loading="lazy" width="52" height="52" /><div><b>${name}</b><small>#${String(num).padStart(4, '0')}</small><div class="chips">${types.map(chip).join(' ')}</div></div></a>`; }).join('');
   };
   document.getElementById('f')!.addEventListener('submit', (e) => { e.preventDefault(); search(); });
   document.querySelectorAll<HTMLButtonElement>('#game button').forEach((b) => b.addEventListener('click', () => {

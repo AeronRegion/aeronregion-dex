@@ -1,0 +1,287 @@
+---
+import Type from './Type.astro';
+import Cat from './Cat.astro';
+import { moveById, pokeUrl, moveUrl, artUrl, STATS, statRange, GAMES, meta, formSlug, formLabel } from '../lib/data';
+import { TYPES, eff, effLabel, effColor, typeColors } from '../lib/types';
+import learnData from '../data/learn.json';
+
+const { s, first } = Astro.props as { s: any; first: boolean };
+const learn = (learnData as Record<string, [string, string[]][]>)[s.id] ?? [];
+
+const abil = [s.abilities['0'], s.abilities['1']].filter(Boolean);
+const statColor = (b: number) => b < 50 ? '#e06a5a' : b < 80 ? '#f2a65a' : b < 100 ? '#e8c64a' : b < 130 ? '#8cc35b' : '#3fa66a';
+
+// moves tab
+const catOrder: Record<string, number> = { Physical: 0, Special: 1, Status: 2 };
+const rows = learn.map(([mid, src]) => ({ m: moveById.get(mid), src })).filter((r) => r.m)
+  .sort((a, b) => catOrder[a.m.cat] - catOrder[b.m.cat] || a.m.name.localeCompare(b.m.name));
+const gens = [...new Set(learn.flatMap(([, src]) => src.map((c) => c[0])))].filter((g) => g !== 'C').map(Number).sort((a, b) => b - a);
+const hasCobble = learn.some(([, src]) => src.some((c) => c[0] === 'C'));
+const pri = (p: number) => p > 0 ? `+${p}` : String(p);
+const priClass = (p: number) => p > 0 ? 'pos' : p < 0 ? 'neg' : 'zero';
+const defs = s.types;
+const spawns = s.cobbleverse?.spawns ?? [];
+---
+<div class="form" data-form={formSlug(s)} hidden={!first}>
+  <section class="hd">
+    <img class="art" src={artUrl(s.art)} alt={s.name} width="200" height="200" />
+    <div>
+      <span class="no">#{String(s.num).padStart(4, '0')}</span>
+      <h1>{formLabel(s)}</h1>
+      <div class="chips">{s.types.map((t: string) => <Type type={t} />)}</div>
+      <table class="kv top" style="margin-top:.8rem">
+        <tr><th>Abilities</th><td>{abil.join(', ')}{s.abilities.H && <><br /><span class="soft">{s.abilities.H} (hidden ability)</span></>}</td></tr>
+        <tr><th>Height / Weight</th><td>{s.height ?? '—'} m · {s.weight} kg</td></tr>
+      </table>
+    </div>
+    <table class="kv top">
+      <tr><th>EV yield</th><td><b>{s.ev.length ? s.ev.join(', ') : '—'}</b></td></tr>
+      <tr><th>Catch rate</th><td>{s.catchRate ?? '—'}</td></tr>
+      <tr><th>Egg groups</th><td>{s.eggGroups.join(', ')}</td></tr>
+      <tr><th>Gender</th><td>{s.gender ?? '—'}</td></tr>
+      <tr><th>Growth rate</th><td>{s.growth ?? '—'}</td></tr>
+      <tr><th>Smogon tier</th><td>{s.tier || '—'}{s.doublesTier && <span class="soft"> · Doubles: {s.doublesTier}</span>}</td></tr>
+    </table>
+  </section>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="overview">Overview</button>
+    <button role="tab" aria-selected="false" data-tab="moves">Moves ({rows.length})</button>
+  </div>
+
+  <section data-panel="overview" class="panel">
+    <div class="two">
+      <div>
+        <h3 class="sec">Base stats</h3>
+        {STATS.map(([k, label]) => { const b = s.stats[k]; const [lo, hi] = statRange(k, b); return (
+          <div class="st"><span>{label}</span><b>{b}</b><div class="bar"><i style={`width:${Math.min(100, b / 1.8)}%;background:${statColor(b)}`}></i></div><span class="mm">{lo}–{hi}</span></div>
+        ); })}
+        <div class="st tot"><span>Total</span><b>{s.bst}</b><span></span><span class="mm">Lv. 100 min–max</span></div>
+      </div>
+      <div>
+        <h3 class="sec">Damage taken</h3>
+        <div class="dt">
+          {TYPES.map((t) => { const m = String(eff(t, defs)); return (
+            <div class="tc"><a href={`/types/#${t.toLowerCase()}`} style={`background:${typeColors[t]}`}>{t.slice(0, 3).toUpperCase()}</a><b style={effColor[m] ? `background:${effColor[m]};color:#fff` : ''}>{effLabel[m]}</b></div>
+          ); })}
+        </div>
+        <p class="note" style="margin-top:.5rem">Before abilities. <a href="/types/">Full type chart</a></p>
+      </div>
+    </div>
+
+    {s.evo.length > 0 && <>
+      <h3 class="sec">Evolution</h3>
+      <div class="evos">
+        {s.evo.map((stage: any[], i: number) => <>
+          {i > 0 && <span class="arr">▶</span>}
+          <div class="stage">{stage.map((e) => (
+            <a class:list={['evo', { cur: e.id === s.id }]} href={pokeUrl(e)}>
+              <img src={artUrl(e.art)} alt="" width="84" height="84" loading="lazy" />
+              {e.how && <em>{e.how}</em>}
+              <span class="soft">#{String(e.num).padStart(4, '0')}</span><b>{e.name}</b>
+            </a>
+          ))}</div>
+        </>)}
+      </div>
+    </>}
+
+    <h3 class="sec">Where to find</h3>
+    <table class="loc">
+      <tr class="cv"><th>Cobbleverse {meta.cobbleverse ?? ''}<br /><span class="soft" style="font-weight:400;font-size:.8rem">Spawns from the pack's own files</span></th><td>
+        {!meta.cobbleverse ? <span class="soft">Spawn data is being added.</span>
+          : !s.cobbleverse ? <span class="soft">Not in Cobbleverse.</span>
+          : spawns.length === 0 ? <span class="soft">Doesn't spawn naturally. Evolve, breed, or check special encounters.</span>
+          : spawns.map((sp: any) => (
+            <div class="spawn">
+              <span>Rarity</span><div>{sp.bucket}{sp.weight != null && <span class="soft"> · weight {sp.weight}</span>}</div><span>Biomes</span><div>{sp.biomes}</div>
+              <span>Levels</span><div>{sp.levels}</div><span>Time</span><div>{sp.time ?? 'Any'}</div>
+              <span>Weather</span><div>{sp.weather ?? 'Any'}</div><span>Context</span><div>{sp.context}</div>
+              {sp.sky && <><span>Sky light</span><div>{sp.sky}</div></>}
+              {sp.conditions && <><span>Conditions</span><div>{sp.conditions}</div></>}
+            </div>))}
+      </td></tr>
+      {s.locations.map((l: any) => <tr><th>{l.game}</th><td>{l.places.join(', ')}</td></tr>)}
+      {s.locations.length === 0 && <tr><th>Main games</th><td class="soft">No wild locations listed. Usually obtained by evolution, trade or event.</td></tr>}
+    </table>
+
+    <div class="two">
+      <div><h3 class="sec">Training</h3>
+        <table class="kv"><tr><th>Base friendship</th><td>{s.friendship ?? '—'}</td></tr><tr><th>Base exp.</th><td>{s.baseExp ?? '—'}</td></tr>{s.cobbleverse?.drops && <tr><th>Drops (Cobbleverse)</th><td>{s.cobbleverse.drops}</td></tr>}</table></div>
+      <div><h3 class="sec">Breeding</h3>
+        <table class="kv"><tr><th>Egg cycles</th><td>{s.eggCycles ?? '—'}{s.eggCycles && <span class="soft"> ({(s.eggCycles * 257).toLocaleString()} steps)</span>}</td></tr><tr><th>Egg groups</th><td>{s.eggGroups.join(', ')}</td></tr></table></div>
+    </div>
+
+    {s.dex.length > 0 && <>
+      <h3 class="sec">Pokédex entries</h3>
+      <table class="dex">{s.dex.map((d: any) => <tr><th>{d.game}</th><td>{d.text}</td></tr>)}</table>
+    </>}
+  </section>
+
+  <section data-panel="moves" class="panel" hidden>
+    <div class="controls">
+      <span class="lab">Game</span>
+      <div class="seg game">
+        {hasCobble && <button aria-pressed="true" data-g="C">Cobbleverse {meta.cobbleverse}</button>}
+        <button aria-pressed={hasCobble ? 'false' : 'true'} data-g="all">All games</button>
+        {gens.map((g) => <button aria-pressed="false" data-g={g}>{GAMES[g]}</button>)}
+      </div>
+    </div>
+    <div class="controls">
+      <div class="seg split"><button aria-pressed="true" data-split="0">All moves</button><button aria-pressed="false" data-split="1">Split by how it learns</button></div>
+      <input class="field mfilter" placeholder="Filter moves or types…" style="margin-left:auto;min-width:240px" />
+    </div>
+    <p class="note mcount"></p>
+    <table class="data sortable mtable">
+      <thead><tr><th data-sort="text">Move</th><th data-sort="text">Type</th><th data-sort="num" class="sorted asc">Cat.</th><th data-sort="num">Pwr</th><th data-sort="num">Acc</th><th data-sort="num">PP</th><th data-sort="num" class="pri">Priority</th><th data-sort="text">Target</th><th data-sort="num">How</th></tr></thead>
+      <tbody>
+        {rows.map(({ m, src }) => (
+          <tr data-src={src.join(',')} data-q={`${m.name} ${m.type} ${m.cat}`.toLowerCase()}>
+            <td><a href={moveUrl(m)}>{m.name}</a></td>
+            <td data-v={m.type}><Type type={m.type} small /></td>
+            <td data-v={catOrder[m.cat]}><Cat cat={m.cat} /></td>
+            <td class="n">{m.power ?? '—'}</td>
+            <td class="n">{m.acc ?? '—'}</td>
+            <td class="n">{m.pp}</td>
+            <td class={`n pri ${priClass(m.pri)}`} data-v={m.pri}>{pri(m.pri)}</td>
+            <td class="tgt">{m.target}</td>
+            <td class="how"></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <p class="note" style="margin-top:.6rem">“All games” lists every move it can learn in any game, with the method from the newest game that has it.</p>
+  </section>
+</div>
+
+<script>
+  // Each form block has its own Overview/Moves tabs and moves table.
+  const METHOD: Record<string, [string, number]> = { L: ['Level up', 0], M: ['TM', 1], E: ['Egg', 2], T: ['Tutor', 3], S: ['Event', 4], D: ['Event', 4], V: ['Transfer', 5], R: ['Special', 4] };
+  const COBBLE: Record<string, [string, number]> = { tm: ['TM', 1], egg: ['Egg', 2], tutor: ['Tutor', 3], legacy: ['Older games', 5], special: ['Special', 4], form_change: ['Form change', 4], evolution: ['Evolution', 4] };
+  const parse = (codes: string[]) => codes.map((c) => {
+    if (c[0] === 'C') { const k = c.slice(1); if (/^\d+$/.test(k)) return { label: `Lv ${k}`, group: 0, sort: +k }; const [l, gr] = COBBLE[k] ?? [k, 4]; return { label: l, group: gr, sort: 200 + gr }; }
+    const t = c[1]; const [l, gr] = METHOD[t] ?? ['Other', 4];
+    if (t === 'L') { const lv = +c.slice(2); return { label: `Lv ${lv}`, group: 0, sort: lv }; }
+    return { label: l, group: gr, sort: 200 + gr };
+  });
+
+  for (const form of document.querySelectorAll<HTMLElement>('.form')) {
+    const tabs = form.querySelectorAll<HTMLButtonElement>('[data-tab]');
+    form.addEventListener('show-tab', ((e: CustomEvent) => {
+      tabs.forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === e.detail)));
+      form.querySelectorAll<HTMLElement>('.panel').forEach((p) => (p.hidden = p.dataset.panel !== e.detail));
+    }) as EventListener);
+    tabs.forEach((t) => t.addEventListener('click', () => {
+      document.querySelectorAll('.form').forEach((f) => f.dispatchEvent(new CustomEvent('show-tab', { detail: t.dataset.tab })));
+      document.dispatchEvent(new CustomEvent('form-state'));
+    }));
+
+    const table = form.querySelector<HTMLTableElement>('.mtable');
+    if (!table) continue;
+    const body = table.tBodies[0];
+    const rows = [...body.rows];
+    let game = (form.querySelector('.game [aria-pressed="true"]') as HTMLElement)?.dataset.g ?? 'all';
+    let split = false;
+    const howFor = (src: string[]) => {
+      if (game === 'C') return parse(src.filter((c) => c[0] === 'C'));
+      if (game !== 'all') return parse(src.filter((c) => c[0] === game));
+      const real = src.filter((c) => c[0] !== 'C' && c[1] !== 'V');
+      const pool = real.length ? real : src.filter((c) => c[0] !== 'C');
+      if (!pool.length) return parse(src);
+      const top = Math.max(...pool.map((c) => +c[0]));
+      const h = parse(pool.filter((c) => +c[0] === top));
+      if (top < 9 && h.length) h[0] = { ...h[0], label: `${h[0].label} (Gen ${top})` };
+      return h;
+    };
+    const uniq = (h: { label: string }[]) => [...new Set(h.map((x) => x.label))];
+    const render = () => {
+      const q = form.querySelector<HTMLInputElement>('.mfilter')!.value.trim().toLowerCase();
+      let n = 0;
+      body.querySelectorAll('tr.group').forEach((g) => g.remove());
+      for (const r of rows) {
+        const h = howFor(r.dataset.src!.split(','));
+        const ok = h.length > 0 && (!q || r.dataset.q!.includes(q));
+        r.hidden = !ok; if (ok) n++;
+        const cell = r.cells[8];
+        cell.textContent = uniq(h).join(', ');
+        cell.dataset.v = String(Math.min(...h.map((x) => x.sort), 999));
+        r.dataset.group = String(Math.min(...h.map((x) => x.group), 9));
+      }
+      if (split) {
+        const names = ['Level up', 'TM', 'Egg', 'Tutor', 'Event / special', 'Older games / transfer'];
+        const ordered = [...rows].sort((a, b) => +a.dataset.group! - +b.dataset.group! || (a.dataset.group === '0' ? +a.cells[8].dataset.v! - +b.cells[8].dataset.v! : 0));
+        let cur = '';
+        for (const r of ordered) {
+          if (!r.hidden && r.dataset.group !== cur) {
+            cur = r.dataset.group!;
+            const g = document.createElement('tr'); g.className = 'group';
+            g.innerHTML = `<td colspan="9">${names[+cur] ?? 'Other'}</td>`; body.appendChild(g);
+          }
+          body.appendChild(r);
+        }
+      }
+      form.querySelector('.mcount')!.textContent = `${n} moves`;
+    };
+    form.querySelectorAll<HTMLButtonElement>('.game button').forEach((b) => b.addEventListener('click', () => {
+      form.querySelectorAll('.game button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      game = b.dataset.g!; render();
+    }));
+    form.querySelectorAll<HTMLButtonElement>('.split button').forEach((b) => b.addEventListener('click', () => {
+      form.querySelectorAll('.split button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      split = b.dataset.split === '1';
+      if (!split) {
+        const ord = [...rows].sort((a, b) => +a.cells[2].dataset.v! - +b.cells[2].dataset.v! || a.cells[0].textContent!.localeCompare(b.cells[0].textContent!));
+        ord.forEach((r) => body.appendChild(r));
+      }
+      render();
+    }));
+    form.querySelector('.mfilter')!.addEventListener('input', render);
+    table.addEventListener('sorted', () => { if (split) { split = false; form.querySelectorAll('.split button').forEach((x, i) => x.setAttribute('aria-pressed', String(i === 0))); } render(); });
+    render();
+  }
+</script>
+
+<style>
+  .hd { display: grid; grid-template-columns: 200px 1fr 330px; gap: 1.6rem; align-items: start; }
+  .art { width: 200px; height: 200px; object-fit: contain; background: #fbe8e4; border: 2px solid var(--ink); }
+  .no { font-weight: 600; color: var(--ink-soft); }
+  h1 { margin: .1rem 0 .5rem; }
+  .tabs { display: flex; border-bottom: 3px solid var(--ink); margin-top: 1.6rem; }
+  .tabs button { font: inherit; font-weight: 700; font-size: 1.05rem; padding: .5rem 1.6rem; background: none; border: 3px solid transparent; border-bottom: 0; margin-bottom: -3px; cursor: pointer; color: var(--ink); }
+  .tabs button[aria-selected='true'] { border-color: var(--ink); background: #fff7f5; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 2.2rem; }
+  .st { display: grid; grid-template-columns: 80px 40px 1fr 80px; gap: .6rem; align-items: center; padding: .22rem 0; }
+  .st span:first-child { font-weight: 500; }
+  .st b { text-align: right; }
+  .bar { height: 12px; background: #ead1cd; } .bar i { display: block; height: 100%; }
+  .mm { color: var(--ink-soft); font-size: .82rem; text-align: right; }
+  .tot { border-top: 2px solid var(--ink); margin-top: .3rem; }
+  .dt { display: grid; grid-template-columns: repeat(9, 1fr); gap: 3px; }
+  .tc { display: flex; flex-direction: column; text-align: center; font-weight: 700; font-size: .75rem; }
+  .tc a { color: #fff; padding: .15rem 0; text-decoration: none; text-shadow: 0 1px 0 rgb(0 0 0 / .35); }
+  .tc b { padding: .2rem 0; background: #fff7f5; border: 1px solid #e2c3bf; min-height: 1.7rem; }
+  .evos { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .stage { display: flex; flex-direction: column; gap: .6rem; }
+  .evo { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--ink); padding: .3rem .6rem; border: 2px solid transparent; }
+  .evo.cur { border-color: var(--ink); background: #fff7f5; }
+  .evo img { width: 84px; height: 84px; object-fit: contain; }
+  .evo em { font-style: normal; font-size: .75rem; background: var(--petal-deep); padding: 0 .4rem; }
+  .evo b { font-weight: 700; }
+  .arr { color: var(--ink-soft); }
+  .loc { font-size: .95rem; }
+  .loc th { text-align: left; font-weight: 700; padding: .5rem 1rem .5rem 0; width: 200px; vertical-align: top; border-bottom: 1px solid #e2c3bf; }
+  .loc td { padding: .5rem 0; border-bottom: 1px solid #e2c3bf; vertical-align: top; }
+  .loc .cv th, .loc .cv td { background: #fff7f5; }
+  .loc .cv th { border-left: 6px solid var(--teal); padding-left: .7rem; }
+  .spawn { display: grid; grid-template-columns: auto 1fr auto 1fr; gap: .1rem 1.2rem; font-size: .9rem; padding: .2rem .6rem .4rem 0; }
+  .spawn + .spawn { border-top: 1px dashed #e2c3bf; padding-top: .4rem; }
+  .spawn span { color: var(--ink-soft); }
+  .dex th { text-align: left; font-weight: 700; padding: .45rem 1rem .45rem 0; width: 200px; vertical-align: top; border-bottom: 1px solid #e2c3bf; font-size: .92rem; }
+  .dex td { padding: .45rem 0; border-bottom: 1px solid #e2c3bf; }
+  :global(.data tr.group td) { background: var(--petal-deep) !important; font-weight: 700; padding-top: .6rem; }
+  @media (max-width: 900px) {
+    .hd { grid-template-columns: 1fr; } .art { width: 160px; height: 160px; }
+    .two { grid-template-columns: 1fr; }
+    .dt { grid-template-columns: repeat(6, 1fr); }
+  .mtable .tgt, .mtable th:nth-child(8) { display: none; }
+  }
+</style>

@@ -81,7 +81,13 @@ const cobble = fs.existsSync(`${CACHE}/cobbleverse.json`) ? JSON.parse(fs.readFi
 
 // ── Species ──────────────────────────────────────────────────────────────
 const OK = (s) => s.exists && [undefined, null, 'Past', 'Future'].includes(s.isNonstandard ?? null) && !/Gmax|Totem/.test(s.forme) && s.num > 0;
-const species = Dex.species.all().filter(OK).sort((a, b) => a.num - b.num || (a.forme ? 1 : 0) - (b.forme ? 1 : 0));
+// Forms that only change looks (Vivillon patterns, Arceus plates, Pikachu caps…) have the same stats and
+// abilities as the base, so they're folded into the base page. Tera-only forms are battle states, not Pokémon.
+const same = (a, b) => JSON.stringify(a.baseStats) === JSON.stringify(b.baseStats) && JSON.stringify(a.abilities) === JSON.stringify(b.abilities);
+const species = Dex.species.all().filter(OK)
+  .filter((s) => !/(^|-)Tera$|Terastal|Stellar/.test(s.forme))
+  .filter((s) => !s.forme || !same(s, Dex.species.get(s.baseSpecies)) || /Mega|Primal/.test(s.forme))
+  .sort((a, b) => a.num - b.num || (a.forme ? 1 : 0) - (b.forme ? 1 : 0));
 const ids = new Set(species.map((s) => s.id));
 
 const learnsets = {};
@@ -196,9 +202,12 @@ write('species', out); write('moves', moves); write('items', items); write('lear
 // names for the header search box
 const sl = (n) => n.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/♀/g, '-f').replace(/♂/g, '-m').replace(/['’.:%]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const moveNames = new Set(moves.map((m) => m.name)), monNames = new Set(out.map((s) => s.name));
+// one page per Pokédex number; forms are #anchors on it
+const firstOfNum = new Map(); for (const s of out) if (!firstOfNum.has(s.num) || !s.forme) if (!firstOfNum.has(s.num) || firstOfNum.get(s.num).forme) firstOfNum.set(s.num, s);
+const urlOf = (s) => { const b = firstOfNum.get(s.num); return `/pokemon/${sl(b.name)}/${b.id !== s.id && s.forme ? '#' + sl(s.forme) : ''}`; };
 fs.mkdirSync('public', { recursive: true });
 fs.writeFileSync('public/names.json', JSON.stringify([
-  ...out.map((s) => [s.name, `/pokemon/${sl(s.name)}/`]),
+  ...out.map((s) => [s.name, urlOf(s)]),
   ...moves.map((m) => [monNames.has(m.name) ? `${m.name} (move)` : m.name, `/moves/${sl(m.name)}/`]),
   ...items.map((i) => [monNames.has(i.name) || moveNames.has(i.name) ? `${i.name} (item)` : i.name, `/items/${sl(i.name)}/`]),
 ]));
@@ -206,7 +215,7 @@ fs.writeFileSync('public/names.json', JSON.stringify([
 const idx = new Map(out.map((s, i) => [s.id, i]));
 fs.mkdirSync('public', { recursive: true });
 fs.writeFileSync('public/search-index.json', JSON.stringify({
-  species: out.map((s) => [s.id, s.name, s.types, s.art, s.num]),
+  species: out.map((s) => [s.id, s.name, s.types, s.art, s.num, urlOf(s)]),
   moves: Object.fromEntries(moves.map((m) => [m.id, [m.name, m.type, m.cat]])),
   learn: Object.fromEntries(Object.entries(learnedBy).map(([m, l]) => [m, l.flatMap(([sid, mask]) => [idx.get(sid), mask])])),
 }));
