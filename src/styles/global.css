@@ -79,7 +79,7 @@ p { margin: 0 0 1em; }
 h1 { font-size: clamp(2rem, 4.5vw, 2.9rem); }
 .sec { font-family: var(--font-ui); font-weight: 800; font-size: 1.25rem; margin: 2rem 0 .6rem; }
 table { border-collapse: collapse; width: 100%; }
-.kv th { text-align: left; font-weight: 500; color: var(--ink-soft); padding: .35rem .8rem .35rem 0; width: 42%; vertical-align: top; font-size: .95rem; }
+.kv th { text-align: right; font-weight: 500; color: var(--ink-soft); padding: .35rem 1rem .35rem 0; width: 1%; white-space: nowrap; vertical-align: top; font-size: .95rem; }
 .kv td { padding: .35rem 0; }
 .kv th, .kv td { padding-top: .28rem; padding-bottom: .28rem; }
 .data { font-size: .95rem; }

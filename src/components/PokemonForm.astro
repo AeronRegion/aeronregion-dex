@@ -44,7 +44,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
       <div class="chips">{s.types.map((t: string) => <Type type={t} />)}</div>
       <table class="kv top" style="margin-top:.8rem">
         <tr><th>Height / Weight</th><td>{s.height ?? '—'} m · {s.weight} kg</td></tr>
-        <tr><th>Abilities</th><td>{abil.map((a, i) => <>{i > 0 && ', '}<a class="ab" href={abilityUrl(a)} title={abilityByName.get(a)?.short}>{a}</a></>)}{s.abilities.H && <><br /><a class="ab" href={abilityUrl(s.abilities.H)} title={abilityByName.get(s.abilities.H)?.short}>{s.abilities.H}</a> <span class="soft">(hidden ability)</span></>}</td></tr>
+        <tr><th>Abilities</th><td>{abil.map((a, i) => <>{i > 0 && <br />}<a class="ab" href={abilityUrl(a)} title={abilityByName.get(a)?.short}>{a}</a></>)}{s.abilities.H && <><br /><a class="ab" href={abilityUrl(s.abilities.H)} title={abilityByName.get(s.abilities.H)?.short}>{s.abilities.H}</a> <span class="soft">(hidden ability)</span></>}</td></tr>
       </table>
     </div>
     <table class="kv top">
@@ -282,6 +282,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .tabs button[aria-selected='true'] { border-color: var(--ink); background: #fff7f5; }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 2.2rem; }
   .st { display: grid; grid-template-columns: 80px 40px 1fr 80px; gap: .6rem; align-items: center; padding: .22rem 0; }
+  .st > span:first-child { text-align: right; color: var(--ink-soft); font-weight: 500; }
   .st span:first-child { font-weight: 500; }
   .st b { text-align: right; }
   .bar { height: 12px; background: #ead1cd; } .bar i { display: block; height: 100%; }
@@ -316,7 +317,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .cvname img { width: 28px; height: 28px; }
   .spawn { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; font-size: .9rem; padding: .2rem .6rem .4rem 0; }
   .spawn dl { display: grid; grid-template-columns: 80px 1fr; gap: .1rem .8rem; margin: 0; align-content: start; }
-  .spawn dt { color: var(--ink-soft); } .spawn dd { margin: 0; }
+  .spawn dt { color: var(--ink-soft); text-align: right; } .spawn dd { margin: 0; }
   .spawn + .spawn { border-top: 1px dashed #e2c3bf; padding-top: .4rem; }
   .dex th { text-align: left; font-weight: 700; padding: .35rem 1rem .35rem 0; width: 200px; vertical-align: top; font-size: .92rem; }
   .dex td { padding: .35rem 0; }
