@@ -131,3 +131,12 @@ select.field option { background: #fff7f5; color: var(--ink); }
 
 /* "Dragon (type)", "Growl (move)": the kind in small muted italics, like PokemonDB */
 h1 .kind { font-style: italic; font-weight: 400; font-size: .5em; color: var(--ink-soft); letter-spacing: 0; vertical-align: .15em; }
+
+/* Phones: wide tables scroll sideways instead of spilling off the page */
+@media (max-width: 760px) {
+  table.data { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; font-size: .9rem; }
+  table.data td, table.data th { white-space: nowrap; padding: .35rem .45rem; }
+  .controls { gap: .5rem; }
+  .controls .field { min-width: 0 !important; flex: 1 1 100%; }
+  h1 { font-size: 2rem; }
+}

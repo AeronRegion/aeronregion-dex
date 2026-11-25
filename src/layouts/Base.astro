@@ -45,7 +45,7 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
             </div>
           ) : <a href={m.href} class:list={['lnk', { on: isOn(m) }]}>{m.label}</a>)}
         </nav>
-        <a class="ar" href="https://aeronregion.net">Aeron Region <span aria-hidden="true">↗</span></a>
+        <a class="ar" href="https://aeronregion.net"><span class="arl">Aeron Region</span> <span aria-hidden="true">↗</span></a>
         <form class="find" action="/pokedex/" role="search"><input id="find" placeholder="Search Pokémon, moves, abilities…" autocomplete="off" aria-label="Search" /></form>
       </div>
     </header>
@@ -127,14 +127,15 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
   .find { width: 300px; position: relative; }
   .find input { width: 100%; font: inherit; font-size: .9rem; padding: .38rem .7rem; border: 2px solid var(--brick); background: #fff7f5; color: var(--ink); }
   @media (max-width: 700px) {
-    .bar { flex-wrap: wrap; height: auto; gap: .2rem 1.1rem; padding-top: .4rem; }
-    .find { width: 100%; order: 9; padding-bottom: .5rem; }
-    .ar { margin-left: auto; font-size: .8rem; padding: .2rem .5rem; }
-    .home, .more > button { height: 42px; }
-    .nav { gap: 1.1rem; justify-content: flex-start; }
-    .brand { font-size: 1.2rem; } .brand img { width: 32px; height: 32px; }
+    .bar { flex-wrap: wrap; height: auto; gap: 0 .9rem; padding-top: .3rem; row-gap: 0; }
+    .brand { font-size: 1.15rem; margin-right: auto; } .brand img { width: 30px; height: 30px; }
+    .nav { flex: none; gap: .9rem; justify-content: flex-start; }
+    .home, .more > button { height: 44px; font-size: .95rem; }
+    .find { flex: 1 1 70%; order: 9; padding: .1rem 0 .5rem; }
     .menu { left: auto; right: -.6rem; }
-    .nav .more:first-child .menu { left: -.6rem; right: auto; }
+    .ar { order: 10; font-size: .85rem; padding: .32rem .5rem; margin: -.4rem 0 0 .5rem; }
+    .arl { display: none; }
+    .ar::before { content: "AR"; }
   }
   main { padding: 1.4rem 0 1rem; }
   .site-footer { border-top: 4px solid var(--brick-deep); padding: 1.6rem 0 .6rem; margin-top: 4rem; font-size: .88rem; }
