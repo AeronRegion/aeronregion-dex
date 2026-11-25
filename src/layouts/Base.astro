@@ -45,6 +45,7 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
             </div>
           ) : <a href={m.href} class:list={['lnk', { on: isOn(m) }]}>{m.label}</a>)}
         </nav>
+        <a class="ar" href="https://aeronregion.net">Aeron Region <span aria-hidden="true">↗</span></a>
         <form class="find" action="/pokedex/" role="search"><input id="find" placeholder="Search Pokémon, moves, abilities…" autocomplete="off" aria-label="Search" /></form>
       </div>
     </header>
@@ -119,11 +120,14 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
   .menu a { padding: .5rem .8rem; text-decoration: none; color: var(--on-brick); font-weight: 600; white-space: nowrap; }
   .menu a:hover { background: var(--brick); outline: 2px solid #fff; outline-offset: -2px; }
   .qh { font-size: .7rem; font-weight: 700; letter-spacing: .04em; color: var(--on-brick-soft); background: rgb(255 255 255 / .08); padding: .3rem .8rem; margin: .3rem -.3rem; }
+  .ar { font-weight: 700; font-size: .9rem; color: var(--on-brick); text-decoration: none; padding: .32rem .8rem; border: 2px solid var(--brick); white-space: nowrap; }
+  .ar:hover { background: var(--brick); color: #fff; }
   .find { width: 300px; position: relative; }
   .find input { width: 100%; font: inherit; font-size: .9rem; padding: .38rem .7rem; border: 2px solid var(--brick); background: #fff7f5; color: var(--ink); }
   @media (max-width: 700px) {
     .bar { flex-wrap: wrap; height: auto; gap: .2rem 1.1rem; padding-top: .4rem; }
     .find { width: 100%; order: 9; padding-bottom: .5rem; }
+    .ar { margin-left: auto; font-size: .8rem; padding: .2rem .5rem; }
     .home, .more > button { height: 42px; }
     .nav { gap: 1.1rem; }
     .menu { left: auto; right: -.6rem; }
