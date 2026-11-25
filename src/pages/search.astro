@@ -88,7 +88,7 @@ import { TYPES } from '../lib/types';
   .chk input { width: 1.05rem; height: 1.05rem; accent-color: #59c4fb; }
   .slot { position: relative; } .slot .field { width: 100%; }
   :global(.card .hid) { display: inline-block; margin-top: .2rem; font-size: .7rem; font-weight: 700; background: var(--ink); color: var(--petal); padding: 0 .4rem; }
-  .slots { display: grid; grid-template-columns: repeat(4, 1fr) 1.2fr .8fr auto; gap: .6rem; margin: .4rem 0 .5rem; }
-  @media (max-width: 1100px) { .slots { grid-template-columns: repeat(4, 1fr); } }
+  .slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: .6rem; margin: .4rem 0 .5rem; }
+  .slots .extra, .slots button { grid-column: span 1; }
   @media (max-width: 800px) { .slots { grid-template-columns: 1fr 1fr; } }
 </style>
