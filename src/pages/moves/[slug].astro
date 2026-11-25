@@ -1,0 +1,99 @@
+---
+import Base from '../../layouts/Base.astro';
+import Type from '../../components/Type.astro';
+import Cat from '../../components/Cat.astro';
+import { moves, speciesById, slug, pokeUrl, iconUrl, GAMES, meta } from '../../lib/data';
+import learnedByData from '../../data/learnedBy.json';
+
+export function getStaticPaths() {
+  return moves.map((m) => ({ params: { slug: slug(m.name) }, props: { m } }));
+}
+const { m } = Astro.props as { m: any };
+const learners = ((learnedByData as Record<string, [string, number][]>)[m.id] ?? [])
+  .map(([id, mask]) => ({ s: speciesById.get(id), mask })).filter((x) => x.s);
+const hits: Record<string, string[]> = {
+  normal: ['f1', 'f2', 'al'], adjacentFoe: ['f1', 'f2'], allAdjacentFoes: ['f1', 'f2'], allAdjacent: ['f1', 'f2', 'al'],
+  self: ['us'], adjacentAlly: ['al'], adjacentAllyOrSelf: ['us', 'al'], allySide: ['us', 'al'], allyTeam: ['us', 'al'], allies: ['us', 'al'],
+  foeSide: ['f1', 'f2'], all: ['f1', 'f2', 'us', 'al'], any: ['f1', 'f2', 'al'], randomNormal: ['f1', 'f2'], scripted: ['f1', 'f2'],
+};
+const h = hits[m.targetKey] ?? [];
+const single = ['normal', 'adjacentFoe', 'any', 'adjacentAllyOrSelf', 'randomNormal'].includes(m.targetKey);
+const gens = [9, 8, 7, 6, 5, 4, 3, 2, 1].filter((g) => learners.some((l) => l.mask & (1 << g)));
+const hasC = learners.some((l) => l.mask & 1);
+---
+<Base title={m.name} description={`${m.name}: ${m.short}`}>
+  <h1>{m.name}</h1>
+  <div class="two">
+    <div>
+      <h3 class="sec">Move data</h3>
+      <table class="kv">
+        <tr><th>Type</th><td><Type type={m.type} /></td></tr>
+        <tr><th>Category</th><td><Cat cat={m.cat} /> {m.cat}</td></tr>
+        <tr><th>Power</th><td>{m.power ?? '—'}</td></tr>
+        <tr><th>Accuracy</th><td>{m.acc ?? '—'}</td></tr>
+        <tr><th>PP</th><td>{m.pp} (max. {m.maxpp})</td></tr>
+        <tr><th>Priority</th><td class={m.pri > 0 ? 'pri pos' : m.pri < 0 ? 'pri neg' : ''} style="text-align:left!important">{m.pri > 0 ? `+${m.pri}` : m.pri}</td></tr>
+        <tr><th>Makes contact?</th><td>{m.contact ? 'Yes' : 'No'}</td></tr>
+        <tr><th>Introduced</th><td>Generation {m.gen}</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3 class="sec">Effect</h3>
+      <p>{m.desc}</p>
+      {m.past && <p class="note">Not usable in Scarlet / Violet.</p>}
+      <h3 class="sec">Move target</h3>
+      <div class="tgtd">
+        <span class:list={{ hit: h.includes('f1') }}>Foe</span><span class:list={{ hit: h.includes('f2') }}>Foe</span><i></i>
+        <span class:list={{ hit: h.includes('us') }}>User</span><span class:list={{ hit: h.includes('al') }}>Ally</span>
+      </div>
+      <p class="note">{m.target}{single && h.length > 1 ? ' (one of the highlighted)' : ''}.</p>
+    </div>
+  </div>
+
+  <h3 class="sec">Learnt by <span class="soft" style="font-weight:500" id="lcount"></span></h3>
+  {learners.length === 0 ? <p class="soft">No Pokémon learn this move.</p> : <>
+    <div class="controls" style="margin-top:0">
+      <div class="seg" id="game">
+        {hasC && <button aria-pressed="true" data-b="0">Cobbleverse {meta.cobbleverse}</button>}
+        <button aria-pressed={hasC ? 'false' : 'true'} data-b="all">All games</button>
+        {gens.map((g) => <button aria-pressed="false" data-b={g}>{GAMES[g]}</button>)}
+      </div>
+      <input class="field" id="lf" placeholder="Filter by name or type…" style="margin-left:auto;min-width:220px" />
+    </div>
+    <div class="cards" id="learners">
+      {learners.map(({ s, mask }) => (
+        <a class="card" href={pokeUrl(s)} data-mask={mask} data-q={`${s.name} ${s.types.join(' ')}`.toLowerCase()}>
+          <img src={iconUrl(s.art)} alt="" loading="lazy" width="52" height="52" />
+          <div><b>{s.name}</b><small>#{String(s.num).padStart(4, '0')}</small><div class="chips">{s.types.map((t: string) => <Type type={t} small link={false} />)}</div></div>
+        </a>
+      ))}
+    </div>
+  </>}
+</Base>
+<script>
+  const cards = [...document.querySelectorAll<HTMLElement>('#learners .card')];
+  let bit = (document.querySelector('#game [aria-pressed="true"]') as HTMLElement)?.dataset.b ?? 'all';
+  const run = () => {
+    const q = (document.getElementById('lf') as HTMLInputElement)?.value.trim().toLowerCase() ?? '';
+    let n = 0;
+    for (const c of cards) {
+      const m = +c.dataset.mask!;
+      const ok = (bit === 'all' ? true : (m & (1 << +bit)) !== 0) && (!q || c.dataset.q!.includes(q));
+      c.hidden = !ok; if (ok) n++;
+    }
+    const el = document.getElementById('lcount'); if (el) el.textContent = `· ${n} Pokémon`;
+  };
+  document.querySelectorAll<HTMLButtonElement>('#game button').forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll('#game button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    bit = b.dataset.b!; run();
+  }));
+  document.getElementById('lf')?.addEventListener('input', run);
+  run();
+</script>
+<style>
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 2.2rem; }
+  .tgtd { display: grid; grid-template-columns: repeat(3, 76px); gap: 5px; margin: .3rem 0 .5rem; }
+  .tgtd span { font-weight: 700; font-size: .85rem; text-align: center; padding: .45rem 0; border: 2px solid var(--ink); background: #fff7f5; color: var(--ink-soft); }
+  .tgtd span.hit { background: var(--ink); color: var(--petal); }
+  @media (max-width: 800px) { .two { grid-template-columns: 1fr; gap: 0; } }
+</style>

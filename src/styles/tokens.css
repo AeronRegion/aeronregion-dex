@@ -1,0 +1,36 @@
+/* ─────────────────────────────────────────────────────────────
+   DESIGN TOKENS — start here.
+   Palette from the community screenshot: blossom petals for the
+   page, nether brick for dark bands, plum shadow for text,
+   diamond teal for "live" things, leaf green for success.
+   Look & feel: Minecraft's own UI — nametag plates, bevelled
+   block buttons, the singleplayer world-select list.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  /* Color */
+  --petal:        #f4dcd8;  /* page background */
+  --petal-deep:   #eac3c0;  /* hover rows, subtle fills */
+  --blossom:      #e895b0;  /* primary buttons */
+  --ink:          #2e1a20;  /* text, outlines */
+  --ink-soft:     #6b4a50;  /* secondary text on petal */
+  --brick:        #5a2731;  /* dark bands, nav, footer */
+  --brick-deep:   #351820;
+  --on-brick:     #f6e7e2;
+  --on-brick-soft:#cfa9a6;
+  --teal:         #56c6bb;  /* online / live */
+  --teal-ink:     #1f6f67;  /* teal text on petal */
+  --leaf:         #b4c07c;
+
+  /* Nametag plate (the floating label above players) */
+  --tag-bg:       rgb(0 0 0 / .32);
+  --tag-fg:       #ffffff;
+
+  /* Type */
+  --font-pixel:   'Rubik Variable', 'Rubik', system-ui, sans-serif;   /* headings, weight 800 */
+  --font-ui:      'Rubik Variable', 'Rubik', system-ui, sans-serif;   /* nav, buttons, labels */
+  --font-body:    'Rubik Variable', 'Rubik', system-ui, sans-serif;
+
+  /* Shape — blocks are square; only plates get stepped "pixel" corners */
+  --px:           4px;      /* one "pixel" at site scale */
+  --max-w:        1080px;
+}

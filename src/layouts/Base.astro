@@ -1,0 +1,110 @@
+---
+import '../styles/global.css';
+import { meta } from '../lib/data';
+const { title, description = 'Pokédex, moves, items, type chart and moveset search, with Cobbleverse movepools.' } = Astro.props;
+const fullTitle = title ? `${title} · Aeron Region Dex` : 'Aeron Region Dex';
+const path = Astro.url.pathname;
+const nav = [
+  { href: '/', label: 'Pokédex', match: (p: string) => p === '/' || p.startsWith('/pokemon/') },
+  { href: '/moves/', label: 'Moves', match: (p: string) => p.startsWith('/moves/') },
+  { href: '/items/', label: 'Items', match: (p: string) => p.startsWith('/items/') },
+  { href: '/types/', label: 'Type chart', match: (p: string) => p.startsWith('/types/') },
+  { href: '/search/', label: 'Moveset search', match: (p: string) => p.startsWith('/search/') },
+];
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/favicon-180.png" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta name="theme-color" content="#2e1a20" />
+  </head>
+  <body>
+    <header class="site-header band">
+      <div class="wrap bar">
+        <a href="/" class="brand"><img src="/icon-96.png" alt="" width="36" height="36" /> Aeron Region <span>Dex</span></a>
+        <button class="menu-btn" aria-label="Open menu" aria-expanded="false">☰</button>
+        <form class="find" action="/" role="search"><input id="find" list="find-list" placeholder="Search Pokémon, moves, items…" autocomplete="off" aria-label="Search" /><datalist id="find-list"></datalist></form>
+        <nav class="nav">
+          {nav.map((n) => <a href={n.href} class:list={['link', { active: n.match(path) }]}>{n.label}</a>)}
+          <a href="https://aeronregion.net" class="link home">aeronregion.net ↗</a>
+        </nav>
+      </div>
+    </header>
+    <main class="wrap"><slot /></main>
+    <footer class="band site-footer">
+      <div class="wrap">
+        <p>Data from <a href="https://github.com/smogon/pokemon-showdown">Pokémon Showdown</a> and <a href="https://pokeapi.co">PokéAPI</a>{meta.cobbleverse && <>, plus Cobbleverse {meta.cobbleverse} pack files</>}. Sprites from PokéAPI. Updated {meta.built}.</p>
+        <p class="soft">Part of <a href="https://aeronregion.net">Aeron Region</a>. Fan-made and not affiliated with Nintendo, Game Freak, The Pokémon Company, Mojang or Microsoft. Pokémon and its names are trademarks of their owners.</p>
+      </div>
+    </footer>
+    <script>
+      document.querySelector('.menu-btn')?.addEventListener('click', (e) => {
+        const open = document.querySelector('.nav')?.classList.toggle('open');
+        (e.currentTarget as HTMLElement).setAttribute('aria-expanded', String(!!open));
+      });
+      // Header search: loads the name list on first focus, jumps to the page on pick/enter.
+      const find = document.getElementById('find') as HTMLInputElement;
+      let names: [string, string][] | null = null;
+      const loadNames = async () => {
+        if (names) return names;
+        names = await (await fetch('/names.json')).json();
+        document.getElementById('find-list')!.innerHTML = names!.map(([n]) => `<option value="${n}">`).join('');
+        return names;
+      };
+      find.addEventListener('focus', loadNames, { once: true });
+      const go = async () => { const v = find.value.trim().toLowerCase(); if (!v) return; const list = await loadNames(); const hit = list.find(([n]) => n.toLowerCase() === v) ?? list.find(([n]) => n.toLowerCase().startsWith(v.replace(/ \((pokémon|move|item)\)$/, ''))); if (hit) location.href = hit[1]; };
+      find.addEventListener('change', go);
+      find.form!.addEventListener('submit', (e) => { e.preventDefault(); go(); });
+      // Any <table class="data sortable">: click a header with data-sort to sort by it.
+      // Cells can carry data-v for the sort value; numbers sort high→low first.
+      document.querySelectorAll<HTMLTableElement>('table.sortable').forEach((table) => {
+        table.querySelectorAll<HTMLTableCellElement>('th[data-sort]').forEach((th) => {
+          th.addEventListener('click', () => {
+            const i = [...th.parentElement!.children].indexOf(th);
+            const num = th.dataset.sort === 'num';
+            const asc = th.classList.contains('sorted') ? !th.classList.contains('asc') : !num;
+            table.querySelectorAll('th').forEach((h) => h.classList.remove('sorted', 'asc'));
+            th.classList.add('sorted'); if (asc) th.classList.add('asc');
+            const body = table.tBodies[0];
+            const val = (r: HTMLTableRowElement) => { const c = r.cells[i]; const v = c?.dataset.v ?? c?.textContent?.trim() ?? ''; return num ? (v === '' || v === '—' ? -Infinity : +v) : v.toLowerCase(); };
+            const rows = [...body.rows].filter((r) => !r.classList.contains('group'));
+            rows.sort((a, b) => { const x = val(a), y = val(b); return (x < y ? -1 : x > y ? 1 : 0) * (asc ? 1 : -1); });
+            body.querySelectorAll('tr.group').forEach((g) => g.remove());
+            rows.forEach((r) => body.appendChild(r));
+            table.dispatchEvent(new CustomEvent('sorted'));
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
+<style>
+  .site-header { position: sticky; top: 0; z-index: 50; border-bottom: 4px solid var(--brick-deep); }
+  .bar { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+  .brand { display: flex; align-items: center; gap: .5rem; font-weight: 800; font-size: 1.3rem; text-decoration: none; color: var(--on-brick); }
+  .brand span { color: var(--blossom); }
+  .brand img { image-rendering: pixelated; }
+  .nav { display: flex; align-items: center; gap: 1.3rem; }
+  .find { flex: 1; max-width: 320px; margin: 0 1.4rem; }
+  .find input { width: 100%; font: inherit; font-size: .92rem; padding: .35rem .7rem; border: 2px solid var(--brick-deep); background: #fff7f5; color: var(--ink); }
+  .link { font-weight: 600; color: var(--on-brick-soft); text-decoration: none; padding: .2rem 0; border-bottom: 3px solid transparent; }
+  .link:hover { color: var(--on-brick); }
+  .link.active { color: var(--on-brick); border-bottom-color: var(--blossom); }
+  .link.home { font-size: .9rem; opacity: .85; }
+  .menu-btn { display: none; background: none; border: 0; color: var(--on-brick); font-size: 1.6rem; cursor: pointer; }
+  main { padding: 1.4rem 0 1rem; }
+  .site-footer { border-top: 4px solid var(--brick-deep); padding: 1.6rem 0 .6rem; margin-top: 4rem; font-size: .88rem; }
+  @media (max-width: 860px) {
+    .menu-btn { display: block; }
+    .find { margin: 0 .8rem; }
+    .nav { display: none; position: absolute; top: 64px; left: 0; right: 0; flex-direction: column; align-items: flex-start; gap: .9rem; padding: 1.2rem; background: var(--brick); border-bottom: 4px solid var(--brick-deep); }
+    .nav.open { display: flex; }
+  }
+</style>

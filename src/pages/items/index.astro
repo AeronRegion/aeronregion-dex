@@ -1,0 +1,28 @@
+---
+import Base from '../../layouts/Base.astro';
+import { items, itemUrl, itemIconUrl } from '../../lib/data';
+---
+<Base title="Items" description="Held items, berries, Mega Stones and more.">
+  <h1>Items</h1>
+  <div class="controls"><input class="field" id="q" placeholder="Search items or effects…" style="flex:1" /></div>
+  <p class="note" id="count"></p>
+  <table class="data sortable" id="it">
+    <thead><tr><th></th><th data-sort="text">Item</th><th>Effect</th><th data-sort="num">Fling</th></tr></thead>
+    <tbody>
+      {items.map((i) => (
+        <tr data-q={`${i.name} ${i.desc}`.toLowerCase()}>
+          <td style="width:40px">{i.icon && <img src={itemIconUrl(i.icon)} alt="" width="30" height="30" loading="lazy" style="image-rendering:pixelated" />}</td>
+          <td style="white-space:nowrap"><a href={itemUrl(i)}>{i.name}</a></td>
+          <td class="tgt">{i.desc}</td>
+          <td class="n">{i.fling ?? '—'}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  <script>
+    const q = document.getElementById('q') as HTMLInputElement;
+    const rows = [...(document.getElementById('it') as HTMLTableElement).tBodies[0].rows];
+    const run = () => { const v = q.value.trim().toLowerCase(); let n = 0; for (const r of rows) { const ok = !v || r.dataset.q!.includes(v); r.hidden = !ok; if (ok) n++; } document.getElementById('count')!.textContent = `${n} items`; };
+    q.addEventListener('input', run); run();
+  </script>
+</Base>

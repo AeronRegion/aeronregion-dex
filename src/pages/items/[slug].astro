@@ -1,0 +1,28 @@
+---
+import Base from '../../layouts/Base.astro';
+import { items, species, slug, pokeUrl, itemIconUrl } from '../../lib/data';
+export function getStaticPaths() {
+  return items.map((i) => ({ params: { slug: slug(i.name) }, props: { i } }));
+}
+const { i } = Astro.props as { i: any };
+const mega = i.megaStone ? species.find((s) => s.name === i.megaStone) : null;
+---
+<Base title={i.name} description={i.desc}>
+  <div class="ih">
+    {i.icon && <img src={itemIconUrl(i.icon)} alt="" width="72" height="72" />}
+    <div><h1>{i.name}</h1><p style="max-width:70ch">{i.desc}</p></div>
+  </div>
+  <h3 class="sec">Details</h3>
+  <table class="kv" style="max-width:640px">
+    {i.effect && i.effect !== i.desc && <tr><th>Outside battle</th><td>{i.effect}</td></tr>}
+    {mega && <tr><th>Mega Evolves</th><td><a href={pokeUrl(mega)}>{mega.name}</a></td></tr>}
+    <tr><th>Fling power</th><td>{i.fling ?? '—'}</td></tr>
+    <tr><th>Introduced</th><td>Generation {i.gen}</td></tr>
+    {i.past && <tr><th>Scarlet / Violet</th><td>Not available</td></tr>}
+  </table>
+</Base>
+<style>
+  .ih { display: flex; gap: 1.2rem; align-items: center; }
+  .ih img { image-rendering: pixelated; background: #fff7f5; border: 2px solid var(--ink); padding: 6px; width: 84px; height: 84px; }
+  h1 { margin: 0 0 .3rem; }
+</style>

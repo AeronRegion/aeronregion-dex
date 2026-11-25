@@ -1,0 +1,117 @@
+@import '@fontsource-variable/rubik';
+@import './tokens.css';
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  overflow-x: clip;
+  margin: 0;
+  background: var(--petal);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+main { flex: 1; }
+img { max-width: 100%; display: block; }
+a { color: var(--brick); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+a:hover { color: var(--ink); }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+h1, h2 { font-family: var(--font-pixel); font-weight: 800; line-height: 1.05; margin: 0 0 .55em; letter-spacing: 0; }
+h1 { font-size: clamp(2.2rem, 5.5vw, 3.8rem); }
+h2 { font-size: clamp(1.4rem, 2.6vw, 1.9rem); }
+h3 { font-family: var(--font-ui); font-weight: 700; font-size: 1.3rem; line-height: 1.25; margin: 0 0 .5em; }
+p { margin: 0 0 1em; }
+
+.wrap { width: min(100% - 2.5rem, var(--max-w)); margin-inline: auto; }
+.soft { color: var(--ink-soft); }
+
+/* Stepped pixel corners, used on plates and panels */
+.pixel-corners {
+  clip-path: polygon(
+    0 var(--px), var(--px) var(--px), var(--px) 0,
+    calc(100% - var(--px)) 0, calc(100% - var(--px)) var(--px), 100% var(--px),
+    100% calc(100% - var(--px)), calc(100% - var(--px)) calc(100% - var(--px)), calc(100% - var(--px)) 100%,
+    var(--px) 100%, var(--px) calc(100% - var(--px)), 0 calc(100% - var(--px)));
+}
+
+/* Nametag plate */
+.nametag {
+  display: inline-block;
+  background: var(--tag-bg);
+  color: var(--tag-fg);
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  padding: .1em .45em .15em;
+}
+
+/* Block button — bevelled like the Minecraft menu */
+.block {
+  display: inline-flex; align-items: center; gap: .55rem;
+  font-family: var(--font-ui); font-size: 1.05rem; font-weight: 700;
+  padding: .6rem 1.15rem;
+  color: var(--ink); background: var(--blossom);
+  border: 2px solid var(--ink);
+  box-shadow: inset 3px 3px 0 rgb(255 255 255 / .45), inset -3px -3px 0 rgb(0 0 0 / .22);
+  text-decoration: none; cursor: pointer;
+}
+.block:hover { color: var(--ink); background: #f2acc3; outline: 2px solid #fff; outline-offset: -4px; }
+.block:active { box-shadow: inset -3px -3px 0 rgb(255 255 255 / .35), inset 3px 3px 0 rgb(0 0 0 / .25); }
+.block.stone { background: #b9aaa6; }
+.block.stone:hover { background: #cbbdb9; }
+.block[aria-disabled='true'] { background: #6f6361; color: #e2d8d6; pointer-events: none; box-shadow: none; }
+
+.band { background: var(--brick); color: var(--on-brick); }
+.band a:not(.block) { color: var(--on-brick); }
+.band a.block, .panel a.block { color: var(--ink); }
+.band .soft { color: var(--on-brick-soft); }
+
+.prose { max-width: 66ch; }
+.prose img { margin: 1.5rem 0; border: 2px solid var(--ink); }
+.prose h2 { margin-top: 2rem; }
+
+
+/* ── Dex ─────────────────────────────────────────────── */
+.wrap { width: min(100% - 2.5rem, 1180px); }
+h1 { font-size: clamp(2rem, 4.5vw, 2.9rem); }
+.sec { font-family: var(--font-ui); font-weight: 700; font-size: 1.15rem; border-bottom: 3px solid var(--ink); padding-bottom: .3rem; margin: 2rem 0 .75rem; }
+table { border-collapse: collapse; width: 100%; }
+.kv th { text-align: left; font-weight: 500; color: var(--ink-soft); padding: .35rem .8rem .35rem 0; width: 42%; vertical-align: top; font-size: .95rem; }
+.kv td { padding: .35rem 0; }
+.kv tr { border-bottom: 1px solid #e2c3bf; }
+.kv.top tr:first-child { border-top: 2px solid var(--ink); }
+.data { font-size: .95rem; }
+.data th { text-align: left; font-weight: 600; font-size: .82rem; color: var(--ink-soft); padding: .45rem .55rem; border-bottom: 2px solid var(--ink); white-space: nowrap; user-select: none; }
+.data th[data-sort] { cursor: pointer; }
+.data th[data-sort]:hover, .data th.sorted { color: var(--ink); }
+.data th.sorted::after { content: ' ▾'; }
+.data th.sorted.asc::after { content: ' ▴'; }
+.data td { padding: .38rem .55rem; border-bottom: 1px solid #e2c3bf; vertical-align: middle; }
+.data tbody tr:hover td { background: #fbeae6; }
+.data .n { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.data a { font-weight: 600; text-decoration: none; color: var(--ink); }
+.data a:hover { text-decoration: underline; }
+.cat { display: inline-block; font-weight: 700; font-size: .7rem; color: #fff; padding: .05rem .4rem; letter-spacing: .02em; }
+.cat.Physical { background: #c9482c; } .cat.Special { background: #4f6fc7; } .cat.Status { background: #8a8a8a; }
+.pri { text-align: center !important; } .pri.pos { color: #1f7a3a; } .pri.neg { color: #b0302b; } .pri.zero { color: var(--ink-soft); font-weight: 500; }
+.tgt { color: var(--ink-soft); font-size: .88rem; }
+.field { font: inherit; font-size: 1rem; padding: .5rem .75rem; border: 2px solid var(--ink); background: #fff7f5; color: var(--ink); min-width: 0; }
+.field:focus { outline: 3px solid var(--blossom); outline-offset: 0; }
+.seg { display: inline-flex; flex-wrap: wrap; }
+.seg button { font: inherit; font-weight: 600; font-size: .85rem; padding: .3rem .75rem; border: 2px solid var(--ink); margin: 0 -2px -2px 0; background: #fff7f5; color: var(--ink); cursor: pointer; }
+.seg button[aria-pressed='true'] { background: var(--ink); color: var(--petal); }
+.controls { display: flex; gap: .8rem 1.2rem; flex-wrap: wrap; align-items: center; margin: 1rem 0 .6rem; }
+.controls .lab { font-weight: 600; font-size: .85rem; color: var(--ink-soft); }
+.note { font-size: .88rem; color: var(--ink-soft); }
+.sprite { width: 40px; height: 40px; object-fit: contain; image-rendering: auto; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .6rem; }
+.card { display: grid; grid-template-columns: 52px 1fr; gap: .6rem; align-items: center; padding: .45rem .6rem; background: #fff7f5; border: 1px solid #e2c3bf; text-decoration: none; color: var(--ink); }
+.card:hover { border-color: var(--ink); color: var(--ink); }
+.card img { width: 52px; height: 52px; object-fit: contain; }
+.card b { display: block; font-weight: 700; line-height: 1.2; }
+.card small { display: block; color: var(--ink-soft); font-size: .78rem; margin-bottom: .15rem; }
+.chips { display: flex; gap: .25rem; flex-wrap: wrap; }
+[hidden] { display: none !important; }
