@@ -9,7 +9,7 @@ import { TYPES } from '../lib/types';
   <div class="controls">
     <input class="field" id="q" placeholder="Search by name, number or ability…" style="flex:1;min-width:240px" autofocus />
     <select class="field" id="t"><option value="">All types</option>{TYPES.map((t) => <option>{t}</option>)}</select>
-    <label class="note"><input type="checkbox" id="forms" checked /> Show forms</label>
+    <label class="note"><input type="checkbox" id="forms" /> Show forms</label>
   </div>
   <p class="note" id="count"></p>
   <table class="data sortable" id="dex">
