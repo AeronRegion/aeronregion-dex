@@ -1,0 +1,35 @@
+---
+import Base from '../layouts/Base.astro';
+import DexTable from '../components/DexTable.astro';
+import { species } from '../lib/data';
+const list = species.filter((s) => !s.forme);
+const OPTS = [['HP', 'HP'], ['Atk', 'Attack'], ['Def', 'Defense'], ['SpA', 'Sp. Atk'], ['SpD', 'Sp. Def'], ['Spe', 'Speed']];
+---
+<Base title="EV yield: Pokémon to train each stat" description="Which Pokémon give EVs in each stat when defeated.">
+  <h1>EV yield</h1>
+  <p class="note">Effort values a Pokémon gives when defeated. Pick a stat to see who to train against.</p>
+  <div class="controls">
+    <span class="lab">Stat</span>
+    <select class="field" id="st"><option value="">Any stat</option>{OPTS.map(([k, l]) => <option value={k}>{l}</option>)}</select>
+    <select class="field" id="amt"><option value="">Any amount</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+  </div>
+  <p class="note" id="count"></p>
+  <DexTable list={list} id="ev" />
+  <script>
+    const st = document.getElementById('st') as HTMLSelectElement, amt = document.getElementById('amt') as HTMLSelectElement;
+    const rows = [...(document.getElementById('ev') as HTMLTableElement).tBodies[0].rows];
+    const run = () => {
+      let n = 0;
+      for (const r of rows) {
+        const ev = (r.querySelector('.tgt')?.textContent ?? '').split(', ').map((x) => x.split(' '));
+        const ok = !st.value || ev.some(([a, k]) => k === st.value && (!amt.value || a === amt.value));
+        r.hidden = !ok; if (ok) n++;
+      }
+      document.getElementById('count')!.textContent = `${n} Pokémon`;
+      const q = new URLSearchParams(); if (st.value) q.set('stat', st.value); if (amt.value) q.set('n', amt.value);
+      history.replaceState(null, '', q.toString() ? `?${q}` : location.pathname);
+    };
+    const p = new URLSearchParams(location.search); if (p.get('stat')) st.value = p.get('stat')!; if (p.get('n')) amt.value = p.get('n')!;
+    [st, amt].forEach((el) => el.addEventListener('change', run)); run();
+  </script>
+</Base>

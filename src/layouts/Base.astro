@@ -7,9 +7,10 @@ const path = Astro.url.pathname;
 // Top menu. Entries with `items` open a dropdown; `quick` adds a small "Quick links" part under it.
 const ITEM = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/';
 const menus: any[] = [
-  { label: 'Pokémon', icon: ITEM + 'poke-ball.png', match: ['/pokedex/', '/pokemon/', '/moves/', '/abilities/', '/items/', '/natures/', '/regions/'], items: [
+  { label: 'Pokémon', icon: ITEM + 'poke-ball.png', match: ['/pokedex/', '/pokemon/', '/moves/', '/abilities/', '/items/', '/natures/', '/regions/', '/egg-groups/', '/ev-yield/'], items: [
     { href: '/pokedex/', label: 'Pokédex' }, { href: '/moves/', label: 'Moves' },
     { href: '/abilities/', label: 'Abilities' }, { href: '/items/', label: 'Items' }, { href: '/natures/', label: 'Natures' },
+    { href: '/egg-groups/', label: 'Egg groups' }, { href: '/ev-yield/', label: 'EV yield' },
   ], quick: [{ href: '/regions/', label: 'Pokémon by generation' }, { href: '/moves/?tag=Multi-hit', label: 'Multi-hit moves' }, { href: '/moves/?tag=Priority', label: 'Priority moves' }] },
   { label: 'Tools', icon: 'gear', match: ['/types/', '/search/'], items: [
     { href: '/search/', label: 'Moveset search' }, { href: '/types/', label: 'Type chart' },

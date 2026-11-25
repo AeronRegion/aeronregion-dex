@@ -1,0 +1,16 @@
+---
+import Base from '../../layouts/Base.astro';
+import { species } from '../../lib/data';
+const egg = (g: string) => g.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const counts = new Map<string, number>();
+for (const s of species) if (!s.forme) for (const g of s.eggGroups ?? []) counts.set(g, (counts.get(g) ?? 0) + 1);
+const list = [...counts].sort((a, b) => a[0].localeCompare(b[0]));
+---
+<Base title="Egg groups" description="Every Pokémon egg group and which Pokémon can breed together.">
+  <h1>Egg groups</h1>
+  <p class="note">Two Pokémon can breed if they share an egg group. Ditto breeds with anything outside Undiscovered, and Undiscovered Pokémon can't breed at all.</p>
+  <table class="data sortable" style="max-width:520px">
+    <thead><tr><th data-sort="text">Egg group</th><th data-sort="num">Pokémon</th></tr></thead>
+    <tbody>{list.map(([g, n]) => <tr><td><a href={`/egg-groups/${egg(g)}/`}>{g}</a></td><td class="n">{n}</td></tr>)}</tbody>
+  </table>
+</Base>

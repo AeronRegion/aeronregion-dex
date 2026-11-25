@@ -43,14 +43,14 @@ const spawns = s.cobbleverse?.spawns ?? [];
       <h1>{formLabel(s)}</h1>
       <div class="chips">{s.types.map((t: string) => <Type type={t} />)}</div>
       <table class="kv top" style="margin-top:.8rem">
-        <tr><th>Abilities</th><td>{abil.map((a, i) => <>{i > 0 && ', '}<a class="ab" href={abilityUrl(a)} title={abilityByName.get(a)?.short}>{a}</a></>)}{s.abilities.H && <><br /><a class="ab" href={abilityUrl(s.abilities.H)} title={abilityByName.get(s.abilities.H)?.short}>{s.abilities.H}</a> <span class="soft">(hidden ability)</span></>}</td></tr>
         <tr><th>Height / Weight</th><td>{s.height ?? '—'} m · {s.weight} kg</td></tr>
+        <tr><th>Abilities</th><td>{abil.map((a, i) => <>{i > 0 && ', '}<a class="ab" href={abilityUrl(a)} title={abilityByName.get(a)?.short}>{a}</a></>)}{s.abilities.H && <><br /><a class="ab" href={abilityUrl(s.abilities.H)} title={abilityByName.get(s.abilities.H)?.short}>{s.abilities.H}</a> <span class="soft">(hidden ability)</span></>}</td></tr>
       </table>
     </div>
     <table class="kv top">
-      <tr><th>EV yield</th><td><b>{s.ev.length ? s.ev.join(', ') : '—'}</b></td></tr>
+      <tr><th>EV yield</th><td>{s.ev.length ? s.ev.map((e: string, i: number) => <>{i > 0 && ', '}<a class="ab" href={`/ev-yield/?stat=${e.split(' ')[1]}`}>{e}</a></>) : '—'}</td></tr>
       <tr><th>Catch rate</th><td>{s.catchRate ?? '—'}</td></tr>
-      <tr><th>Egg groups</th><td>{s.eggGroups.join(', ')}</td></tr>
+      <tr><th>Egg groups</th><td>{s.eggGroups.map((g: string, i: number) => <>{i > 0 && ', '}<a class="ab" href={`/egg-groups/${g.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}/`}>{g}</a></>)}</td></tr>
       <tr><th>Gender</th><td>{s.gender ?? '—'}</td></tr>
       <tr><th>Growth rate</th><td>{s.growth ?? '—'}</td></tr>
       <tr><th>Smogon tier</th><td>{s.tier || '—'}{s.doublesTier && <span class="soft"> · Doubles: {s.doublesTier}</span>}</td></tr>
@@ -69,7 +69,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
         {STATS.map(([k, label]) => { const b = s.stats[k]; const [lo, hi] = statRange(k, b); return (
           <div class="st"><span>{label}</span><b>{b}</b><div class="bar"><i style={`width:${Math.min(100, b / 1.8)}%;background:${statColor(b)}`}></i></div><span class="mm">{lo}–{hi}</span></div>
         ); })}
-        <div class="st tot"><span>Total</span><b>{s.bst}</b><span></span><span class="mm">Lv. 100 min–max</span></div>
+        <div class="st tot"><span>Total</span><b>{s.bst}</b><span class="mm">Min–max at Lv. 100</span></div>
       </div>
       <div>
         <h3 class="sec">Type defenses</h3>
@@ -138,7 +138,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
       <div><h3 class="sec">Training</h3>
         <table class="kv"><tr><th>Base friendship</th><td>{s.friendship ?? '—'}</td></tr><tr><th>Base exp.</th><td>{s.baseExp ?? '—'}</td></tr>{s.cobbleverse?.drops && <tr><th>Drops (Cobbleverse)</th><td>{s.cobbleverse.drops}</td></tr>}</table></div>
       <div><h3 class="sec">Breeding</h3>
-        <table class="kv"><tr><th>Egg cycles</th><td>{s.eggCycles ?? '—'}{s.eggCycles && <span class="soft"> ({(s.eggCycles * 257).toLocaleString()} steps)</span>}</td></tr><tr><th>Egg groups</th><td>{s.eggGroups.join(', ')}</td></tr></table></div>
+        <table class="kv"><tr><th>Egg cycles</th><td>{s.eggCycles ?? '—'}{s.eggCycles && <span class="soft"> ({(s.eggCycles * 257).toLocaleString()} steps)</span>}</td></tr><tr><th>Egg groups</th><td>{s.eggGroups.map((g: string, i: number) => <>{i > 0 && ', '}<a class="ab" href={`/egg-groups/${g.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}/`}>{g}</a></>)}</td></tr></table></div>
     </div>
 
     {s.dex.length > 0 && <>
@@ -274,7 +274,8 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .hd h1 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .art { width: 210px; height: 210px; object-fit: contain; margin-top: -6px; }
   .no { font-weight: 600; color: var(--ink-soft); }
-  .ab { color: var(--ink); font-weight: 500; }
+  .ab { color: var(--ink); font-weight: 700; text-decoration: none; }
+  .ab:hover { color: #1f7fb8; }
   h1 { margin: .1rem 0 .5rem; }
   .tabs { display: flex; border-bottom: 3px solid var(--ink); margin-top: 1.6rem; }
   .tabs button { font: inherit; font-weight: 700; font-size: 1.05rem; padding: .5rem 1.6rem; background: none; border: 3px solid transparent; border-bottom: 0; margin-bottom: -3px; cursor: pointer; color: var(--ink); }
@@ -284,6 +285,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .st span:first-child { font-weight: 500; }
   .st b { text-align: right; }
   .bar { height: 12px; background: #ead1cd; } .bar i { display: block; height: 100%; }
+  .tot .mm { grid-column: 3 / 5; white-space: nowrap; }
   .mm { color: var(--ink-soft); font-size: .82rem; text-align: right; }
   .tot { border-top: 2px solid var(--ink); margin-top: .3rem; }
   .dt { display: grid; grid-template-columns: repeat(9, 38px); gap: 10px 2px; }

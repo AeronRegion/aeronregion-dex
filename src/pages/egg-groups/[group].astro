@@ -1,0 +1,18 @@
+---
+import Base from '../../layouts/Base.astro';
+import DexTable from '../../components/DexTable.astro';
+import { species } from '../../lib/data';
+export function getStaticPaths() {
+  const egg = (g: string) => g.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const names = new Set<string>(); for (const s of species) for (const g of s.eggGroups ?? []) names.add(g);
+  return [...names].map((g) => ({ params: { group: egg(g) }, props: { g } }));
+}
+const { g } = Astro.props as { g: string };
+const list = species.filter((s) => !s.forme && s.eggGroups?.includes(g));
+---
+<Base title={`${g} egg group`} description={`Every Pokémon in the ${g} egg group.`}>
+  <p class="note"><a href="/egg-groups/">← All egg groups</a></p>
+  <h1>{g} <span class="kind">(egg group)</span></h1>
+  <p class="note">{list.length} Pokémon. {g === 'Undiscovered' ? "These can't breed." : `Any two of these can breed, as can any of them with Ditto.`}</p>
+  <DexTable list={list} />
+</Base>
