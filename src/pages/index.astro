@@ -125,7 +125,8 @@ const _tries = [['Garchomp', '/pokemon/garchomp/'], ['Fake Out', '/moves/fake-ou
   @media (max-width: 960px) { .hero-in { grid-template-columns: 1fr; } .pa img { width: 220px; height: 220px; } .tiles { grid-template-columns: 1fr 1fr; } }
   @media (max-width: 520px) {
     .hero { padding: 1.6rem 1rem 4rem; min-height: 0; }
-    .tiles { grid-template-columns: 1fr 1fr; gap: .6rem; }
+    .tiles { grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; gap: .6rem; }
+    .tile b { white-space: nowrap; font-size: .95rem; } .tile .mini { flex: none; transform: scale(.8); }
     .tile { padding: .6rem; gap: .5rem; } .tile img { width: 36px; height: 36px; } .tile small { display: none; }
     .big { margin-bottom: 1.4rem; } .big input { font-size: 1rem; padding: .7rem .8rem; } .big button { padding: 0 .9rem; font-size: .95rem; }
     .right { display: grid !important; grid-template-columns: 120px 1fr; align-items: center; gap: .8rem; margin-top: 1rem; }
