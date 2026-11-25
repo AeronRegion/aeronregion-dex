@@ -9,6 +9,7 @@ import learnData from '../data/learn.json';
 const { s, first } = Astro.props as { s: any; first: boolean };
 const learn = (learnData as Record<string, [string, string[]][]>)[s.id] ?? [];
 
+const imp = (m: number) => { const inch = Math.round(m * 39.3701); return `${Math.floor(inch / 12)}′${String(inch % 12).padStart(2, '0')}″`; };
 const abil = [s.abilities['0'], s.abilities['1']].filter(Boolean);
 const statColor = (b: number) => b < 50 ? '#e06a5a' : b < 80 ? '#f2a65a' : b < 100 ? '#e8c64a' : b < 130 ? '#8cc35b' : '#3fa66a';
 
@@ -43,14 +44,15 @@ const spawns = s.cobbleverse?.spawns ?? [];
       <h1>{formLabel(s)}</h1>
       <div class="chips">{s.types.map((t: string) => <Type type={t} />)}</div>
       <table class="kv top" style="margin-top:.8rem">
-        <tr><th>Height / Weight</th><td>{s.height ?? '—'} m · {s.weight} kg</td></tr>
+        <tr><th>Height</th><td>{s.height != null ? <>{s.height} m <span class="soft">({imp(s.height)})</span></> : '—'}</td></tr>
+        <tr><th>Weight</th><td>{s.weight} kg <span class="soft">({(s.weight * 2.20462).toFixed(1)} lbs)</span></td></tr>
         <tr><th>Abilities</th><td>{abil.map((a, i) => <>{i > 0 && <br />}<a class="ab" href={abilityUrl(a)} title={abilityByName.get(a)?.short}>{a}</a></>)}{s.abilities.H && <><br /><a class="ab" href={abilityUrl(s.abilities.H)} title={abilityByName.get(s.abilities.H)?.short}>{s.abilities.H}</a> <span class="soft">(hidden ability)</span></>}</td></tr>
       </table>
     </div>
     <table class="kv top">
       <tr><th>EV yield</th><td>{s.ev.length ? <span class="evs">{s.ev.map((e: string) => <a class={`evb ev-${e.split(' ')[1]}`} href={`/ev-yield/?stat=${e.split(' ')[1]}`}>{e}</a>)}</span> : '—'}</td></tr>
       <tr><th>Catch rate</th><td>{s.catchRate ?? '—'}</td></tr>
-      <tr><th>Egg groups</th><td>{s.eggGroups.map((g: string, i: number) => <>{i > 0 && ', '}<a class="ab" href={`/egg-groups/${g.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}/`}>{g}</a></>)}</td></tr>
+      <tr><th>Egg groups</th><td>{s.eggGroups.map((g: string, i: number) => <>{i > 0 && ', '}<a class="ab" href={`/egg-groups/#${g.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`}>{g}</a></>)}</td></tr>
       <tr><th>Gender</th><td>{s.gender ?? '—'}</td></tr>
       <tr><th>Growth rate</th><td>{s.growth ?? '—'}</td></tr>
       <tr><th>Smogon tier</th><td>{s.tier || '—'}{s.doublesTier && <span class="soft"> · Doubles: {s.doublesTier}</span>}</td></tr>
@@ -138,7 +140,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
       <div><h3 class="sec">Training</h3>
         <table class="kv"><tr><th>Base friendship</th><td>{s.friendship ?? '—'}</td></tr><tr><th>Base exp.</th><td>{s.baseExp ?? '—'}</td></tr>{s.cobbleverse?.drops && <tr><th>Drops (Cobbleverse)</th><td>{s.cobbleverse.drops}</td></tr>}</table></div>
       <div><h3 class="sec">Breeding</h3>
-        <table class="kv"><tr><th>Egg cycles</th><td>{s.eggCycles ?? '—'}{s.eggCycles && <span class="soft"> ({(s.eggCycles * 257).toLocaleString()} steps)</span>}</td></tr><tr><th>Egg groups</th><td>{s.eggGroups.map((g: string, i: number) => <>{i > 0 && ', '}<a class="ab" href={`/egg-groups/${g.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}/`}>{g}</a></>)}</td></tr></table></div>
+        <table class="kv"><tr><th>Egg cycles</th><td>{s.eggCycles ?? '—'}{s.eggCycles && <span class="soft"> ({(s.eggCycles * 257).toLocaleString()} steps)</span>}</td></tr><tr><th>Egg groups</th><td>{s.eggGroups.map((g: string, i: number) => <>{i > 0 && ', '}<a class="ab" href={`/egg-groups/#${g.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`}>{g}</a></>)}</td></tr></table></div>
     </div>
 
     {s.dex.length > 0 && <>
@@ -270,7 +272,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
 </script>
 
 <style>
-  .hd { display: grid; grid-template-columns: 200px 1fr 330px; gap: 1.6rem; align-items: start; height: 232px; }
+  .hd { display: grid; grid-template-columns: 200px 1fr 330px; gap: 1.6rem; align-items: start; height: 268px; }
   .hd h1 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .art { width: 210px; height: 210px; object-fit: contain; margin-top: -6px; }
   .no { font-weight: 600; color: var(--ink-soft); }

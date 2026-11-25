@@ -82,11 +82,18 @@ const cobble = fs.existsSync(`${CACHE}/cobbleverse.json`) ? JSON.parse(fs.readFi
 // ── Species ──────────────────────────────────────────────────────────────
 const OK = (s) => s.exists && [undefined, null, 'Past', 'Future'].includes(s.isNonstandard ?? null) && !/Gmax|Totem/.test(s.forme) && s.num > 0;
 // Forms that only change looks (Vivillon patterns, Arceus plates, Pikachu caps…) have the same stats and
-// abilities as the base, so they're folded into the base page. Tera-only forms are battle states, not Pokémon.
+// abilities as the base, so they're folded into the base page. Regional forms always get their own tab. Tera-only forms are battle states, not Pokémon.
 const same = (a, b) => JSON.stringify(a.baseStats) === JSON.stringify(b.baseStats) && JSON.stringify(a.abilities) === JSON.stringify(b.abilities);
 const species = Dex.species.all().filter(OK)
   .filter((s) => !/(^|-)Tera$|Terastal|Stellar/.test(s.forme))
-  .filter((s) => !s.forme || !same(s, Dex.species.get(s.baseSpecies)) || /Mega|Primal/.test(s.forme))
+  .filter((s) => {
+    if (!s.forme || /Mega|Primal/.test(s.forme) || (/Alola|Galar|Hisui|Paldea/.test(s.forme) && s.baseSpecies !== 'Pikachu')) return true;
+    const b = Dex.species.get(s.baseSpecies);
+    if (!same(s, b)) return true;
+    // same stats and abilities but a different typing (Oricorio styles) is a real form; type swaps from a
+    // held item (Arceus plates, Silvally memories) or mid-battle (Castform weather) stay folded
+    return s.types.join() !== b.types.join() && !s.requiredItem && !s.requiredItems?.length && !s.battleOnly;
+  })
   .sort((a, b) => a.num - b.num || (a.forme ? 1 : 0) - (b.forme ? 1 : 0));
 const ids = new Set(species.map((s) => s.id));
 
