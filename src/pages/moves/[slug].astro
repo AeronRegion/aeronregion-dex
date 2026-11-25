@@ -22,7 +22,7 @@ const gens = [9, 8, 7, 6, 5, 4, 3, 2, 1].filter((g) => learners.some((l) => l.ma
 const hasC = learners.some((l) => l.mask & 1);
 ---
 <Base title={m.name} description={`${m.name}: ${m.short}`}>
-  <h1>{m.name}</h1>
+  <h1>{m.name} <em class="kind">(move)</em></h1>
   <div class="two">
     <div>
       <h3 class="sec">Move data</h3>

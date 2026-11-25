@@ -10,7 +10,7 @@ const list = a.holders.map(([id, kind]: [string, string]) => ({ s: speciesById.g
 const normal = list.filter((x: any) => !x.hidden), hidden = list.filter((x: any) => x.hidden);
 ---
 <Base title={a.name} description={a.short}>
-  <h1>{a.name}</h1>
+  <h1>{a.name} <em class="kind">(ability)</em></h1>
   <h3 class="sec">Effect</h3>
   <p style="max-width:75ch">{a.desc}</p>
   <p class="note">Introduced in Generation {a.gen}.</p>

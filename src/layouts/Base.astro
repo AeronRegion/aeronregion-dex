@@ -35,7 +35,6 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
       <div class="wrap bar">
         <a href="/" class="brand"><img src="/icon-96.png" alt="" width="40" height="40" />ARdex</a>
         <nav class="nav" aria-label="Main">
-          <a href="/" class:list={['home', { on: path === '/' }]}>Home</a>
           {menus.map((m) => m.items ? (
             <div class:list={['more', { on: isOn(m) }]}>
               <button type="button" aria-haspopup="true">{m.label}<span class="car">▾</span></button>

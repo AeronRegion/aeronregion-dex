@@ -10,7 +10,7 @@ const mega = i.megaStone ? species.find((s) => s.name === i.megaStone) : null;
 <Base title={i.name} description={i.desc}>
   <div class="ih">
     {i.icon && <img src={itemIconUrl(i.icon)} alt="" width="72" height="72" />}
-    <div><h1>{i.name}</h1><p style="max-width:70ch">{i.desc}</p></div>
+    <div><h1>{i.name} <em class="kind">(item)</em></h1><p style="max-width:70ch">{i.desc}</p></div>
   </div>
   <h3 class="sec">Details</h3>
   <table class="kv" style="max-width:640px">
