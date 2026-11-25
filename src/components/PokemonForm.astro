@@ -29,6 +29,9 @@ for (const a of allAbil) {
   if (v) v.names.push(a); else variants.push({ names: [a], cells });
 }
 const affecting = allAbil.filter((a) => ABILITY_DEF[a]);
+const plain = TYPES.map((t) => effWith(t, defs));
+// show the ability that changes matchups first, so it isn't hidden behind a button
+variants.sort((x, y) => (x.names.some((n) => ABILITY_DEF[n]) ? 0 : 1) - (y.names.some((n) => ABILITY_DEF[n]) ? 0 : 1));
 const spawns = s.cobbleverse?.spawns ?? [];
 ---
 <div class="form" data-form={formSlug(s)} hidden={!first}>
@@ -70,19 +73,19 @@ const spawns = s.cobbleverse?.spawns ?? [];
       <div>
         <h3 class="sec">Damage taken</h3>
         {variants.length > 1 && (
-          <div class="seg abil" style="margin-bottom:.5rem">
+          <div class="abilrow"><span class="lab">Ability</span><div class="seg abil">
             {variants.map((v, i) => <button aria-pressed={i === 0 ? 'true' : 'false'} data-v={i}>{v.names.join(' / ')}</button>)}
-          </div>
+          </div></div>
         )}
         {variants.map((v, i) => (
           <div class="dt" data-v={i} hidden={i > 0}>
             {TYPES.map((t, j) => { const m = v.cells[j]; const bg = effBg(m); return (
-              <div class="tc"><a href={`/types/#${t.toLowerCase()}`} style={`background:${typeColors[t]}`}>{t.slice(0, 3).toUpperCase()}</a><b style={bg ? `background:${bg};color:#fff` : ''}>{effText(m)}</b></div>
+              <div class="tc"><a href={`/types/#${t.toLowerCase()}`} style={`background:${typeColors[t]}`}>{t.slice(0, 3).toUpperCase()}</a><b class:list={{ chg: m !== plain[j] }} title={m !== plain[j] ? `Changed by ${v.names.join(' / ')} (normally ${effText(plain[j]) || '1'}×)` : undefined} style={bg ? `background:${bg};color:#fff` : ''}>{effText(m)}</b></div>
             ); })}
           </div>
         ))}
         <p class="note" style="margin-top:.5rem">
-          {variants.length === 1 && affecting.length > 0 ? <>Includes {affecting.join(', ')}. </> : variants.length > 1 ? <>Pick an ability to see its effect. </> : null}
+          {variants.length === 1 && affecting.length > 0 ? <>Includes {affecting.join(', ')}. Outlined boxes are changed by the ability. </> : variants.length > 1 ? <>Outlined boxes are changed by the selected ability. </> : null}
           <a href="/types/">Full type chart</a>
         </p>
       </div>
@@ -282,6 +285,9 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .dt { display: grid; grid-template-columns: repeat(9, 38px); gap: 10px 2px; }
   .tc { display: flex; flex-direction: column; text-align: center; font-weight: 700; font-size: .7rem; }
   .tc a { color: #fff; height: 24px; line-height: 24px; text-decoration: none; text-shadow: 0 1px 0 rgb(0 0 0 / .4); }
+  .abilrow { display: flex; align-items: center; gap: .6rem; margin-bottom: .6rem; flex-wrap: wrap; }
+  .abilrow .lab { font-weight: 600; font-size: .85rem; color: var(--ink-soft); }
+  .tc b.chg { outline: 2px solid var(--ink); outline-offset: -2px; }
   .tc b { height: 26px; line-height: 26px; font-size: .78rem; background: #fff7f5; border: 1px solid #e2c3bf; border-top: 0; }
   .evos { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
   .stage { display: flex; flex-direction: column; gap: .6rem; }

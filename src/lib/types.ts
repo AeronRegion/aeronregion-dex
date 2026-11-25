@@ -32,7 +32,7 @@ export const effColor: Record<string, string> = { '4': '#1f8f3a', '2': '#4caf50'
 
 // Abilities that change how much damage a Pokémon takes from a type (defending side).
 // Numbers multiply the normal type chart; 'se' applies only to super-effective hits.
-export const ABILITY_DEF: Record<string, Record<string, number> & { se?: number; wonder?: number }> = {
+export const ABILITY_DEF: Record<string, Record<string, number> & { se?: number; wonder?: number; delta?: number }> = {
   'Levitate': { Ground: 0 }, 'Earth Eater': { Ground: 0 },
   'Water Absorb': { Water: 0 }, 'Storm Drain': { Water: 0 }, 'Dry Skin': { Water: 0, Fire: 1.25 },
   'Volt Absorb': { Electric: 0 }, 'Lightning Rod': { Electric: 0 }, 'Motor Drive': { Electric: 0 },
@@ -42,12 +42,14 @@ export const ABILITY_DEF: Record<string, Record<string, number> & { se?: number;
   'Filter': { se: 0.75 }, 'Solid Rock': { se: 0.75 }, 'Prism Armor': { se: 0.75 },
   'Wonder Guard': { wonder: 1 },
   'Desolate Land': { Water: 0 }, 'Primordial Sea': { Fire: 0 },
+  'Delta Stream': { delta: 1 },
 };
 export const effWith = (atk: string, defs: string[], ability?: string) => {
   let m = eff(atk, defs);
   const a = ability ? ABILITY_DEF[ability] : undefined;
   if (!a) return m;
   if (a.wonder) return m > 1 ? m : 0;
+  if (a.delta && defs.includes('Flying') && (CHART[atk].Flying ?? 1) > 1) m /= 2; // strong winds: no super-effective hits on Flying
   if (a[atk] !== undefined) m *= a[atk];
   if (a.se && m > 1) m *= a.se;
   return m;
