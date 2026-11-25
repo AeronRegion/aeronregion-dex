@@ -38,17 +38,17 @@ const _tries = [['Garchomp', '/pokemon/garchomp/'], ['Fake Out', '/moves/fake-ou
     ))}
   </div>
 
-  <a class="potd" id="potd" href="/pokedex/">
-    <span class="pa"><img id="part" alt="" /></span>
+  <div class="potd" id="potd">
+    <a class="pa" id="partlink" href="/pokedex/"><img id="part" alt="" /></a>
     <span class="pm">
       <span class="pl">Pokémon of the day · <span id="pnum"></span></span>
-      <span class="pn" id="pname">&nbsp;</span>
+      <a class="pn" id="pname" href="/pokedex/">&nbsp;</a>
       <span class="pty" id="ptypes"></span>
       <span class="pinfo"><span id="pev"></span><span id="pspawn"></span></span>
       <span class="pab" id="pab"></span>
     </span>
     <span class="pstats" id="pstats"></span>
-  </a>
+  </div>
 
   <div class="about">
     <p>ARdex is built for hunting, training and competitive team building, with spawns and movepools pulled straight from Cobbleverse {meta.cobbleverse}. It's a neutral tool: nothing here is for sale.</p>
@@ -66,17 +66,19 @@ const _tries = [['Garchomp', '/pokemon/garchomp/'], ['Fake Out', '/moves/fake-ou
     const d = new Date(); const key = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
     let h = key; h = Math.imul(h ^ (h >>> 16), 0x45d9f3b) >>> 0; h = Math.imul(h ^ (h >>> 16), 0x45d9f3b) >>> 0; h = (h ^ (h >>> 16)) >>> 0;
     const [name, num, types, stats, ev, art, url, spawn, abil, hidden] = list[h % list.length];
-    const card = document.getElementById('potd') as HTMLAnchorElement;
+    const card = document.getElementById('potd') as HTMLElement;
+    const slug = (x: string) => x.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/['’.:%]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     const c = TC[types[0]];
-    card.href = url;
+    (document.getElementById('partlink') as HTMLAnchorElement).href = url;
+    (document.getElementById('pname') as HTMLAnchorElement).href = url;
     card.style.background = `linear-gradient(110deg, ${c}, ${shade(c, .55)} 60%, ${shade(c, .35)})`;
     document.getElementById('pnum')!.textContent = '#' + String(num).padStart(4, '0');
     document.getElementById('pname')!.textContent = name;
-    document.getElementById('ptypes')!.innerHTML = types.map((t) => `<span style="background:${TC[t]};color:${LIGHT.has(t) ? '#2e1a20' : '#fff'}">${t}</span>`).join('');
+    document.getElementById('ptypes')!.innerHTML = types.map((t) => `<a href="/types/${t.toLowerCase()}/" style="background:${TC[t]};color:${LIGHT.has(t) ? '#2e1a20' : '#fff'}">${t}</a>`).join('');
     (document.getElementById('part') as HTMLImageElement).src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${art}.png`;
     const labels = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'];
     document.getElementById('pstats')!.innerHTML = stats.map((v, i) => `<span class="ps"><span>${labels[i]}</span><b>${v}</b><i><u style="width:${Math.min(100, v / 1.6)}%;background:${col(v)}"></u></i></span>`).join('') + `<span class="ps tot"><span>Total</span><b>${stats.reduce((a, b) => a + b, 0)}</b><i></i></span>`;
-    document.getElementById('pab')!.innerHTML = `Abilities <b>${abil.join(', ')}</b>${hidden ? ` · <b>${hidden}</b> <span class="hid">(hidden)</span>` : ''}`;
+    document.getElementById('pab')!.innerHTML = 'Abilities ' + abil.map((a) => `<a href="/abilities/${slug(a)}/">${a}</a>`).join(', ') + (hidden ? ` · <a href="/abilities/${slug(hidden)}/">${hidden}</a> <span class="hid">(hidden)</span>` : '');
     document.getElementById('pev')!.innerHTML = `EV yield <b>${ev || '—'}</b>`;
     document.getElementById('pspawn')!.innerHTML = spawn ? `<img src="/cobbleverse.png" alt="" width="16" height="16"> ${spawn}` : 'No natural Cobbleverse spawn';
   });
@@ -103,14 +105,17 @@ const _tries = [['Garchomp', '/pokemon/garchomp/'], ['Fake Out', '/moves/fake-ou
   .mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; width: 38px; height: 38px; margin: 5px 0; }
   .mini i { display: block; border: 1px solid rgb(0 0 0 / .25); }
   .potd { display: grid; grid-template-columns: 250px 1fr 290px; align-items: center; gap: 1.4rem; margin-top: 2.2rem; min-height: 230px; color: #fff; text-decoration: none; border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); background: var(--brick); overflow: hidden; }
-  .potd:hover { color: #fff; }
-  .pa { align-self: stretch; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgb(255 255 255 / .24), transparent 66%); }
-  .pa img { width: 220px; height: 220px; object-fit: contain; filter: drop-shadow(0 10px 10px rgb(0 0 0 / .35)); animation: float 3.2s ease-in-out infinite; }
-  @keyframes float { 0%, 100% { transform: translateY(4px) rotate(-1deg); filter: drop-shadow(0 12px 8px rgb(0 0 0 / .35)); } 50% { transform: translateY(-8px) rotate(1deg); filter: drop-shadow(0 22px 14px rgb(0 0 0 / .25)); } }
+  .potd a { color: #fff; }
+  .potd a:hover { color: #fff; text-decoration: underline; }
+  .pab :global(a) { font-weight: 700; text-decoration: none; }
+  .pa { text-decoration: none !important; align-self: stretch; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgb(255 255 255 / .24), transparent 66%); }
+  .pa img { width: 220px; height: 220px; object-fit: contain; filter: drop-shadow(0 10px 10px rgb(0 0 0 / .35)); animation: drift 6s ease-in-out infinite; }
+  /* small slow loop: a few pixels around a circle */
+  @keyframes drift { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(2px, -2px); } 50% { transform: translate(0, -4px); } 75% { transform: translate(-2px, -2px); } }
   .pl { display: block; font-size: .85rem; font-weight: 700; opacity: .85; }
-  .pn { display: block; font-size: 2.6rem; font-weight: 800; line-height: 1.05; margin: .15rem 0 .5rem; }
+  .pn { display: inline-block; text-decoration: none; font-size: 2.6rem; font-weight: 800; line-height: 1.05; margin: .15rem 0 .5rem; }
   .pty { display: flex; gap: .3rem; }
-  .pty :global(span) { font-size: .78rem; font-weight: 700; padding: .05rem .55rem; border: 1px solid rgb(0 0 0 / .3); }
+  .pty :global(a) { text-decoration: none !important;  font-size: .78rem; font-weight: 700; padding: .05rem .55rem; border: 1px solid rgb(0 0 0 / .3); }
   .pinfo { display: flex; gap: 1.4rem; flex-wrap: wrap; margin-top: 1rem; font-size: .9rem; }
   .pinfo > span { display: flex; align-items: center; gap: .4rem; }
   .pab { display: block; margin-top: .55rem; font-size: .9rem; }
