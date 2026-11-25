@@ -14,7 +14,6 @@ const menus: any[] = [
   { label: 'Mechanics', icon: 'gear', match: ['/types/', '/natures/'], items: [
     { href: '/types/', label: 'Type chart' }, { href: '/natures/', label: 'Natures' },
   ] },
-  { label: 'Home', icon: '/icon-96.png', href: '/', match: [] },
 ];
 const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x));
 ---
@@ -32,23 +31,19 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
     <meta name="theme-color" content="#2e1a20" />
   </head>
   <body>
-    <header class="site-header band">
+    <header class="site-header">
       <div class="wrap bar">
+        <a href="/" class:list={['home', { on: path === '/' }]}><img src="/icon-96.png" alt="" width="30" height="30" />Home</a>
         <nav class="nav" aria-label="Main">
-          {menus.map((m) => {
-            const icon = m.icon === 'gear'
-              ? <svg class="ic" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.3 2.9a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7 1L11 21h4l.3-2.9a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg>
-              : <img class="ic" src={m.icon} alt="" width="28" height="28" />;
-            return m.items ? (
-              <div class:list={['more', 'tab', { on: isOn(m) }]}>
-                <button type="button" aria-haspopup="true">{icon}<span class="tl">{m.label}</span><span class="car">▾</span></button>
-                <div class="menu">
-                  {m.items.map((x: any) => <a href={x.href}>{x.label}</a>)}
-                  {m.quick && <><span class="qh">Quick links</span>{m.quick.map((x: any) => <a href={x.href}>{x.label}</a>)}</>}
-                </div>
+          {menus.map((m) => m.items ? (
+            <div class:list={['more', { on: isOn(m) }]}>
+              <button type="button" aria-haspopup="true">{m.label}<span class="car">▾</span></button>
+              <div class="menu">
+                {m.items.map((x: any) => <a href={x.href}>{x.label}</a>)}
+                {m.quick && <><span class="qh">Quick links</span>{m.quick.map((x: any) => <a href={x.href}>{x.label}</a>)}</>}
               </div>
-            ) : <a href={m.href} class:list={['tab', { on: isOn(m) }]}>{icon}<span class="tl">{m.label}</span></a>;
-          })}
+            </div>
+          ) : <a href={m.href} class:list={['lnk', { on: isOn(m) }]}>{m.label}</a>)}
         </nav>
         <form class="find" action="/pokedex/" role="search"><input id="find" placeholder="Search Pokémon, moves, abilities…" autocomplete="off" aria-label="Search" /></form>
       </div>
@@ -107,35 +102,32 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
   </body>
 </html>
 <style>
-  .site-header { position: sticky; top: 0; z-index: 50; }
-  .bar { display: flex; align-items: flex-end; gap: 1rem; height: 58px; }
-  .nav { flex: 1; display: flex; align-items: flex-end; gap: .3rem; height: 100%; }
-  .tab { flex: 1; position: relative; height: 48px; display: flex; }
-  .tab > button, a.tab { flex: 1; font: inherit; display: flex; align-items: center; justify-content: center; gap: .5rem; height: 48px;
-    font-weight: 700; font-size: 1rem; color: var(--on-brick); text-decoration: none; background: none; cursor: pointer;
-    border: 2px solid transparent; border-bottom: 0; }
-  .tab > button:hover, a.tab:hover { background: rgb(255 255 255 / .07); color: var(--on-brick); }
-  .tab.on > button, a.tab.on { background: var(--petal); color: var(--ink); border-color: var(--brick-deep); }
-  .ic { width: 28px; height: 28px; image-rendering: pixelated; flex: none; }
-  img.ic { width: 38px; height: 38px; margin: -5px; }
+  .site-header { position: sticky; top: 0; z-index: 50; background: var(--brick-deep); border-bottom: 3px solid #000; }
+  .bar { display: flex; align-items: center; gap: 1.6rem; height: 52px; }
+  .home, .more > button, .lnk { font: inherit; font-weight: 700; font-size: 1rem; color: var(--on-brick); text-decoration: none; background: none; border: 0; cursor: pointer;
+    display: flex; align-items: center; gap: .45rem; height: 52px; padding: 0 .2rem; border-bottom: 3px solid transparent; margin-bottom: -3px; }
+  .home img { width: 30px; height: 30px; image-rendering: pixelated; }
+  .home:hover, .more > button:hover, .lnk:hover { color: #fff; }
+  .home.on, .more.on > button, .lnk.on { border-bottom-color: #59c4fb; }
+  .nav { display: flex; gap: 1.6rem; flex: 1; }
   .car { font-size: .7em; opacity: .7; }
-  .find { width: 280px; flex: none; align-self: center; position: relative; }
-  .find input { width: 100%; font: inherit; font-size: .92rem; padding: .4rem .7rem; border: 2px solid var(--brick-deep); background: #fff7f5; color: var(--ink); }
+  .more { position: relative; }
   .more > .menu { display: none; }
   .more.open > .menu, .more:focus-within > .menu { display: grid; }
   @media (hover: hover) { .more:hover > .menu { display: grid; } }
-  .menu { position: absolute; left: 0; top: 100%; min-width: 100%; width: max-content; max-width: 280px; background: var(--brick-deep); border: 2px solid #000; padding: .3rem; z-index: 70; }
+  .menu { position: absolute; left: -.6rem; top: 100%; width: max-content; min-width: 220px; background: #1d0c10; border: 2px solid #000; padding: .3rem; z-index: 70; }
   .menu a { padding: .5rem .8rem; text-decoration: none; color: var(--on-brick); font-weight: 600; white-space: nowrap; }
   .menu a:hover { background: var(--brick); outline: 2px solid #fff; outline-offset: -2px; }
   .qh { font-size: .7rem; font-weight: 700; letter-spacing: .04em; color: var(--on-brick-soft); background: rgb(255 255 255 / .08); padding: .3rem .8rem; margin: .3rem -.3rem; }
-  @media (max-width: 960px) { .find { width: 200px; } .tl { font-size: .92rem; } }
-  @media (max-width: 760px) {
-    .bar { flex-wrap: wrap; height: auto; padding-top: .5rem; gap: .4rem; }
-    .find { width: 100%; order: -1; }
-    .nav { height: 48px; }
-    .tl, .car { display: none; }
-    .menu { left: auto; right: 0; }
-    .tab:first-child .menu { left: 0; right: auto; }
+  .find { width: 300px; position: relative; }
+  .find input { width: 100%; font: inherit; font-size: .9rem; padding: .38rem .7rem; border: 2px solid var(--brick); background: #fff7f5; color: var(--ink); }
+  @media (max-width: 700px) {
+    .bar { flex-wrap: wrap; height: auto; gap: .2rem 1.1rem; padding-top: .4rem; }
+    .find { width: 100%; order: 9; padding-bottom: .5rem; }
+    .home, .more > button { height: 42px; }
+    .nav { gap: 1.1rem; }
+    .menu { left: auto; right: -.6rem; }
+    .nav .more:first-child .menu { left: -.6rem; right: auto; }
   }
   main { padding: 1.4rem 0 1rem; }
   .site-footer { border-top: 4px solid var(--brick-deep); padding: 1.6rem 0 .6rem; margin-top: 4rem; font-size: .88rem; }

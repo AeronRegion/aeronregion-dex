@@ -1,109 +1,128 @@
 ---
 import Base from '../layouts/Base.astro';
-import { species, moves, abilities, items, meta, groups } from '../lib/data';
+import { moves, abilities, items, meta, groups } from '../lib/data';
 import { TYPES, typeColors } from '../lib/types';
-const spawning = groups.filter((g) => g.some((s) => s.cobbleverse?.spawns?.length)).length;
 const ITEM = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/';
-const main = [
-  { href: '/pokedex/', name: 'Pokédex', icon: 'poke-ball', text: `All ${groups.length} Pokémon with forms and Megas: stats, EV yields, matchups and where each one spawns.` },
-  { href: '/moves/', name: 'Moves', icon: 'tm-normal', text: `${moves.length} moves. Sort by category, power or priority, or filter for multi-hit, spread, sound and more.` },
-  { href: '/abilities/', name: 'Abilities', icon: 'ability-capsule', text: `${abilities.length} abilities, what they do in battle, and which Pokémon have them.` },
-  { href: '/items/', name: 'Items', icon: 'leftovers', text: `${items.length} held items, berries and Mega Stones.` },
+const tiles = [
+  { href: '/pokedex/', name: 'Pokédex', icon: 'poke-ball', text: `All ${groups.length} Pokémon` },
+  { href: '/moves/', name: 'Moves', icon: 'tm-normal', text: `${moves.length} moves, filter by category or tag` },
+  { href: '/abilities/', name: 'Abilities', icon: 'ability-capsule', text: `${abilities.length} abilities and who has them` },
+  { href: '/items/', name: 'Items', icon: 'leftovers', text: `${items.length} held items, berries, Mega Stones` },
+  { href: '/search/', name: 'Moveset search', icon: 'poke-radar', text: 'Who learns these moves together' },
+  { href: '/types/', name: 'Type chart', icon: null, text: 'Matchups and a page per type' },
+  { href: '/natures/', name: 'Natures', icon: 'adamant-mint', text: 'Which stat goes up and down' },
+  { href: '/regions/', name: 'By generation', icon: 'town-map', text: 'Every Pokémon by region' },
 ];
-const tools = [
-  { href: '/search/', name: 'Moveset search', icon: 'poke-radar', text: 'Find every Pokémon that learns up to four moves together.' },
-  { href: '/types/', name: 'Type chart', icon: null, text: 'The full chart, plus a page for every type.' },
-  { href: '/natures/', name: 'Natures', icon: 'adamant-mint', text: 'Which stat each nature raises and lowers.' },
-  { href: '/regions/', name: 'Pokémon by generation', icon: 'town-map', text: 'Every Pokémon grouped by the region it came from.' },
-];
+const _tries = [['Garchomp', '/pokemon/garchomp/'], ['Fake Out', '/moves/fake-out/'], ['Intimidate', '/abilities/intimidate/'], ['Choice Scarf', '/items/choice-scarf/']];
 ---
 <Base description="ARdex: the Aeron Region Pokédex, with Cobbleverse spawns and movepools.">
-  <section class="hero band">
+  <section class="hero">
+    <div class="blur" aria-hidden="true"></div>
     <div class="hero-in">
-      <img class="mascot" src="/icon-96.png" alt="" width="104" height="104" />
-      <div class="hero-text">
-        <h1 class="logo"><span class="ar">AR</span><span class="dx">dex</span></h1>
-        <p class="lede">Welcome to ARdex, the Aeron Region Pokédex! Whether you're hunting, training or building a team for competitive battles, every spawn and movepool here is pulled straight from Cobbleverse {meta.cobbleverse}, so what you see is exactly what you'll find in game.</p>
-        <form class="big" role="search">
-          <input class="field" data-find placeholder="Search a Pokémon, move, ability or item…" autocomplete="off" aria-label="Search" />
-          <button class="block" type="submit">Search</button>
-        </form>
-        <p class="stats">{groups.length} Pokémon · {spawning} with Cobbleverse spawns · {moves.length} moves · {abilities.length} abilities · {items.length} items</p>
-      </div>
+      <h1 class="logo"><span class="word"><img src="/icon-96.png" alt="" width="76" height="76" />ARdex</span></h1>
+      <p class="tag">The Aeron Region Pokédex</p>
+      <form class="big" role="search">
+        <input data-find placeholder="Search a Pokémon, move, ability or item…" autocomplete="off" aria-label="Search" />
+        <button type="submit">Search</button>
+      </form>
     </div>
   </section>
 
-  <h2 class="h">Browse</h2>
-  <div class="main">
-    {main.map((t) => (
+  <div class="tiles">
+    {tiles.map((t) => (
       <a href={t.href} class="tile">
-        <img src={ITEM + t.icon + '.png'} alt="" width="48" height="48" />
-        <div><b>{t.name}</b><span>{t.text}</span></div>
+        {t.icon ? <img src={ITEM + t.icon + '.png'} alt="" width="56" height="56" />
+          : <span class="mini">{TYPES.slice(0, 9).map((x) => <i style={`background:${typeColors[x]}`}></i>)}</span>}
+        <b>{t.name}</b>
       </a>
     ))}
   </div>
 
-  <h2 class="h">Tools and mechanics</h2>
-  <div class="tools">
-    {tools.map((t) => (
-      <a href={t.href} class="tool">
-        {t.icon ? <img src={ITEM + t.icon + '.png'} alt="" width="40" height="40" />
-          : <span class="mini">{TYPES.slice(0, 9).map((x) => <i style={`background:${typeColors[x]}`}></i>)}</span>}
-        <div><b>{t.name}</b><span>{t.text}</span></div>
-      </a>
-    ))}
-  </div>
+  <a class="potd" id="potd" href="/pokedex/">
+    <span class="pa"><img id="part" alt="" /></span>
+    <span class="pm">
+      <span class="pl">Pokémon of the day · <span id="pnum"></span></span>
+      <span class="pn" id="pname">&nbsp;</span>
+      <span class="pty" id="ptypes"></span>
+      <span class="pinfo"><span id="pev"></span><span id="pspawn"></span></span>
+      <span class="pab" id="pab"></span>
+    </span>
+    <span class="pstats" id="pstats"></span>
+  </a>
 
   <div class="about">
-    <div>
-      <h2 class="h">What it's for</h2>
-      <p>ARdex is built for team building and hunting. Check a Pokémon's EV yield before training, see which biome and time it spawns in, and find who can learn the moves you want, using the same movepools Cobbleverse uses.</p>
-      <p>It's a neutral reference tool. Nothing here is for sale, and it works the same whether or not you play on Aeron Region.</p>
-    </div>
-    <div>
-      <h2 class="h">Where the data comes from</h2>
-      <dl class="src">
-        <dt>Cobbleverse {meta.cobbleverse}</dt><dd>Spawns, drops and movepools from the pack's own files.</dd>
-        <dt>Pokémon Showdown</dt><dd>Stats, types, abilities, move and item effects, learnsets.</dd>
-        <dt>PokéAPI</dt><dd>EV yields, catch rates, egg cycles, dex entries, game locations.</dd>
-      </dl>
-      <p class="note">ARdex is part of <a href="https://aeronregion.net">Aeron Region</a>. Updated {meta.built}. Spotted a mistake? Tell us in the <a href="https://discord.gg/zC4YKx5sDx">Aeron Region Discord</a>.</p>
-    </div>
+    <p>ARdex is built for hunting, training and competitive team building, with spawns and movepools pulled straight from Cobbleverse {meta.cobbleverse}. It's a neutral tool: nothing here is for sale.</p>
+    <p class="note">Data from Cobbleverse, Pokémon Showdown and PokéAPI · Updated {meta.built} · Part of <a href="https://aeronregion.net">Aeron Region</a></p>
   </div>
 </Base>
+
+<script>
+  // Pokémon of the day: same pick for everyone on a given date (local time).
+  const TC: Record<string, string> = { Normal: '#a8a77a', Fire: '#ee8130', Water: '#6390f0', Electric: '#f7d02c', Grass: '#7ac74c', Ice: '#96d9d6', Fighting: '#c22e28', Poison: '#a33ea1', Ground: '#e2bf65', Flying: '#a98ff3', Psychic: '#f95587', Bug: '#a6b91a', Rock: '#b6a136', Ghost: '#735797', Dragon: '#6f35fc', Dark: '#705746', Steel: '#b7b7ce', Fairy: '#d685ad' };
+  const LIGHT = new Set(['Normal', 'Electric', 'Grass', 'Ice', 'Ground', 'Flying', 'Bug', 'Rock', 'Steel', 'Fairy']);
+  const shade = (hex: string, f: number) => '#' + [1, 3, 5].map((i) => Math.round(parseInt(hex.slice(i, i + 2), 16) * f).toString(16).padStart(2, '0')).join('');
+  const col = (v: number) => v < 50 ? '#e06a5a' : v < 80 ? '#f2a65a' : v < 100 ? '#e8c64a' : v < 130 ? '#8cc35b' : '#3fa66a';
+  fetch('/potd.json').then((r) => r.json()).then((list: [string, number, string[], number[], string, string, string, string | null, string[], string | null][]) => {
+    const d = new Date(); const key = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+    let h = key; h = Math.imul(h ^ (h >>> 16), 0x45d9f3b) >>> 0; h = Math.imul(h ^ (h >>> 16), 0x45d9f3b) >>> 0; h = (h ^ (h >>> 16)) >>> 0;
+    const [name, num, types, stats, ev, art, url, spawn, abil, hidden] = list[h % list.length];
+    const card = document.getElementById('potd') as HTMLAnchorElement;
+    const c = TC[types[0]];
+    card.href = url;
+    card.style.background = `linear-gradient(110deg, ${c}, ${shade(c, .55)} 60%, ${shade(c, .35)})`;
+    document.getElementById('pnum')!.textContent = '#' + String(num).padStart(4, '0');
+    document.getElementById('pname')!.textContent = name;
+    document.getElementById('ptypes')!.innerHTML = types.map((t) => `<span style="background:${TC[t]};color:${LIGHT.has(t) ? '#2e1a20' : '#fff'}">${t}</span>`).join('');
+    (document.getElementById('part') as HTMLImageElement).src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${art}.png`;
+    const labels = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'];
+    document.getElementById('pstats')!.innerHTML = stats.map((v, i) => `<span class="ps"><span>${labels[i]}</span><b>${v}</b><i><u style="width:${Math.min(100, v / 1.6)}%;background:${col(v)}"></u></i></span>`).join('') + `<span class="ps tot"><span>Total</span><b>${stats.reduce((a, b) => a + b, 0)}</b><i></i></span>`;
+    document.getElementById('pab')!.innerHTML = `Abilities <b>${abil.join(', ')}</b>${hidden ? ` · <b>${hidden}</b> <span class="hid">(hidden)</span>` : ''}`;
+    document.getElementById('pev')!.innerHTML = `EV yield <b>${ev || '—'}</b>`;
+    document.getElementById('pspawn')!.innerHTML = spawn ? `<img src="/cobbleverse.png" alt="" width="16" height="16"> ${spawn}` : 'No natural Cobbleverse spawn';
+  });
+</script>
+
 <style>
-  .hero { margin: -1.4rem calc(50% - 50vw) 0; padding: 3.2rem 0 3rem; border-bottom: 4px solid var(--brick-deep); border-top: 3px solid var(--brick-deep);
-    background: linear-gradient(90deg, rgb(53 24 32 / .94) 0%, rgb(53 24 32 / .82) 45%, rgb(53 24 32 / .35) 100%), url(/hero-battle.webp) center 40% / cover no-repeat, var(--brick); }
-  .hero-in { width: min(100% - 2.5rem, 1180px); margin: 0 auto; display: grid; grid-template-columns: 120px 1fr; gap: 1.8rem; align-items: start; }
-  .mascot { width: 104px; height: 104px; image-rendering: pixelated; filter: drop-shadow(4px 4px 0 rgb(0 0 0 / .35)); margin-top: .3rem; }
-  .logo { font-size: clamp(3rem, 7vw, 4.4rem); margin: 0 0 .5rem; -webkit-text-stroke: 7px #07142a; paint-order: stroke fill; letter-spacing: .02em; line-height: 1; }
-  .ar { color: #59c4fb; } .dx { color: #f6e7e2; }
-  .lede { font-size: 1.15rem; max-width: 60ch; color: var(--on-brick); margin: 0 0 1.2rem; text-shadow: 0 1px 2px rgb(0 0 0 / .6); }
-  .big { display: flex; gap: .6rem; max-width: 640px; position: relative; }
-  .big .field { flex: 1; font-size: 1.05rem; padding: .75rem .9rem; border-color: var(--brick-deep); }
-  .stats { margin: .9rem 0 0; font-size: .88rem; color: var(--on-brick-soft); }
-  .h { font-size: 1.5rem; margin: 2.4rem 0 .9rem; }
-  .main { display: grid; grid-template-columns: repeat(4, 1fr); gap: .9rem; }
-  .tile { display: flex; flex-direction: column; gap: .7rem; padding: 1.1rem 1.1rem 1.2rem; background: #fff7f5; border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); text-decoration: none; color: var(--ink); transition: transform .08s, box-shadow .08s; }
+  .hero { position: relative; overflow: hidden; margin: -1.4rem calc(50% - 50vw) 0; padding: 3.4rem 1.2rem 6rem; text-align: center; color: var(--on-brick); background: var(--brick-deep); }
+  .blur { position: absolute; inset: 0; background: linear-gradient(rgb(53 24 32 / .84), rgb(53 24 32 / .84)), url(/hero-battle.webp) center 35% / cover; }
+  .hero-in { position: relative; }
+  .logo { margin: 0; font-size: clamp(3.4rem, 8vw, 4.8rem); font-weight: 800; line-height: 1; color: #f6e7e2; }
+  .word { position: relative; display: inline-block; }
+  .word img { position: absolute; right: calc(100% + .2em); top: 50%; transform: translateY(-50%); width: 1.05em; height: 1.05em; image-rendering: pixelated; }
+  .tag { margin: .6rem 0 1.5rem; font-size: 1.1rem; opacity: .85; }
+  .big { display: flex; max-width: 640px; margin: 0 auto; background: #fff7f5; border: 3px solid #07142a; box-shadow: 5px 5px 0 #07142a; position: relative; text-align: left; }
+  .big input { flex: 1; border: 0; background: none; font: inherit; font-size: 1.1rem; padding: .9rem 1rem; color: var(--ink); min-width: 0; }
+  .big input:focus { outline: none; }
+  .big button { font: inherit; font-weight: 800; font-size: 1.05rem; background: #59c4fb; color: #07142a; border: 0; border-left: 3px solid #07142a; padding: 0 1.5rem; cursor: pointer; }
+  .big button:hover { background: #7fd3ff; }
+  .tiles { display: grid; grid-template-columns: repeat(8, 1fr); gap: .8rem; margin-top: -3.4rem; position: relative; }
+  .tile { display: flex; flex-direction: column; align-items: center; gap: .3rem; padding: .9rem .3rem .8rem; background: #fff7f5; border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); text-decoration: none; color: var(--ink); text-align: center; transition: transform .08s, box-shadow .08s; }
   .tile:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); color: var(--ink); }
-  .tile img { width: 60px; height: 60px; margin: -6px 0 -6px -6px; image-rendering: pixelated; }
-  .tile b { display: block; font-size: 1.25rem; margin-bottom: .2rem; }
-  .tile span { color: var(--ink-soft); font-size: .93rem; line-height: 1.45; }
-  .tools { display: grid; grid-template-columns: repeat(4, 1fr); gap: .7rem; }
-  .tool { display: grid; grid-template-columns: 40px 1fr; gap: .7rem; align-items: center; padding: .7rem .9rem; border: 2px solid #d9b9b4; background: rgb(255 255 255 / .35); text-decoration: none; color: var(--ink); }
-  .tool:hover { border-color: var(--ink); background: #fff7f5; color: var(--ink); }
-  .tool img { width: 40px; height: 40px; image-rendering: pixelated; }
-  .tool b { display: block; }
-  .tool span { color: var(--ink-soft); font-size: .85rem; line-height: 1.35; }
-  .mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; width: 34px; height: 34px; margin: 3px; }
+  .tile img { width: 56px; height: 56px; image-rendering: pixelated; margin: -4px 0; }
+  .tile b { font-size: .95rem; }
+  .mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; width: 38px; height: 38px; margin: 5px 0; }
   .mini i { display: block; border: 1px solid rgb(0 0 0 / .25); }
-  .about { display: grid; grid-template-columns: 1fr 1fr; gap: 2.6rem; margin-top: 1rem; }
-  .about p { max-width: 62ch; }
-  .src { display: grid; grid-template-columns: 200px 1fr; gap: .45rem 1rem; margin: 0 0 1rem; }
-  .src dt { font-weight: 700; } .src dd { margin: 0; color: var(--ink-soft); }
-  @media (max-width: 1000px) { .main, .tools { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 700px) {
-    .hero-in { grid-template-columns: 1fr; } .mascot { width: 72px; height: 72px; }
-    .main, .tools, .about { grid-template-columns: 1fr; } .src { grid-template-columns: 1fr; gap: 0 1rem; } .src dd { margin-bottom: .5rem; }
-  }
+  .potd { display: grid; grid-template-columns: 250px 1fr 290px; align-items: center; gap: 1.4rem; margin-top: 2.2rem; min-height: 230px; color: #fff; text-decoration: none; border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); background: var(--brick); overflow: hidden; }
+  .potd:hover { color: #fff; }
+  .pa { align-self: stretch; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgb(255 255 255 / .24), transparent 66%); }
+  .pa img { width: 220px; height: 220px; object-fit: contain; filter: drop-shadow(0 10px 10px rgb(0 0 0 / .35)); animation: float 3.2s ease-in-out infinite; }
+  @keyframes float { 0%, 100% { transform: translateY(4px) rotate(-1deg); filter: drop-shadow(0 12px 8px rgb(0 0 0 / .35)); } 50% { transform: translateY(-8px) rotate(1deg); filter: drop-shadow(0 22px 14px rgb(0 0 0 / .25)); } }
+  .pl { display: block; font-size: .85rem; font-weight: 700; opacity: .85; }
+  .pn { display: block; font-size: 2.6rem; font-weight: 800; line-height: 1.05; margin: .15rem 0 .5rem; }
+  .pty { display: flex; gap: .3rem; }
+  .pty :global(span) { font-size: .78rem; font-weight: 700; padding: .05rem .55rem; border: 1px solid rgb(0 0 0 / .3); }
+  .pinfo { display: flex; gap: 1.4rem; flex-wrap: wrap; margin-top: 1rem; font-size: .9rem; }
+  .pinfo > span { display: flex; align-items: center; gap: .4rem; }
+  .pab { display: block; margin-top: .55rem; font-size: .9rem; }
+  .pab :global(.hid) { opacity: .75; }
+  .pstats { background: rgb(0 0 0 / .28); padding: .8rem 1rem; margin-right: 1.4rem; }
+  .pstats :global(.ps) { display: grid; grid-template-columns: 42px 36px 1fr; gap: .4rem; align-items: center; font-size: .85rem; margin: .1rem 0; }
+  .pstats :global(.ps i) { height: 7px; background: rgb(255 255 255 / .15); }
+  .pstats :global(.ps.tot i) { background: none; }
+  .pstats :global(.ps u) { display: block; height: 100%; }
+  .about { text-align: center; margin-top: 2.4rem; }
+  .about p { max-width: 60ch; margin: 0 auto .5rem; color: var(--ink-soft); }
+  @media (prefers-reduced-motion: reduce) { .pa img { animation: none; } }
+  @media (max-width: 1000px) { .tiles { grid-template-columns: repeat(4, 1fr); } .potd { grid-template-columns: 180px 1fr; } .pa img { width: 160px; height: 160px; } .pstats { grid-column: 1 / -1; margin: 0 1.2rem 1.2rem; } }
+  @media (max-width: 560px) { .tiles { grid-template-columns: repeat(2, 1fr); } .potd { grid-template-columns: 1fr; text-align: center; } .pty, .pinfo { justify-content: center; } .pm { padding: 0 1rem; } }
 </style>

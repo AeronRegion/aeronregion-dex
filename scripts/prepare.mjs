@@ -226,6 +226,13 @@ fs.writeFileSync('public/names.json', JSON.stringify([
   ...abilities.map((a) => [a.name, `/abilities/${sl(a.name)}/`, 'Ability']),
   ...items.map((i) => [i.name, `/items/${sl(i.name)}/`, 'Item']),
 ]));
+// Pokémon of the day pool: one entry per Pokédex number
+fs.writeFileSync('public/potd.json', JSON.stringify([...firstOfNum.values()].sort((a, b) => a.num - b.num).map((s) => {
+  const sp = s.cobbleverse?.spawns?.[0];
+  return [s.name, s.num, s.types, Object.values(s.stats), s.ev.join(', '), s.art, urlOf(s),
+    sp ? `${sp.bucket} · ${sp.biomes.split(', ').slice(0, 2).join(', ')} · Lv ${sp.levels.replace('-', '–')}` : null,
+    [s.abilities['0'], s.abilities['1']].filter(Boolean), s.abilities.H ?? null];
+})));
 // compact index for the moveset search page: species list + move → [speciesIndex, genMask, …]
 const idx = new Map(out.map((s, i) => [s.id, i]));
 fs.mkdirSync('public', { recursive: true });
