@@ -15,6 +15,12 @@ import { TYPES, CHART, dbTypeColors } from '../lib/types';
       <button class="sm" id="clear" type="button" disabled>Clear</button>
     </div>
   </div>
+  <div class="finder">
+    <span class="lab">Find by moves</span>
+    <div class="slot fslot"><input class="field" id="fm" placeholder="Pokémon that learn…" autocomplete="off" /></div>
+    <div id="fchips" class="fchips"></div>
+  </div>
+  <div id="fres" class="fres" hidden></div>
   <p class="note" id="msg" aria-live="polite"></p>
   <div id="team" class="team"></div>
 
@@ -116,17 +122,17 @@ import { TYPES, CHART, dbTypeColors } from '../lib/types';
         el.querySelectorAll<HTMLInputElement>('.mvin').forEach((inp) => {
           const j = +inp.dataset.j!;
           const setMove = (name: string) => { const id = Object.keys(d.moves).find((m) => d.moves[m][0].toLowerCase() === name.trim().toLowerCase()) ?? ''; t.moves[j] = id; draw(); };
-          autocomplete(inp, async () => (await learnOf(t.i)).map((m) => d.moves[m]).filter(Boolean).map(([label, type, cat]) => ({ label, type, cat })), (it) => { setMove(it.label); (el.querySelectorAll<HTMLInputElement>('.mvin')[j + 1])?.focus(); });
+          autocomplete(inp, async () => (await learnOf(t.i)).map((m) => d.moves[m]).filter(Boolean).map(([label, type, cat]) => ({ label, type, cat })).sort((a, b) => a.label.localeCompare(b.label)), (it) => { setMove(it.label); (el.querySelectorAll<HTMLInputElement>('.mvin')[j + 1])?.focus(); }, 12, true);
           inp.addEventListener('change', () => setMove(inp.value));
         });
       });
       draw();
     };
 
-    const addMon = async (name: string) => {
+    const addMon = async (name: string, moves: string[] = []) => {
       const d = await load(); const i = d.species.findIndex((x) => x[1].toLowerCase() === name.trim().toLowerCase());
       if (i < 0 || team.length >= 12) return;
-      team.push({ i, moves: [] }); add.value = ''; cards();
+      team.push({ i, moves: moves.slice(0, 4) }); add.value = ''; cards();
       ($('team').lastElementChild?.querySelector('.mvin') as HTMLInputElement | null)?.focus();
     };
     autocomplete(add, async () => (await load()).species.map((s) => ({ label: s[1], sub: s[2].join(' / ') })), (it) => addMon(it.label));
@@ -141,6 +147,27 @@ import { TYPES, CHART, dbTypeColors } from '../lib/types';
       say('Copied. In Showdown: Teambuilder → New team → Import from text, then paste.');
     });
     $('share').addEventListener('click', async () => { await navigator.clipboard.writeText(location.href); say('Link copied.'); });
+    // find Pokémon that learn every picked move, then add them with those moves filled in
+    const fm = $('fm') as HTMLInputElement; const fpick: string[] = [];
+    const finder = async () => {
+      const d = await load();
+      $('fchips').innerHTML = fpick.map((m, k) => `<span class="fchip">${esc(d.moves[m][0])}<button type="button" data-k="${k}" aria-label="Remove">×</button></span>`).join('');
+      fm.disabled = fpick.length >= 4; fm.placeholder = fpick.length >= 4 ? '4 moves max' : fpick.length ? 'And also learns…' : 'Pokémon that learn…';
+      const box = $('fres'); if (!fpick.length) { box.hidden = true; return; }
+      let hit: Set<number> | null = null;
+      for (const m of fpick) { const arr = d.learn[m] ?? []; const set = new Set<number>(); for (let k = 0; k < arr.length; k += 2) set.add(arr[k]); hit = hit ? new Set([...hit].filter((x) => set.has(x))) : set; }
+      const list = [...hit!].sort((a, b) => d.species[a][4] - d.species[b][4] || a - b);
+      box.hidden = false;
+      box.innerHTML = `<p class="note">${list.length} Pokémon learn ${fpick.length === 1 ? 'this move' : 'all of these'}. Click one to add it with these moves.</p><div class="fgrid">` +
+        list.slice(0, 120).map((i) => { const s = d.species[i]; return `<button type="button" class="fmon" data-i="${i}"><img src="${s[3] ? SPR + s[3] + '.png' : ''}" alt="" width="36" height="36" loading="lazy" /><span>${esc(s[1])}</span></button>`; }).join('') +
+        `</div>${list.length > 120 ? `<p class="note">Showing the first 120. Add another move to narrow it down.</p>` : ''}`;
+    };
+    autocomplete(fm, async () => Object.values((await load()).moves).map(([label, type, cat]) => ({ label, type, cat })), (it) => {
+      const d = idx!; const id = Object.keys(d.moves).find((m) => d.moves[m][0] === it.label);
+      if (id && !fpick.includes(id)) fpick.push(id); fm.value = ''; finder();
+    });
+    $('fchips').addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest('button'); if (b) { fpick.splice(+b.dataset.k!, 1); finder(); } });
+    $('fres').addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest<HTMLElement>('.fmon'); if (b) { const s = idx!.species[+b.dataset.i!]; addMon(s[1], fpick); } });
     const vb = [...document.querySelectorAll<HTMLButtonElement>('#view button')];
     vb.forEach((b) => b.addEventListener('click', () => {
       vb.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
@@ -173,6 +200,15 @@ import { TYPES, CHART, dbTypeColors } from '../lib/types';
   .team :global(.slot) { position: relative; }
   .team :global(.mvin) { width: 100%; padding: .3rem .5rem; font-size: .85rem; }
   #view { margin-bottom: .6rem; }
+  .finder { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; margin-top: .6rem; }
+  .fslot { position: relative; width: 260px; } .fslot .field { width: 100%; }
+  .fchips { display: flex; gap: .3rem; flex-wrap: wrap; }
+  .fchips :global(.fchip) { display: inline-flex; align-items: center; font-weight: 700; font-size: .85rem; border: 2px solid var(--ink); background: var(--ink); color: #fff; padding: 0 0 0 .5rem; }
+  .fchips :global(button) { border: 0; background: none; color: #f2c9c3; font: inherit; font-weight: 800; cursor: pointer; padding: 0 .45rem; }
+  .fres { margin: .4rem 0 .6rem; }
+  .fres :global(.fgrid) { display: flex; flex-wrap: wrap; gap: .3rem; max-height: 220px; overflow-y: auto; padding: .2rem 0; }
+  .fres :global(.fmon) { display: inline-flex; align-items: center; gap: .2rem; font: inherit; font-size: .82rem; font-weight: 700; border: 1px solid #d9b9b4; background: #fff7f5; color: var(--ink); padding: 0 .5rem 0 0; cursor: pointer; }
+  .fres :global(.fmon:hover) { border-color: var(--ink); background: var(--petal-deep); }
   .key { display: inline-block; font-weight: 800; font-size: .78rem; padding: 0 .4rem; border: 2px solid; }
   .key.weak { color: #a40000; border-color: #a40000; background: #fbe3e0; }
   .key.res { color: #2f6b06; border-color: #4e9a06; background: #e4f2d9; }

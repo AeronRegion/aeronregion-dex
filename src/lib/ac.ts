@@ -5,7 +5,8 @@ const LIGHT = new Set(['Normal', 'Electric', 'Grass', 'Ice', 'Ground', 'Flying',
 const CAT: Record<string, string> = { Physical: '#c9482c', Special: '#4f6fc7', Status: '#8a8a8a' };
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
 
-export function autocomplete(input: HTMLInputElement, getItems: () => Promise<AcItem[]> | AcItem[], onPick: (item: AcItem) => void, max = 12) {
+// openEmpty: clicking or focusing the box lists every item (scrollable), and typing narrows it down
+export function autocomplete(input: HTMLInputElement, getItems: () => Promise<AcItem[]> | AcItem[], onPick: (item: AcItem) => void, max = 12, openEmpty = false) {
   input.removeAttribute('list');
   input.setAttribute('autocomplete', 'off');
   input.setAttribute('role', 'combobox');
@@ -23,18 +24,21 @@ export function autocomplete(input: HTMLInputElement, getItems: () => Promise<Ac
       (it.cat ? `<span class="ac-c" style="background:${CAT[it.cat]}" title="${it.cat}">${it.cat.slice(0, 3).toUpperCase()}</span>` : '') +
       `</div>`).join('');
     box.hidden = shown.length === 0; place();
+    box.querySelector('.ac-row.on')?.scrollIntoView({ block: 'nearest' });
   };
   const update = async () => {
     items = await getItems();
     const q = input.value.trim().toLowerCase();
-    if (!q) { shown = []; render(); return; }
+    if (!q) { shown = openEmpty ? items.slice() : []; active = -1; render(); return; }
     const starts = items.filter((it) => it.label.toLowerCase().startsWith(q));
     const has = items.filter((it) => !it.label.toLowerCase().startsWith(q) && it.label.toLowerCase().includes(q));
-    shown = [...starts, ...has].slice(0, max); active = shown.length ? 0 : -1; render();
+    shown = [...starts, ...has].slice(0, openEmpty ? 400 : max); active = shown.length ? 0 : -1; render();
   };
   const pick = (i: number) => { const it = shown[i]; if (!it) return; input.value = it.label; shown = []; render(); onPick(it); };
   input.addEventListener('input', update);
-  input.addEventListener('focus', () => { if (input.value) update(); });
+  const showAll = async () => { items = await getItems(); shown = items.slice(); active = shown.findIndex((it) => it.label === input.value); render(); };
+  input.addEventListener('focus', () => { if (openEmpty) { input.select(); showAll(); } else if (input.value) update(); });
+  input.addEventListener('mousedown', () => { if (openEmpty && document.activeElement === input && box.hidden) showAll(); });
   input.addEventListener('keydown', (e) => {
     if (box.hidden) return;
     if (e.key === 'ArrowDown') { active = (active + 1) % shown.length; render(); e.preventDefault(); }
