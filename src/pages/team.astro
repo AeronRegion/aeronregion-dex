@@ -2,11 +2,11 @@
 import Base from '../layouts/Base.astro';
 import { TYPES, CHART, dbTypeColors } from '../lib/types';
 ---
-<Base title="Team builder" description="Add up to 12 Pokémon to check type coverage, and copy the team into Pokémon Showdown.">
+<Base title="Team builder" description="Build a team of up to 12 Pokémon with moves, and check its defensive and offensive type coverage.">
   <h1>Team builder</h1>
-  <p class="note">Add 1 to 12 Pokémon to see how the team holds up against each type.</p>
+  <p class="note">Add up to 12 Pokémon and give each one up to 4 moves. The tables below show what the team is weak to and which types its moves hit super effectively.</p>
   <div class="controls">
-    <div class="slot"><input class="field" id="add" placeholder="Add a Pokémon…" autocomplete="off" /></div>
+    <div class="slot addslot"><input class="field" id="add" placeholder="Add a Pokémon…" autocomplete="off" /></div>
     <span class="soft" id="n">0 / 12</span>
     <div class="acts">
       <button class="sm" id="copy" type="button" disabled>Copy for Showdown</button>
@@ -17,11 +17,24 @@ import { TYPES, CHART, dbTypeColors } from '../lib/types';
   </div>
   <p class="note" id="msg" aria-live="polite"></p>
   <div id="team" class="team"></div>
+
   <div id="res" hidden>
-    <h3 class="sec">Defensive coverage</h3>
-    <p class="note">How much damage each attacking type does to each team member. Totals on the right; the most shared weakness is highlighted.</p>
-    <div class="mx-wrap"><table class="mx" id="mx"></table></div>
+    <div class="seg" id="view" role="tablist">
+      <button aria-pressed="true" data-v="def">Defense: what hits us</button>
+      <button aria-pressed="false" data-v="off">Coverage: what we hit</button>
+    </div>
+
+    <section data-v="def">
+      <p class="note">Damage each attacking type does to each team member. <span class="key weak">Weak</span> counts members that take 2× or more, <span class="key res">Resist</span> counts members that take ½× or less (immunities included).</p>
+      <div class="mx-wrap"><table class="mx" id="def"></table></div>
+    </section>
+
+    <section data-v="off" hidden>
+      <p class="note" id="offnote"></p>
+      <div class="mx-wrap"><table class="mx" id="off"></table></div>
+    </section>
   </div>
+
   <script define:vars={{ TYPES, CHART, COLORS: dbTypeColors }}>
     window.__TW = { TYPES, CHART, COLORS };
   </script>
@@ -29,84 +42,157 @@ import { TYPES, CHART, dbTypeColors } from '../lib/types';
     import { autocomplete } from '../lib/ac';
     const { TYPES, CHART, COLORS } = (window as any).__TW as { TYPES: string[]; CHART: Record<string, Record<string, number>>; COLORS: Record<string, string> };
     type Sp = [string, string, string[], string | null, number, string, string[], string | null];
-    let all: Sp[] = [];
-    const load = async () => (all.length ? all : (all = (await (await fetch('/search-index.json')).json()).species));
-    const team: Sp[] = [];
+    type Idx = { species: Sp[]; moves: Record<string, [string, string, string]>; learn: Record<string, number[]> };
+    type Member = { i: number; moves: string[] };
+    let idx: Idx | null = null;
+    let learnable: Map<number, string[]> | null = null;
+    const load = async () => (idx ??= await (await fetch('/search-index.json')).json());
+    const learnOf = async (i: number) => {
+      const d = await load();
+      if (!learnable) { learnable = new Map(); for (const [m, arr] of Object.entries(d.learn)) for (let k = 0; k < arr.length; k += 2) { const l = learnable.get(arr[k]); l ? l.push(m) : learnable.set(arr[k], [m]); } }
+      return learnable.get(i) ?? [];
+    };
+    const team: Member[] = [];
     const $ = (id: string) => document.getElementById(id)!;
     const add = $('add') as HTMLInputElement;
     const SPR = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
+    const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
     const chip = (t: string) => `<span class="tchip" style="background:${COLORS[t]}">${t}</span>`;
     const mult = (atk: string, defs: string[]) => defs.reduce((m, d) => m * (CHART[atk][d] ?? 1), 1);
-    const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+    // a damaging move's multiplier against one defending type, with the few moves that bend the chart
+    const moveVs = (id: string, type: string, def: string) => {
+      if (id === 'freezedry' && def === 'Water') return 2;
+      if (id === 'flyingpress') return mult('Fighting', [def]) * mult('Flying', [def]);
+      if (id === 'thousandarrows' && def === 'Flying') return 1;
+      return mult(type, [def]);
+    };
+    const txt = (m: number) => m === 1 ? '' : m === 0 ? '0' : m === 0.5 ? '½' : m === 0.25 ? '¼' : String(m);
+    const bg = (m: number) => m === 1 ? '' : m === 0 ? '#2e3436' : m >= 4 ? '#73d216' : m > 1 ? '#4e9a06' : m <= 0.25 ? '#7c0000' : '#a40000';
+    const cell = (m: number, title = '') => `<td title="${title}" style="${bg(m) ? `background:${bg(m)};color:${m === 0 ? '#fff' : '#ffdd57'}` : ''}">${txt(m)}</td>`;
+    const head = (d: Idx) => `<thead><tr><th></th>${team.map((t) => { const s = d.species[t.i]; return `<th class="mh" title="${esc(s[1])}"><img src="${s[3] ? SPR + s[3] + '.png' : ''}" alt="" width="44" height="44" /><span>${esc(s[1])}</span></th>`; }).join('')}`;
 
-    const render = () => {
+    const draw = () => {
+      const d = idx!;
       $('n').textContent = `${team.length} / 12`;
       add.disabled = team.length >= 12; add.placeholder = team.length >= 12 ? 'Team is full' : 'Add a Pokémon…';
       ['copy', 'share', 'clear'].forEach((k) => (($(k) as HTMLButtonElement).disabled = !team.length));
-      $('team').innerHTML = team.map((s, i) => `<span class="mon"><img src="${s[3] ? SPR + s[3] + '.png' : ''}" alt="" width="40" height="40" /><a href="${s[5]}">${esc(s[1])}</a><button type="button" data-i="${i}" aria-label="Remove ${esc(s[1])}">×</button></span>`).join('');
-      const q = new URLSearchParams(); if (team.length) q.set('t', team.map((s) => s[0]).join(','));
-      history.replaceState(null, '', team.length ? `?${q}` : location.pathname);
+      const q = team.map((t) => d.species[t.i][0] + (t.moves.some(Boolean) ? ':' + t.moves.filter(Boolean).join('.') : '')).join(',');
+      history.replaceState(null, '', team.length ? `?t=${q}` : location.pathname);
       $('res').hidden = !team.length; if (!team.length) return;
-      const txt = (m: number) => m === 1 ? '' : m === 0 ? '0' : m === 0.5 ? '½' : m === 0.25 ? '¼' : String(m);
-      const bg = (m: number) => m === 1 ? '' : m === 0 ? '#2e3436' : m >= 4 ? '#73d216' : m > 1 ? '#4e9a06' : m <= 0.25 ? '#7c0000' : '#a40000';
-      const rows = TYPES.map((t) => { const ms = team.map((s) => mult(t, s[2])); return { t, ms, w: ms.filter((m) => m > 1).length, r: ms.filter((m) => m > 0 && m < 1).length, i: ms.filter((m) => m === 0).length }; });
+
+      // defense
+      const rows = TYPES.map((t) => { const ms = team.map((m) => mult(t, d.species[m.i][2])); return { t, ms, w: ms.filter((m) => m > 1).length, r: ms.filter((m) => m < 1).length }; });
       const maxW = Math.max(...rows.map((r) => r.w));
-      $('mx').innerHTML = `<thead><tr><th></th>${team.map((s) => `<th class="mh" title="${esc(s[1])}"><a href="${s[5]}"><img src="${s[3] ? SPR + s[3] + '.png' : ''}" alt="${esc(s[1])}" width="44" height="44" /><span>${esc(s[1])}</span></a></th>`).join('')}<th class="tot">Weak</th><th class="tot">Resist</th></tr></thead><tbody>` +
-        rows.map((r) => `<tr class="${r.w && r.w === maxW ? 'worst' : ''}"><th>${chip(r.t)}</th>${r.ms.map((m) => `<td style="${bg(m) ? `background:${bg(m)};color:${m === 0 ? '#fff' : '#ffdd57'}` : ''}">${txt(m)}</td>`).join('')}<td class="tot w${r.w >= 3 ? ' hi' : ''}">${r.w || ''}</td><td class="tot">${r.r + r.i || ''}</td></tr>`).join('') + '</tbody>';
+      $('def').innerHTML = head(d) + `<th class="gap"></th><th class="tot">Weak</th><th class="tot">Resist</th></tr></thead><tbody>` +
+        rows.map((r) => `<tr class="${r.w && r.w === maxW ? 'worst' : ''}"><th>${chip(r.t)}</th>${r.ms.map((m) => cell(m)).join('')}<td class="gap"></td><td class="tot weak${r.w ? '' : ' zero'}">${r.w}</td><td class="tot res${r.r ? '' : ' zero'}">${r.r}</td></tr>`).join('') + '</tbody>';
+
+      // offense: best multiplier each member's damaging moves get against each single type
+      const dmg = team.map((m) => m.moves.filter((id) => id && d.moves[id] && d.moves[id][2] !== 'Status'));
+      const anyMoves = dmg.some((l) => l.length);
+      const offRows = TYPES.map((def) => {
+        const best = team.map((m, k) => {
+          let b = -1, by = '';
+          for (const id of dmg[k]) { const v = moveVs(id, d.moves[id][1], def); if (v > b) { b = v; by = d.moves[id][0]; } }
+          return { b, by };
+        });
+        return { def, best, se: best.filter((x) => x.b > 1).length };
+      });
+      const none = offRows.filter((r) => r.se === 0).map((r) => r.def);
+      $('offnote').innerHTML = !anyMoves ? 'Add damaging moves to the team members above to see what the team hits super effectively.'
+        : none.length ? `Best multiplier each member's attacking moves get against each type. <b>Nothing on the team hits ${none.join(', ')} super effectively.</b>`
+        : `Best multiplier each member's attacking moves get against each type. <b>The team hits every type super effectively.</b>`;
+      $('off').innerHTML = head(d) + `<th class="gap"></th><th class="tot">Hit 2×</th></tr></thead><tbody>` +
+        offRows.map((r) => `<tr class="${anyMoves && r.se === 0 ? 'hole' : ''}"><th>${chip(r.def)}</th>${r.best.map((x) => x.b < 0 ? '<td class="none"></td>' : cell(x.b, `${x.by}: ${txt(x.b) || '1'}×`)).join('')}<td class="gap"></td><td class="tot cov${r.se ? '' : ' zero'}">${r.se}</td></tr>`).join('') + '</tbody>';
+    };
+
+    const cards = () => {
+      const d = idx!;
+      $('team').innerHTML = team.map((t, k) => { const s = d.species[t.i]; return `<div class="mon" data-k="${k}">
+        <div class="top"><img src="${s[3] ? SPR + s[3] + '.png' : ''}" alt="" width="48" height="48" /><div><a href="${s[5]}">${esc(s[1])}</a><div>${s[2].map(chip).join('')}</div></div><button type="button" class="rm" aria-label="Remove ${esc(s[1])}">×</button></div>
+        ${[0, 1, 2, 3].map((j) => `<div class="slot"><input class="field mvin" data-j="${j}" placeholder="Move ${j + 1}" value="${t.moves[j] && d.moves[t.moves[j]] ? esc(d.moves[t.moves[j]][0]) : ''}" autocomplete="off" /></div>`).join('')}
+      </div>`; }).join('');
+      $('team').querySelectorAll<HTMLElement>('.mon').forEach((el) => {
+        const t = team[+el.dataset.k!];
+        el.querySelectorAll<HTMLInputElement>('.mvin').forEach((inp) => {
+          const j = +inp.dataset.j!;
+          const setMove = (name: string) => { const id = Object.keys(d.moves).find((m) => d.moves[m][0].toLowerCase() === name.trim().toLowerCase()) ?? ''; t.moves[j] = id; draw(); };
+          autocomplete(inp, async () => (await learnOf(t.i)).map((m) => d.moves[m]).filter(Boolean).map(([label, type, cat]) => ({ label, type, cat })), (it) => { setMove(it.label); (el.querySelectorAll<HTMLInputElement>('.mvin')[j + 1])?.focus(); });
+          inp.addEventListener('change', () => setMove(inp.value));
+        });
+      });
+      draw();
     };
 
     const addMon = async (name: string) => {
-      const d = await load(); const s = d.find((x) => x[1].toLowerCase() === name.trim().toLowerCase());
-      if (!s || team.length >= 12) return;
-      team.push(s); add.value = ''; render(); add.focus();
+      const d = await load(); const i = d.species.findIndex((x) => x[1].toLowerCase() === name.trim().toLowerCase());
+      if (i < 0 || team.length >= 12) return;
+      team.push({ i, moves: [] }); add.value = ''; cards();
+      ($('team').lastElementChild?.querySelector('.mvin') as HTMLInputElement | null)?.focus();
     };
-    autocomplete(add, async () => (await load()).map((s) => ({ label: s[1], sub: s[2].join(' / ') })), (it) => addMon(it.label));
+    autocomplete(add, async () => (await load()).species.map((s) => ({ label: s[1], sub: s[2].join(' / ') })), (it) => addMon(it.label));
     add.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addMon(add.value); } });
-    $('team').addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest('button'); if (b) { team.splice(+b.dataset.i!, 1); render(); } });
-    $('clear').addEventListener('click', () => { team.length = 0; render(); });
-    const say = (t: string) => { $('msg').textContent = t; setTimeout(() => ($('msg').textContent = ''), 4000); };
+    $('team').addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest('.rm'); if (b) { team.splice(+b.closest<HTMLElement>('.mon')!.dataset.k!, 1); cards(); } });
+    $('clear').addEventListener('click', () => { team.length = 0; cards(); });
+    const say = (t: string) => { $('msg').textContent = t; setTimeout(() => ($('msg').textContent = ''), 5000); };
     $('copy').addEventListener('click', async () => {
-      await navigator.clipboard.writeText(team.map((s) => s[1]).join('\n\n') + '\n');
+      const d = idx!;
+      const text = team.map((t) => [d.species[t.i][1], ...t.moves.filter((m) => m && d.moves[m]).map((m) => `- ${d.moves[m][0]}`)].join('\n')).join('\n\n') + '\n';
+      await navigator.clipboard.writeText(text);
       say('Copied. In Showdown: Teambuilder → New team → Import from text, then paste.');
     });
     $('share').addEventListener('click', async () => { await navigator.clipboard.writeText(location.href); say('Link copied.'); });
-    const p = new URLSearchParams(location.search).get('t');
-    if (p) load().then((d) => { for (const id of p.split(',').slice(0, 12)) { const s = d.find((x) => x[0] === id); if (s) team.push(s); } render(); });
-    else render();
+    const vb = [...document.querySelectorAll<HTMLButtonElement>('#view button')];
+    vb.forEach((b) => b.addEventListener('click', () => {
+      vb.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      document.querySelectorAll<HTMLElement>('#res section').forEach((s) => (s.hidden = s.dataset.v !== b.dataset.v));
+    }));
+    load().then((d) => {
+      const p = new URLSearchParams(location.search).get('t');
+      if (p) for (const part of p.split(',').slice(0, 12)) {
+        const [id, mv] = part.split(':'); const i = d.species.findIndex((x) => x[0] === id);
+        if (i >= 0) team.push({ i, moves: (mv ?? '').split('.').filter((m) => d.moves[m]).slice(0, 4) });
+      }
+      cards();
+    });
   </script>
 </Base>
 <style>
-  .slot { position: relative; flex: 1; min-width: 240px; max-width: 420px; } .slot .field { width: 100%; }
+  .addslot { position: relative; flex: 1; min-width: 240px; max-width: 420px; } .addslot .field { width: 100%; }
   .acts { display: flex; gap: .4rem; flex-wrap: wrap; margin-left: auto; }
   .sm { font: inherit; font-weight: 700; font-size: .85rem; padding: .35rem .7rem; border: 2px solid var(--ink); background: #fff7f5; color: var(--ink); cursor: pointer; text-decoration: none; }
   .sm:hover:not(:disabled) { background: var(--petal-deep); color: var(--ink); }
   .sm:disabled { opacity: .45; cursor: default; }
-  .team { display: flex; flex-wrap: wrap; gap: .4rem; margin: .6rem 0 1rem; }
-  .team :global(.mon) { display: inline-flex; align-items: center; gap: .25rem; border: 2px solid var(--ink); background: #fff7f5; padding: 0 0 0 .1rem; font-size: .88rem; }
-  .team :global(.mon img) { width: 36px; height: 36px; }
-  .team :global(.mon button) { border: 0; background: none; font: inherit; font-size: 1.1rem; font-weight: 800; cursor: pointer; color: var(--ink-soft); padding: 0 .45rem; }
-  .team :global(.mon button:hover) { color: #a40000; }
+  .team { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: .6rem; margin: .6rem 0 1.4rem; }
+  .team :global(.mon) { border: 2px solid var(--ink); background: #fff7f5; padding: .4rem; display: flex; flex-direction: column; gap: .3rem; }
+  .team :global(.top) { display: flex; align-items: center; gap: .4rem; }
+  .team :global(.top img) { width: 48px; height: 48px; }
+  .team :global(.top > div) { flex: 1; min-width: 0; }
+  .team :global(.top a) { display: block; font-size: .95rem; }
+  .team :global(.rm) { align-self: flex-start; border: 0; background: none; font: inherit; font-size: 1.2rem; font-weight: 800; cursor: pointer; color: var(--ink-soft); padding: 0 .3rem; }
+  .team :global(.rm:hover) { color: #a40000; }
+  .team :global(.slot) { position: relative; }
+  .team :global(.mvin) { width: 100%; padding: .3rem .5rem; font-size: .85rem; }
+  #view { margin-bottom: .6rem; }
+  .key { display: inline-block; font-weight: 800; font-size: .78rem; padding: 0 .4rem; border: 2px solid; }
+  .key.weak { color: #a40000; border-color: #a40000; background: #fbe3e0; }
+  .key.res { color: #2f6b06; border-color: #4e9a06; background: #e4f2d9; }
   .mx-wrap { overflow-x: auto; }
   .mx { border-collapse: separate; border-spacing: 2px; width: auto; }
   .mx :global(th), .mx :global(td) { padding: 0; }
   .mx :global(tbody th) { text-align: left; padding-right: .5rem; }
   .mx :global(td) { width: 52px; height: 28px; text-align: center; font-weight: 800; font-size: .85rem; background: #fff7f5; border: 1px solid #e2c3bf; }
-  .mx :global(.mh) { vertical-align: bottom; width: 52px; }
-  .mx :global(.mh a) { display: flex; flex-direction: column; align-items: center; font-size: .66rem; line-height: 1.1; color: var(--ink); }
-  .mx :global(.mh span) { max-width: 52px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .mx :global(.tot) { width: 52px; font-size: .78rem; color: var(--ink-soft); }
-  .mx :global(td.tot) { background: transparent; border-color: transparent; color: var(--ink); font-size: .95rem; }
-  .mx :global(td.tot.hi) { color: #a40000; }
-  .mx :global(tr.worst th .tchip) { outline: 2px solid var(--ink); outline-offset: 1px; }
-  .mx :global(tr.worst td.w) { background: #f6d2cd; border-color: #a40000; }
-  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 2.2rem; align-items: start; }
-  .cols > div { min-width: 0; }
-  @media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
-  .tw :global(td), .tw :global(th) { padding: .2rem .45rem; vertical-align: middle; }
-  .tw :global(tbody tr:nth-child(even)) { background: rgb(255 255 255 / .35); }
-  .tw :global(.who) { font-size: .85rem; white-space: normal; }
-  .tw :global(tr.worst td) { background: #f6d2cd; }
-  .tw :global(.chips) { margin-top: .1rem; }
+  .mx :global(td.none) { background: repeating-linear-gradient(45deg, #f3e4e1 0 4px, #fff7f5 4px 8px); }
+  .mx :global(.mh) { vertical-align: bottom; width: 52px; font-size: .66rem; line-height: 1.1; }
+  .mx :global(.mh img) { display: block; margin: 0 auto; }
+  .mx :global(.mh span) { display: block; max-width: 52px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mx :global(.gap) { width: 14px; background: transparent !important; border: 0 !important; }
+  .mx :global(th.tot) { width: 58px; font-size: .78rem; text-align: center; }
+  .mx :global(td.tot) { width: 58px; font-size: .95rem; border-width: 2px; }
+  .mx :global(td.weak) { color: #a40000; border-color: #a40000; background: #fbe3e0; }
+  .mx :global(td.res) { color: #2f6b06; border-color: #4e9a06; background: #e4f2d9; }
+  .mx :global(td.cov) { color: #1f5f8a; border-color: #59c4fb; background: #e3f4fd; }
+  .mx :global(td.tot.zero) { color: var(--ink-soft); background: #fff7f5; border-color: #e2c3bf; font-weight: 500; }
+  .mx :global(tr.worst td.weak) { background: #a40000; color: #fff; }
+  .mx :global(tr.hole td.cov) { background: #a40000; border-color: #a40000; color: #fff; font-weight: 800; }
   :global(.tchip) { display: inline-block; font-weight: 700; font-size: .68rem; padding: 0 .35rem; margin-right: .2rem; color: #fff; text-shadow: 1px 1px 1px rgb(0 0 0 / .5); border: 1px solid rgb(0 0 0 / .25); }
-  :global(.x4) { font-size: .72rem; background: #a40000; color: #ffdd57; padding: 0 .25rem; }
 </style>
