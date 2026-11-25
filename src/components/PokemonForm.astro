@@ -156,11 +156,12 @@ const spawns = s.cobbleverse?.spawns ?? [];
         {hasCobble && <option value="C">Cobbleverse {meta.cobbleverse}</option>}
         {gens.map((g) => <option value={g}>{GAMES[g]}</option>)}
       </select>
-      <div class="seg split"><button aria-pressed="true" data-split="0">All moves</button><button aria-pressed="false" data-split="1">Split by how it learns</button></div>
+      <div class="seg split"><button aria-pressed="true" data-split="1">By how it learns</button><button aria-pressed="false" data-split="0">One list</button></div>
       <input class="field mfilter" placeholder="Filter moves or types…" style="margin-left:auto;min-width:240px" />
     </div>
     <p class="note mcount"></p>
-    <table class="data sortable mtable">
+    <div class="msplit"></div>
+    <table class="data sortable mtable" hidden>
       <thead><tr><th data-sort="text">Move</th><th data-sort="text">Type</th><th data-sort="num" class="sorted asc">Cat.</th><th data-sort="num">Power</th><th data-sort="num">Acc</th><th data-sort="num">PP</th><th data-sort="num" class="pri">Priority</th><th data-sort="text">Target</th><th data-sort="num">How</th></tr></thead>
       <tbody>
         {rows.map(({ m, src }) => (
@@ -214,7 +215,8 @@ const spawns = s.cobbleverse?.spawns ?? [];
     const rows = [...body.rows];
     const gameSel = form.querySelector<HTMLSelectElement>('select.game')!;
     let game = gameSel.value;
-    let split = false;
+    let split = true;
+    const msplit = form.querySelector<HTMLElement>('.msplit')!;
     const howFor = (src: string[]) => {
       if (game === 'C') return parse(src.filter((c) => c[0] === 'C'));
       if (game !== 'all') return parse(src.filter((c) => c[0] === game));
@@ -240,19 +242,30 @@ const spawns = s.cobbleverse?.spawns ?? [];
         cell.dataset.v = String(Math.min(...h.map((x) => x.sort), 999));
         r.dataset.group = String(Math.min(...h.map((x) => x.group), 9));
       }
+      table.hidden = split;
       if (split) {
-        const names = ['Level up', 'TM', 'Egg', 'Tutor', 'Event / special', 'Older games / transfer'];
-        const ordered = [...rows].sort((a, b) => +a.dataset.group! - +b.dataset.group! || (a.dataset.group === '0' ? +a.cells[8].dataset.v! - +b.cells[8].dataset.v! : 0));
-        let cur = '';
-        for (const r of ordered) {
-          if (!r.hidden && r.dataset.group !== cur) {
-            cur = r.dataset.group!;
-            const g = document.createElement('tr'); g.className = 'group';
-            g.innerHTML = `<td colspan="9">${names[+cur] ?? 'Other'}</td>`; body.appendChild(g);
+        // PokemonDB-style: one small table per method, level up + egg on the left, TM + the rest on the right
+        const names = ['Moves learnt by level up', 'Moves learnt by TM', 'Egg moves', 'Tutor moves', 'Event / special moves', 'Older games / transfer'];
+        const by: Record<number, string[]> = {};
+        const q2 = (r: HTMLTableRowElement) => [0, 1, 2, 3, 4].map((k) => r.cells[k].innerHTML);
+        const lvRows: [number, string][] = [];
+        for (const r of rows) {
+          if (r.hidden) continue;
+          const [mv, ty, ca, pw, ac] = q2(r);
+          const tail = `<td>${mv}</td><td>${ty}</td><td class="c">${ca}</td><td class="n">${pw}</td><td class="n">${ac}</td>`;
+          const h = howFor(r.dataset.src!.split(','));
+          const seen = new Set<number>();
+          for (const x of h) {
+            if (x.group === 0) lvRows.push([x.sort, `<tr><td class="n lv">${x.sort === 0 ? 'Evo' : x.sort}</td>${tail}</tr>`]);
+            else if (!seen.has(x.group)) { seen.add(x.group); (by[x.group] ??= []).push(`<tr>${tail}</tr>`); }
           }
-          body.appendChild(r);
         }
-      }
+        const lvSeen = new Set<string>();
+        by[0] = lvRows.sort((a, b) => a[0] - b[0]).map((x) => x[1]).filter((x) => !lvSeen.has(x) && lvSeen.add(x));
+        const head = (g: number) => `<thead><tr>${g === 0 ? '<th class="n">Lv.</th>' : ''}<th>Move</th><th>Type</th><th class="c">Cat.</th><th class="n">Power</th><th class="n">Acc.</th></tr></thead>`;
+        const block = (g: number) => by[g]?.length ? `<div class="mgrp"><h4>${names[g]} <span>${by[g].length}</span></h4><table class="data mini">${head(g)}<tbody>${by[g].join('')}</tbody></table></div>` : '';
+        msplit.innerHTML = `<div>${block(0)}${block(2)}</div><div>${block(1)}${block(3)}${block(4)}${block(5)}</div>`;
+      } else msplit.innerHTML = '';
       form.querySelector('.mcount')!.textContent = `${n} moves`;
     };
     gameSel.addEventListener('change', () => { game = gameSel.value; render(); });
@@ -266,7 +279,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
       render();
     }));
     form.querySelector('.mfilter')!.addEventListener('input', render);
-    table.addEventListener('sorted', () => { if (split) { split = false; form.querySelectorAll('.split button').forEach((x, i) => x.setAttribute('aria-pressed', String(i === 0))); } render(); });
+    table.addEventListener('sorted', () => render());
     render();
   }
 </script>
@@ -293,7 +306,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .tot { border-top: 2px solid var(--ink); margin-top: .3rem; }
   .dt { display: grid; grid-template-columns: repeat(9, 44px); gap: 6px 2px; }
   .tc { display: flex; flex-direction: column; text-align: center; font-weight: 700; font-size: .7rem; }
-  .tc a { height: 18px; line-height: 17px; font-size: .62rem; text-decoration: none; color: #fff; text-shadow: 1px 1px 1px rgb(0 0 0 / .6); border: 1px solid rgb(0 0 0 / .2); border-radius: 0; }
+  .tc a { min-width: 0; height: 18px; line-height: 17px; font-size: .62rem; text-decoration: none; color: #fff; text-shadow: 1px 1px 1px rgb(0 0 0 / .6); border: 1px solid rgb(0 0 0 / .2); border-radius: 0; }
   .abilrow { display: flex; align-items: center; gap: .6rem; margin-bottom: .6rem; flex-wrap: wrap; }
   .abilrow .lab { font-weight: 600; font-size: .85rem; color: var(--ink-soft); }
   .tc b.chg { outline: 2px solid var(--ink); outline-offset: -2px; }
@@ -327,6 +340,24 @@ const spawns = s.cobbleverse?.spawns ?? [];
   @media (max-width: 900px) {
     .hd { grid-template-columns: 1fr; height: auto; } .art { width: 160px; height: 160px; }
     .two { grid-template-columns: 1fr; }
+    .stage.many { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .dt { grid-template-columns: repeat(9, minmax(0, 1fr)); }
+    .st { grid-template-columns: 62px 34px 1fr 64px; gap: .45rem; }
+    .spawn { grid-template-columns: 1fr; gap: .2rem; }
   .mtable .tgt, .mtable th:nth-child(8) { display: none; }
   }
+  .mtable td, .mtable th { padding-top: .18rem; padding-bottom: .18rem; }
+  .msplit { display: grid; grid-template-columns: 1fr 1fr; gap: 0 2.4rem; align-items: start; }
+  .msplit:empty { display: none; }
+  .msplit > :global(div) { min-width: 0; }
+  .two > div { min-width: 0; }
+  .msplit :global(.mgrp) { margin-bottom: 1.6rem; }
+  .msplit :global(h4) { font-size: 1.15rem; font-weight: 800; margin: 0 0 .4rem; }
+  .msplit :global(h4 span) { font-weight: 500; font-size: .85rem; color: var(--ink-soft); }
+  .msplit :global(.mini td), .msplit :global(.mini th) { padding: .16rem .45rem; }
+  .msplit :global(.mini .c) { text-align: center; }
+  .msplit :global(.mini .lv) { color: var(--ink-soft); width: 2.4rem; }
+  .msplit :global(.mini tbody tr:nth-child(even)) { background: rgb(255 255 255 / .35); }
+  @media (max-width: 900px) { .msplit { grid-template-columns: 1fr; } }
+  @media (max-width: 600px) { .evos { flex-direction: column; gap: .4rem; } .arr { margin-top: 0; } .arr > span { transform: rotate(90deg); } }
 </style>

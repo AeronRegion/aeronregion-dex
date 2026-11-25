@@ -10,8 +10,8 @@ const all = [...counts].sort((a, b) => a[0].localeCompare(b[0]));
 ---
 <Base title="Egg groups" description="Every Pokémon egg group and which Pokémon can breed together.">
   <h1 id="h">Egg groups</h1>
-  <p class="note" id="note">Two Pokémon can breed if they share an egg group. Pick a group to see its Pokémon.</p>
-  <div class="groups" role="tablist">{all.map(([g, n]) => <button type="button" data-g={g} data-s={egg(g)} aria-pressed="false">{g} <span>{n}</span></button>)}</div>
+  <p class="note" id="note">Two Pokémon can breed if they share an egg group.</p>
+  <div class="controls"><span class="lab">Egg group</span><select class="field" id="pickg">{all.map(([g, n]) => <option value={egg(g)} data-g={g}>{g} ({n})</option>)}</select></div>
   <table class="data sortable" id="eg" hidden>
     <thead><tr><th data-sort="num">#</th><th></th><th data-sort="text">Name</th><th>Type</th><th data-sort="text">Other group</th></tr></thead>
     <tbody>{list.map((s) => (
@@ -25,13 +25,13 @@ const all = [...counts].sort((a, b) => a[0].localeCompare(b[0]));
     ))}</tbody>
   </table>
   <script>
-    const btns = [...document.querySelectorAll<HTMLButtonElement>('.groups button')];
+    const sel = document.getElementById('pickg') as HTMLSelectElement; const btns = [...sel.options].map((o) => ({ dataset: { s: o.value, g: o.dataset.g } }));
     const table = document.getElementById('eg') as HTMLTableElement, rows = [...table.tBodies[0].rows];
     const h = document.getElementById('h')!, note = document.getElementById('note')!;
     const show = (s: string) => {
       const b = btns.find((x) => x.dataset.s === s); if (!b) return;
       const g = b.dataset.g!; let n = 0;
-      btns.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      sel.value = s;
       for (const r of rows) {
         const gs = r.dataset.g!.split('|'), on = gs.includes(g); r.hidden = !on;
         if (on) { n++; const o = gs.filter((x) => x !== g); const c = r.querySelector('.other') as HTMLElement; c.dataset.v = o.join(' ');
@@ -42,7 +42,7 @@ const all = [...counts].sort((a, b) => a[0].localeCompare(b[0]));
       note.textContent = `${n} Pokémon. ` + (g === 'Undiscovered' ? "These can't breed." : g === 'Ditto' ? 'Ditto can breed with any Pokémon outside Undiscovered.' : 'Any two of these can breed, as can any of them with Ditto.');
       document.title = `${g} egg group | ARdex`;
     };
-    btns.forEach((b) => b.addEventListener('click', () => { history.replaceState(null, '', '#' + b.dataset.s); show(b.dataset.s!); }));
+    sel.addEventListener('change', () => { history.replaceState(null, '', '#' + sel.value); show(sel.value); });
     const go = () => show(location.hash.slice(1) || 'amorphous');
     window.addEventListener('hashchange', go); go();
   </script>
@@ -51,8 +51,4 @@ const all = [...counts].sort((a, b) => a[0].localeCompare(b[0]));
   #eg { max-width: 720px; }
   #eg td, #eg th { padding-top: .2rem; padding-bottom: .2rem; }
   #eg .sprite { width: 32px; height: 32px; }
-  .groups { display: flex; flex-wrap: wrap; gap: .35rem; margin: .8rem 0 1rem; }
-  .groups button { font: inherit; font-weight: 700; font-size: .85rem; padding: .15rem .55rem; border: 2px solid var(--ink); color: var(--ink); background: #fff7f5; cursor: pointer; }
-  .groups button span { font-weight: 500; color: var(--ink-soft); }
-  .groups button[aria-pressed='true'] { background: var(--ink); color: #fff; } .groups button[aria-pressed='true'] span { color: #e8d3d0; }
 </style>

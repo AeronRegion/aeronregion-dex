@@ -16,8 +16,8 @@ body {
 }
 main { flex: 1; }
 img { max-width: 100%; display: block; }
-a { color: var(--brick); text-decoration-thickness: 2px; text-underline-offset: 3px; }
-a:hover { color: var(--ink); }
+a { color: var(--ink); font-weight: 700; text-decoration: none; }
+a:hover { color: #1f7fb8; }
 :focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
 
 h1, h2 { font-family: var(--font-pixel); font-weight: 800; line-height: 1.05; margin: 0 0 .55em; letter-spacing: 0; }
@@ -92,7 +92,7 @@ table { border-collapse: collapse; width: 100%; }
 .data tbody tr:hover td { background: #fbeae6; }
 .data .n { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
 .data a { font-weight: 600; text-decoration: none; color: var(--ink); }
-.data a:hover { text-decoration: underline; }
+.data a:hover { color: #1f7fb8; }
 .cat { display: inline-block; font-weight: 700; font-size: .7rem; color: #fff; padding: .05rem .4rem; letter-spacing: .02em; }
 .cat.Physical { background: #c9482c; } .cat.Special { background: #4f6fc7; } .cat.Status { background: #8a8a8a; }
 .pri { text-align: center !important; } .pri.pos { color: #1f7a3a; } .pri.neg { color: #b0302b; } .pri.zero { color: var(--ink-soft); font-weight: 500; }

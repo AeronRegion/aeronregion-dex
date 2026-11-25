@@ -30,6 +30,8 @@ const by = (rows, key) => { const m = new Map(); for (const r of rows) { const k
 
 // ── PokéAPI lookups ──────────────────────────────────────────────────────
 const apiPokemon = new Map(T.pokemon.map((r) => [r.identifier.replace(/-/g, ''), r]));
+// Showdown spells gendered forms Basculegion-F / Meowstic-F-Mega; PokéAPI spells them basculegion-female
+for (const r of T.pokemon) { const k = r.identifier.replace(/-female/, 'f').replace(/-male/, 'm').replace(/-/g, ''); if (!apiPokemon.has(k)) apiPokemon.set(k, r); }
 const apiSpecies = new Map(T.pokemon_species.map((r) => [r.id, r]));
 const statsBy = by(T.pokemon_stats, 'pokemon_id');
 const STATN = { 1: 'HP', 2: 'Atk', 3: 'Def', 4: 'SpA', 5: 'SpD', 6: 'Spe' };

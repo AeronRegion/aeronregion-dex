@@ -4,23 +4,27 @@ import { GAMES, meta } from '../lib/data';
 import { TYPES } from '../lib/types';
 ---
 <Base title="Moveset search" description="Find every Pokémon that can learn up to four moves together.">
-  <h1>Moveset search</h1>
-  <p>Pick up to 4 moves to see every Pokémon that can learn all of them. Narrow it down by type, or tick Search by ability to filter by ability too.</p>
-  <div class="controls">
-    <span class="lab">Movepool</span>
-    <select class="field" id="game" aria-label="Movepool">
-      <option value="all" selected>All games</option>
-      {meta.cobbleverse && <option value="0">Cobbleverse {meta.cobbleverse}</option>}
-      {[9, 8, 7].map((g) => <option value={g}>{GAMES[g]}</option>)}
-    </select>
-    <label class="chk"><input type="checkbox" id="abOn" /> Search by ability</label>
+  <div class="tool" id="tool">
+    <h1>Moveset search</h1>
+    <p class="intro">Pick up to 4 moves to see every Pokémon that can learn all of them.</p>
+    <form id="f">
+      <div class="slots">{[0, 1, 2, 3].map(() => <div class="slot"><input class="field mv" placeholder="Add a move…" autocomplete="off" /></div>)}</div>
+      <div class="opts">
+        <label class="lab2">Movepool
+          <select class="field" id="game" aria-label="Movepool">
+            <option value="all" selected>All games</option>
+            {meta.cobbleverse && <option value="0">Cobbleverse {meta.cobbleverse}</option>}
+            {[9, 8, 7].map((g) => <option value={g}>{GAMES[g]}</option>)}
+          </select>
+        </label>
+        <label class="chk"><input type="checkbox" id="abOn" /> Ability</label>
+        <div class="slot extra" id="abSlot" hidden><input class="field" id="ab" placeholder="Ability…" autocomplete="off" /></div>
+        <label class="chk"><input type="checkbox" id="tyOn" /> Type</label>
+        <div class="slot extra" id="tySlot" hidden><select class="field" id="ty"><option value="">Pick a type</option>{TYPES.map((t) => <option>{t}</option>)}</select></div>
+        <button class="block" type="submit">Find Pokémon</button>
+      </div>
+    </form>
   </div>
-  <form id="f" class="slots">
-    {[0, 1, 2, 3].map((i) => <div class="slot"><input class="field mv" placeholder="Add a move…" autocomplete="off" /></div>)}
-    <div class="slot extra" id="abSlot" hidden><input class="field" id="ab" placeholder="Ability (optional)…" autocomplete="off" /></div>
-    <div class="slot extra"><select class="field" id="ty"><option value="">Any type</option>{TYPES.map((t) => <option>{t}</option>)}</select></div>
-    <button class="block" type="submit">Find Pokémon</button>
-  </form>
   <h3 class="sec" id="title" hidden></h3>
   <div class="cards" id="out"></div>
 </Base>
@@ -36,10 +40,12 @@ import { TYPES } from '../lib/types';
   import { autocomplete } from '../lib/ac';
   const inputs = [...document.querySelectorAll<HTMLInputElement>('#f input.mv')];
   const abIn = document.getElementById('ab') as HTMLInputElement, tySel = document.getElementById('ty') as HTMLSelectElement;
+  const tyOn = document.getElementById('tyOn') as HTMLInputElement, tySlot = document.getElementById('tySlot')!, tool = document.getElementById('tool')!;
+  tyOn.addEventListener('change', () => { tySlot.hidden = !tyOn.checked; if (tool.classList.contains('done')) search(); });
   const abOn = document.getElementById('abOn') as HTMLInputElement, abSlot = document.getElementById('abSlot')!;
-  abOn.addEventListener('change', () => { abSlot.hidden = !abOn.checked; if (abOn.checked) abIn.focus(); if (inputs.some((i) => i.value) || abIn.value || tySel.value) search(); });
+  abOn.addEventListener('change', () => { abSlot.hidden = !abOn.checked; if (abOn.checked) abIn.focus(); if (tool.classList.contains('done')) search(); });
   autocomplete(abIn, async () => (await load()).abilities.map((label) => ({ label, sub: 'Ability' })), () => {});
-  tySel.addEventListener('change', () => search());
+  tySel.addEventListener('change', () => { if (tool.classList.contains('done')) search(); });
   const moveItems = async () => { const d = await load(); return Object.values(d.moves).map(([label, type, cat]) => ({ label, type, cat })); };
   inputs.forEach((inp, i) => autocomplete(inp, moveItems, () => { (inputs[i + 1] ?? inp).focus(); }));
   const gameSel = document.getElementById('game') as HTMLSelectElement;
@@ -49,12 +55,13 @@ import { TYPES } from '../lib/types';
     const data = await load();
     const ids = inputs.map((i) => toID(i.value)).filter((m) => m && data.moves[m]);
     const abName = abOn.checked ? data.abilities.find((a) => a.toLowerCase() === abIn.value.trim().toLowerCase()) ?? '' : '';
-    const ty = tySel.value;
+    const ty = tyOn.checked ? tySel.value : '';
     const out = document.getElementById('out')!, title = document.getElementById('title')!;
     const q = new URLSearchParams();
     if (ids.length) q.set('m', ids.join(',')); if (abName) q.set('a', abName); if (ty) q.set('t', ty); if (ids.length) q.set('g', bit);
     history.replaceState(null, '', q.toString() ? `?${q}` : location.pathname);
     if (!ids.length && !abName && !ty) { out.innerHTML = ''; title.hidden = true; return; }
+    tool.classList.add('done');
     const want = bit === 'all' ? 0 : 1 << +bit;
     let result: Set<number> | null = ids.length ? null : new Set(data.species.map((_, i) => i));
     for (const m of ids) {
@@ -73,22 +80,31 @@ import { TYPES } from '../lib/types';
       return `<a class="card" href="${url}"><img src="${art ? SPR + art + '.png' : ''}" alt="" loading="lazy" width="52" height="52" /><div><b>${name}</b><small>#${String(num).padStart(4, '0')}</small><div class="chips">${types.map(chip).join(' ')}</div>${hTag}</div></a>`; }).join('');
   };
   document.getElementById('f')!.addEventListener('submit', (e) => { e.preventDefault(); search(); });
-  gameSel.addEventListener('change', () => { bit = gameSel.value; if (inputs.some((i) => i.value) || abIn.value || tySel.value) search(); });
+  gameSel.addEventListener('change', () => { bit = gameSel.value; if (tool.classList.contains('done')) search(); });
   // restore from a shared link: ?m=rockslide,protect&g=0
   const p = new URLSearchParams(location.search);
   if (p.get('m') || p.get('a') || p.get('t')) load().then((data) => {
     (p.get('m') ?? '').split(',').slice(0, 4).forEach((m, i) => { if (data.moves[m]) inputs[i].value = data.moves[m][0]; });
-    if (p.get('a')) { abIn.value = p.get('a')!; abOn.checked = true; abSlot.hidden = false; } if (p.get('t')) tySel.value = p.get('t')!;
+    if (p.get('a')) { abIn.value = p.get('a')!; abOn.checked = true; abSlot.hidden = false; } if (p.get('t')) { tySel.value = p.get('t')!; tyOn.checked = true; tySlot.hidden = false; }
     const g = p.get('g'); if (g && [...gameSel.options].some((o) => o.value === g)) { gameSel.value = g; bit = g; } search();
   });
 </script>
 <style>
-  .chk { display: inline-flex; align-items: center; gap: .4rem; font-weight: 600; font-size: .9rem; margin-left: .8rem; cursor: pointer; }
-  #f button { white-space: nowrap; }
+  .tool { min-height: calc(100vh - 200px); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; transition: min-height .35s ease; }
+  .tool.done { min-height: 0; align-items: stretch; text-align: left; }
+  .tool .intro { margin: 0 0 1rem; }
+  #f { width: 100%; max-width: 1000px; }
+  .tool.done #f { max-width: none; }
+  .slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: .6rem; margin: .4rem 0 .7rem; }
+  .opts { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .6rem 1rem; }
+  .tool.done .opts { justify-content: flex-start; }
+  .lab2 { display: inline-flex; align-items: center; gap: .5rem; font-weight: 600; font-size: .9rem; color: var(--ink-soft); }
+  .chk { display: inline-flex; align-items: center; gap: .4rem; font-weight: 600; font-size: .9rem; cursor: pointer; }
   .chk input { width: 1.05rem; height: 1.05rem; accent-color: #59c4fb; }
   .slot { position: relative; } .slot .field { width: 100%; }
+  .extra { width: 220px; }
+  #f button { white-space: nowrap; }
   :global(.card .hid) { display: inline-block; margin-top: .2rem; font-size: .7rem; font-weight: 700; background: var(--ink); color: var(--petal); padding: 0 .4rem; }
-  .slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: .6rem; margin: .4rem 0 .5rem; }
-  .slots .extra, .slots button { grid-column: span 1; }
-  @media (max-width: 800px) { .slots { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 800px) { .slots { grid-template-columns: 1fr 1fr; } .tool { min-height: 0; } }
+  @media (prefers-reduced-motion: reduce) { .tool { transition: none; } }
 </style>

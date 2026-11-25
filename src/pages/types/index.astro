@@ -2,8 +2,18 @@
 import Base from '../../layouts/Base.astro';
 import { TYPES, CHART, dbTypeColors as typeColors, effLabel, effColor } from '../../lib/types';
 ---
-<Base title="Type chart" description="Pokémon type effectiveness chart.">
-  <h1>Type chart</h1>
+<Base title="Types and type chart" description="Pokémon types and the type effectiveness chart.">
+  <h1 id="pick">Types</h1>
+  <div class="controls"><span class="lab">Show</span><div class="seg" id="want"><button aria-pressed="true" data-w="">Pokémon</button><button aria-pressed="false" data-w="#moves">Moves</button></div></div>
+  <div class="pick">{TYPES.map((t) => <a href={`/types/${t.toLowerCase()}/`} data-base={`/types/${t.toLowerCase()}/`} style={`background:${typeColors[t]}`}>{t}</a>)}</div>
+  <script>
+    const bs = [...document.querySelectorAll<HTMLButtonElement>('#want button')];
+    bs.forEach((b) => b.addEventListener('click', () => {
+      bs.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      document.querySelectorAll<HTMLAnchorElement>('.pick a').forEach((a) => (a.href = a.dataset.base! + b.dataset.w));
+    }));
+  </script>
+  <h2 class="sec" id="chart">Type chart</h2>
   <p class="note">Attacking type down the side, defending type across the top. Blank = 1×. Click a type to see every Pokémon and move of that type.</p>
   <div class="scroll">
     <table class="tchart">
@@ -17,6 +27,9 @@ import { TYPES, CHART, dbTypeColors as typeColors, effLabel, effColor } from '..
   </div>
 </Base>
 <style>
+  .pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: .4rem; margin: .6rem 0 2rem; }
+  .pick a { display: block; text-align: center; padding: .45rem 0; color: #fff; font-weight: 800; text-decoration: none; text-shadow: 1px 1px 1px rgb(0 0 0 / .55); border: 2px solid var(--ink); }
+  .pick a:hover { filter: brightness(1.1); }
   .scroll { overflow-x: auto; margin-top: 1rem; }
   .tchart { border-collapse: separate; border-spacing: 2px; width: auto; margin: 0 auto; }
   .tchart td, .tchart th { width: 54px; height: 34px; text-align: center; font-weight: 700; font-size: .82rem; padding: 0; }

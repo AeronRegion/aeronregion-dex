@@ -4,7 +4,7 @@ import Type from '../../components/Type.astro';
 import Cat from '../../components/Cat.astro';
 import DexTable from '../../components/DexTable.astro';
 import { species, moves, moveUrl } from '../../lib/data';
-import { TYPES, CHART, typeColors } from '../../lib/types';
+import { TYPES, CHART, typeColors, dbTypeColors, effBg, effFg, effText } from '../../lib/types';
 export function getStaticPaths() {
   return TYPES.map((t) => ({ params: { type: t.toLowerCase() }, props: { t } }));
 }
@@ -22,21 +22,16 @@ const SHIELD = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentCol
 ---
 <Base title={`${t} type | Pokémon types`} description={`${t}-type Pokémon, moves and type matchups.`}>
   <h1><span class="sw" style={`background:${typeColors[t]}`}></span>{t} <em class="kind">(type)</em></h1>
-  <div class="two">
-    <div>
-      <h3 class="sec"><span class="ico" set:html={SWORD} /> Attacking</h3>
-      {[row('2×', `Super effective against`, atk(2)), row('½×', `Not very effective against`, atk(0.5)), row('0×', `No effect on`, atk(0))].map((r) => (
-        <div class="mrow" title={r.title}><span class="mx" style={`background:${BADGE[r.m]}`}>{r.m}</span><div class="chips">{r.list.length ? r.list.map((x) => <Type type={x} />) : <span class="soft">—</span>}</div></div>
-      ))}
-    </div>
-    <div>
-      <h3 class="sec"><span class="ico" set:html={SHIELD} /> Defending</h3>
-      {[row('2×', 'Weak to', def(2)), row('½×', 'Resists', def(0.5)), row('0×', 'Immune to', def(0))].map((r) => (
-        <div class="mrow" title={r.title}><span class="mx" style={`background:${BADGE[r.m]}`}>{r.m}</span><div class="chips">{r.list.length ? r.list.map((x) => <Type type={x} />) : <span class="soft">—</span>}</div></div>
-      ))}
-    </div>
+  <div class="slice">
+    <table class="tchart">
+      <thead><tr><th></th>{TYPES.map((d) => <th><a href={`/types/${d.toLowerCase()}/`} style={`background:${dbTypeColors[d]}`} title={d}>{d.slice(0, 3).toUpperCase()}</a></th>)}</tr></thead>
+      <tbody>
+        <tr><th scope="row"><span class="ico" set:html={SWORD} /> {t} attacking</th>{TYPES.map((d) => { const m = CHART[t][d] ?? 1; return <td style={effBg(m) ? `background:${effBg(m)};color:${effFg(m)}` : ''} title={`${t} → ${d}: ${effText(m) || '1'}×`}>{effText(m)}</td>; })}</tr>
+        <tr><th scope="row"><span class="ico" set:html={SHIELD} /> {t} defending</th>{TYPES.map((d) => { const m = CHART[d][t] ?? 1; return <td style={effBg(m) ? `background:${effBg(m)};color:${effFg(m)}` : ''} title={`${d} → ${t}: ${effText(m) || '1'}×`}>{effText(m)}</td>; })}</tr>
+      </tbody>
+    </table>
   </div>
-  <p class="note">Numbers show the damage multiplier: <b>2×</b> super effective, <b>½×</b> not very effective, <b>0×</b> no effect.</p>
+  <p class="note"><a href="/types/">Full type chart</a></p>
 
   <div class="tabs" role="tablist">
     <button role="tab" aria-selected="true" data-tab="mons">Pokémon ({mons.filter((s) => !s.forme).length})</button>
@@ -75,7 +70,9 @@ const SHIELD = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentCol
   tabs.forEach((b) => b.addEventListener('click', () => {
     tabs.forEach((x) => x.setAttribute('aria-selected', String(x === b)));
     document.querySelectorAll<HTMLElement>('[data-panel]').forEach((p) => (p.hidden = p.dataset.panel !== b.dataset.tab));
+    history.replaceState(null, '', b.dataset.tab === 'moves' ? '#moves' : location.pathname);
   }));
+  if (location.hash === '#moves') document.querySelector<HTMLButtonElement>('[data-tab="moves"]')!.click();
   const q = document.getElementById('q') as HTMLInputElement, f = document.getElementById('forms') as HTMLInputElement;
   let pure = false;
   const rows = [...document.querySelector<HTMLTableElement>('.dextable')!.tBodies[0].rows];
@@ -94,6 +91,12 @@ const SHIELD = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentCol
   [q, f].forEach((el) => el.addEventListener('input', run)); run();
 </script>
 <style>
+  .slice { overflow-x: auto; margin: 1rem 0 .3rem; }
+  .tchart { border-collapse: separate; border-spacing: 2px; }
+  .tchart thead a { display: block; width: 40px; height: 20px; line-height: 20px; text-align: center; font-size: .62rem; font-weight: 700; color: #fff; text-decoration: none; text-shadow: 1px 1px 1px rgb(0 0 0 / .6); border: 1px solid rgb(0 0 0 / .2); }
+  .tchart td { width: 40px; height: 32px; padding: 0; text-align: center; font-weight: 800; font-size: .85rem; background: #fff7f5; border: 1px solid #e2c3bf; }
+  .tchart tbody th { text-align: right; padding: 0 .7rem 0 0; font-weight: 700; font-size: .9rem; white-space: nowrap; }
+  .tchart .ico { vertical-align: -4px; }
   h1 { display: flex; align-items: center; gap: .8rem; }
   .sw { width: 1.1em; height: 1.1em; border: 3px solid rgb(0 0 0 / .3); }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 2.2rem; }
