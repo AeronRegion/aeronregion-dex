@@ -2,7 +2,7 @@
 import '../styles/global.css';
 import { meta } from '../lib/data';
 const { title, description = 'Pokédex, moves, items, type chart and moveset search, with Cobbleverse movepools.' } = Astro.props;
-const fullTitle = title ? `${title} · Aeron Region Dex` : 'Aeron Region Dex';
+const fullTitle = title ? `${title} · ARdex` : 'ARdex · Aeron Region Pokédex';
 const path = Astro.url.pathname;
 const nav = [
   { href: '/', label: 'Pokédex', match: (p: string) => p === '/' || p.startsWith('/pokemon/') },
@@ -28,7 +28,7 @@ const nav = [
   <body>
     <header class="site-header band">
       <div class="wrap bar">
-        <a href="/" class="brand"><img src="/icon-96.png" alt="" width="36" height="36" /> Aeron Region <span>Dex</span></a>
+        <a href="/" class="brand"><img src="/icon-96.png" alt="" width="36" height="36" /> AR<span>dex</span></a>
         <button class="menu-btn" aria-label="Open menu" aria-expanded="false">☰</button>
         <form class="find" action="/" role="search"><input id="find" list="find-list" placeholder="Search Pokémon, moves, items…" autocomplete="off" aria-label="Search" /><datalist id="find-list"></datalist></form>
         <nav class="nav">
@@ -41,7 +41,7 @@ const nav = [
     <footer class="band site-footer">
       <div class="wrap">
         <p>Data from <a href="https://github.com/smogon/pokemon-showdown">Pokémon Showdown</a> and <a href="https://pokeapi.co">PokéAPI</a>{meta.cobbleverse && <>, plus Cobbleverse {meta.cobbleverse} pack files</>}. Sprites from PokéAPI. Updated {meta.built}.</p>
-        <p class="soft">Part of <a href="https://aeronregion.net">Aeron Region</a>. Fan-made and not affiliated with Nintendo, Game Freak, The Pokémon Company, Mojang or Microsoft. Pokémon and its names are trademarks of their owners.</p>
+        <p class="soft">ARdex is part of <a href="https://aeronregion.net">Aeron Region</a>. Fan-made and not affiliated with Nintendo, Game Freak, The Pokémon Company, Mojang or Microsoft. Pokémon and its names are trademarks of their owners.</p>
       </div>
     </footer>
     <script>

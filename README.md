@@ -1,4 +1,4 @@
-# Aeron Region Dex
+# ARdex (Aeron Region Dex)
 
 dex.aeronregion.net: Pokédex, moves, items, type chart and moveset search, with Cobbleverse spawns and movepools.
 
