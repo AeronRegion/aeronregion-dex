@@ -1,10 +1,22 @@
 ---
 import Base from '../layouts/Base.astro';
 import { TYPES, CHART, dbTypeColors } from '../lib/types';
+import { GAMES, meta } from '../lib/data';
 ---
 <Base title="Team builder" description="Build a team of up to 12 Pokémon with moves, and check its defensive and offensive type coverage.">
   <h1>Team builder</h1>
   <p class="note">Add up to 12 Pokémon and give each one up to 4 moves. The tables below show what the team is weak to and which types its moves hit super effectively.</p>
+  <div class="controls">
+    <label class="lab2">Format
+      <select class="field" id="fmt">
+        <option value="all" selected>All games</option>
+        {meta.cobbleverse && <option value="0">Cobbleverse {meta.cobbleverse}</option>}
+        {[9, 8, 7].map((g) => <option value={g}>{GAMES[g]}</option>)}
+      </select>
+    </label>
+    <label class="lab2">Randomize <input class="field num" id="rn" type="number" min="1" max="12" value="6" aria-label="How many to randomize" /></label>
+    <button class="sm" id="rand" type="button">Randomize team</button>
+  </div>
   <div class="controls">
     <div class="slot addslot"><input class="field" id="add" placeholder="Add a Pokémon…" autocomplete="off" /></div>
     <span class="soft" id="n">0 / 12</span>
@@ -51,12 +63,14 @@ import { TYPES, CHART, dbTypeColors } from '../lib/types';
     type Idx = { species: Sp[]; moves: Record<string, [string, string, string]>; learn: Record<string, number[]> };
     type Member = { i: number; moves: string[] };
     let idx: Idx | null = null;
-    let learnable: Map<number, string[]> | null = null;
+    let learnable: Map<number, [string, number][]> | null = null;
+    const fmtSel = document.getElementById('fmt') as HTMLSelectElement;
+    const want = () => fmtSel.value === 'all' ? -1 : 1 << +fmtSel.value;
     const load = async () => (idx ??= await (await fetch('/search-index.json')).json());
     const learnOf = async (i: number) => {
       const d = await load();
-      if (!learnable) { learnable = new Map(); for (const [m, arr] of Object.entries(d.learn)) for (let k = 0; k < arr.length; k += 2) { const l = learnable.get(arr[k]); l ? l.push(m) : learnable.set(arr[k], [m]); } }
-      return learnable.get(i) ?? [];
+      if (!learnable) { learnable = new Map(); for (const [m, arr] of Object.entries(d.learn)) for (let k = 0; k < arr.length; k += 2) { const e: [string, number] = [m, arr[k + 1]]; const l = learnable.get(arr[k]); l ? l.push(e) : learnable.set(arr[k], [e]); } }
+      const w = want(); return (learnable.get(i) ?? []).filter(([, mask]) => mask & w).map(([m]) => m);
     };
     const team: Member[] = [];
     const $ = (id: string) => document.getElementById(id)!;
@@ -155,7 +169,7 @@ import { TYPES, CHART, dbTypeColors } from '../lib/types';
       fm.disabled = fpick.length >= 4; fm.placeholder = fpick.length >= 4 ? '4 moves max' : fpick.length ? 'And also learns…' : 'Pokémon that learn…';
       const box = $('fres'); if (!fpick.length) { box.hidden = true; return; }
       let hit: Set<number> | null = null;
-      for (const m of fpick) { const arr = d.learn[m] ?? []; const set = new Set<number>(); for (let k = 0; k < arr.length; k += 2) set.add(arr[k]); hit = hit ? new Set([...hit].filter((x) => set.has(x))) : set; }
+      const w = want(); for (const m of fpick) { const arr = d.learn[m] ?? []; const set = new Set<number>(); for (let k = 0; k < arr.length; k += 2) if (arr[k + 1] & w) set.add(arr[k]); hit = hit ? new Set([...hit].filter((x) => set.has(x))) : set; }
       const list = [...hit!].sort((a, b) => d.species[a][4] - d.species[b][4] || a - b);
       box.hidden = false;
       box.innerHTML = `<p class="note">${list.length} Pokémon learn ${fpick.length === 1 ? 'this move' : 'all of these'}. Click one to add it with these moves.</p><div class="fgrid">` +
@@ -168,6 +182,24 @@ import { TYPES, CHART, dbTypeColors } from '../lib/types';
     });
     $('fchips').addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest('button'); if (b) { fpick.splice(+b.dataset.k!, 1); finder(); } });
     $('fres').addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest<HTMLElement>('.fmon'); if (b) { const s = idx!.species[+b.dataset.i!]; addMon(s[1], fpick); } });
+    fmtSel.addEventListener('change', () => { cards(); finder(); });
+    // randomize: random Pokémon that have a movepool in the chosen format, each with 4 random moves (at least 2 attacks when possible)
+    const rnIn = document.getElementById('rn') as HTMLInputElement, rBtn = document.getElementById('rand') as HTMLButtonElement;
+    const pickN = <T,>(arr: T[], n: number) => { const a = arr.slice(); for (let k = a.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [a[k], a[j]] = [a[j], a[k]]; } return a.slice(0, n); };
+    rBtn.addEventListener('click', async () => {
+      const d = await load(); await learnOf(0);
+      const n = Math.max(1, Math.min(12, Math.round(+rnIn.value || 6))); rnIn.value = String(n);
+      const pool: number[] = []; for (let i = 0; i < d.species.length; i++) if ((await learnOf(i)).length >= 4) pool.push(i);
+      team.length = 0;
+      for (const i of pickN(pool, n)) {
+        const ms = await learnOf(i); const atk = ms.filter((m) => d.moves[m] && d.moves[m][2] !== 'Status'), st = ms.filter((m) => d.moves[m] && d.moves[m][2] === 'Status');
+        const a = pickN(atk, Math.min(atk.length, 2 + Math.floor(Math.random() * 2)));
+        team.push({ i, moves: pickN([...a, ...pickN(st.concat(atk.filter((m) => !a.includes(m))), 4 - a.length)], 4) });
+      }
+      cards();
+      let left = 10; rBtn.disabled = true; rBtn.textContent = `Randomize (${left}s)`;
+      const tick = setInterval(() => { left--; if (left <= 0) { clearInterval(tick); rBtn.disabled = false; rBtn.textContent = 'Randomize team'; } else rBtn.textContent = `Randomize (${left}s)`; }, 1000);
+    });
     const vb = [...document.querySelectorAll<HTMLButtonElement>('#view button')];
     vb.forEach((b) => b.addEventListener('click', () => {
       vb.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
@@ -200,6 +232,9 @@ import { TYPES, CHART, dbTypeColors } from '../lib/types';
   .team :global(.slot) { position: relative; }
   .team :global(.mvin) { width: 100%; padding: .3rem .5rem; font-size: .85rem; }
   #view { margin-bottom: .6rem; }
+  .lab2 { display: inline-flex; align-items: center; gap: .5rem; font-weight: 600; font-size: .9rem; color: var(--ink-soft); }
+  .num { width: 4.2rem; }
+  #rand:disabled { opacity: .55; cursor: default; }
   .finder { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; margin-top: .6rem; }
   .fslot { position: relative; width: 260px; } .fslot .field { width: 100%; }
   .fchips { display: flex; gap: .3rem; flex-wrap: wrap; }
