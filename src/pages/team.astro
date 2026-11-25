@@ -1,0 +1,119 @@
+---
+import Base from '../layouts/Base.astro';
+import { TYPES, CHART, dbTypeColors } from '../lib/types';
+---
+<Base title="Team weaknesses" description="Add up to 12 Pokémon to count their weaknesses by type, and copy the team into Pokémon Showdown.">
+  <h1>Team weaknesses</h1>
+  <p class="note">Add 1 to 12 Pokémon. A Pokémon counts once for each type it's weak to; 4× weaknesses count once and are marked 4×.</p>
+  <div class="controls">
+    <div class="slot"><input class="field" id="add" placeholder="Add a Pokémon…" autocomplete="off" /></div>
+    <span class="soft" id="n">0 / 12</span>
+    <div class="acts">
+      <button class="sm" id="copy" type="button" disabled>Copy for Showdown</button>
+      <a class="sm" href="https://play.pokemonshowdown.com/teambuilder" target="_blank" rel="noopener">Open Showdown ↗</a>
+      <button class="sm" id="share" type="button" disabled>Copy link</button>
+      <button class="sm" id="clear" type="button" disabled>Clear</button>
+    </div>
+  </div>
+  <p class="note" id="msg" aria-live="polite"></p>
+  <div id="team" class="team"></div>
+  <div id="res" hidden>
+    <p class="big" id="total"></p>
+    <div class="cols">
+      <div>
+        <h3 class="sec">Weaknesses per Pokémon</h3>
+        <table class="data tw" id="per"><thead><tr><th></th><th>Pokémon</th><th>Weak to</th><th class="n">#</th></tr></thead><tbody></tbody></table>
+      </div>
+      <div>
+        <h3 class="sec">By attacking type</h3>
+        <table class="data tw sortable" id="bytype"><thead><tr><th data-sort="text">Type</th><th data-sort="num" class="n">Weak</th><th data-sort="num" class="n">Resist</th><th data-sort="num" class="n">Immune</th><th>Weak Pokémon</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </div>
+  <script define:vars={{ TYPES, CHART, COLORS: dbTypeColors }}>
+    window.__TW = { TYPES, CHART, COLORS };
+  </script>
+  <script>
+    import { autocomplete } from '../lib/ac';
+    const { TYPES, CHART, COLORS } = (window as any).__TW as { TYPES: string[]; CHART: Record<string, Record<string, number>>; COLORS: Record<string, string> };
+    type Sp = [string, string, string[], string | null, number, string, string[], string | null];
+    let all: Sp[] = [];
+    const load = async () => (all.length ? all : (all = (await (await fetch('/search-index.json')).json()).species));
+    const team: Sp[] = [];
+    const $ = (id: string) => document.getElementById(id)!;
+    const add = $('add') as HTMLInputElement;
+    const SPR = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
+    const chip = (t: string) => `<span class="tchip" style="background:${COLORS[t]}">${t}</span>`;
+    const mult = (atk: string, defs: string[]) => defs.reduce((m, d) => m * (CHART[atk][d] ?? 1), 1);
+    const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+
+    const render = () => {
+      $('n').textContent = `${team.length} / 12`;
+      add.disabled = team.length >= 12; add.placeholder = team.length >= 12 ? 'Team is full' : 'Add a Pokémon…';
+      ['copy', 'share', 'clear'].forEach((k) => (($(k) as HTMLButtonElement).disabled = !team.length));
+      $('team').innerHTML = team.map((s, i) => `<span class="mon"><img src="${s[3] ? SPR + s[3] + '.png' : ''}" alt="" width="40" height="40" /><a href="${s[5]}">${esc(s[1])}</a><button type="button" data-i="${i}" aria-label="Remove ${esc(s[1])}">×</button></span>`).join('');
+      const q = new URLSearchParams(); if (team.length) q.set('t', team.map((s) => s[0]).join(','));
+      history.replaceState(null, '', team.length ? `?${q}` : location.pathname);
+      $('res').hidden = !team.length; if (!team.length) return;
+      let total = 0;
+      const per = team.map((s) => {
+        const w = TYPES.map((t) => [t, mult(t, s[2])] as const).filter(([, m]) => m > 1);
+        total += w.length; return { s, w };
+      });
+      ($('per') as HTMLTableElement).tBodies[0].innerHTML = per.sort((a, b) => b.w.length - a.w.length).map(({ s, w }) =>
+        `<tr><td><img class="sprite" src="${s[3] ? SPR + s[3] + '.png' : ''}" alt="" width="32" height="32" /></td><td><a href="${s[5]}">${esc(s[1])}</a><div class="chips">${s[2].map(chip).join('')}</div></td><td>${w.map(([t, m]) => `${t}${m >= 4 ? ' <b class="x4">4×</b>' : ''}`).join(', ') || '<span class="soft">None</span>'}</td><td class="n"><b>${w.length}</b></td></tr>`).join('');
+      const rows = TYPES.map((t) => {
+        const ms = team.map((s) => [s, mult(t, s[2])] as const);
+        const weak = ms.filter(([, m]) => m > 1), res = ms.filter(([, m]) => m > 0 && m < 1).length, imm = ms.filter(([, m]) => m === 0).length;
+        return { t, weak, res, imm };
+      });
+      const max = Math.max(...rows.map((r) => r.weak.length));
+      ($('bytype') as HTMLTableElement).tBodies[0].innerHTML = rows.map((r) =>
+        `<tr class="${r.weak.length && r.weak.length === max ? 'worst' : ''}"><td data-v="${r.t}">${chip(r.t)}</td><td class="n" data-v="${r.weak.length}"><b>${r.weak.length}</b></td><td class="n" data-v="${r.res}">${r.res || ''}</td><td class="n" data-v="${r.imm}">${r.imm || ''}</td><td class="who">${r.weak.map(([s, m]) => esc(s[1]) + (m >= 4 ? ' <b class="x4">4×</b>' : '')).join(', ')}</td></tr>`).join('');
+      const worst = rows.filter((r) => r.weak.length === max && max > 0).map((r) => r.t);
+      $('total').innerHTML = `<b>${total}</b> weaknesses across ${team.length} Pokémon` + (worst.length ? `. Most weak to <b>${worst.join(', ')}</b> (${max} of ${team.length}).` : '.');
+    };
+
+    const addMon = async (name: string) => {
+      const d = await load(); const s = d.find((x) => x[1].toLowerCase() === name.trim().toLowerCase());
+      if (!s || team.length >= 12) return;
+      team.push(s); add.value = ''; render(); add.focus();
+    };
+    autocomplete(add, async () => (await load()).map((s) => ({ label: s[1], sub: s[2].join(' / ') })), (it) => addMon(it.label));
+    add.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addMon(add.value); } });
+    $('team').addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest('button'); if (b) { team.splice(+b.dataset.i!, 1); render(); } });
+    $('clear').addEventListener('click', () => { team.length = 0; render(); });
+    const say = (t: string) => { $('msg').textContent = t; setTimeout(() => ($('msg').textContent = ''), 4000); };
+    $('copy').addEventListener('click', async () => {
+      await navigator.clipboard.writeText(team.map((s) => s[1]).join('\n\n') + '\n');
+      say('Copied. In Showdown: Teambuilder → New team → Import from text, then paste.');
+    });
+    $('share').addEventListener('click', async () => { await navigator.clipboard.writeText(location.href); say('Link copied.'); });
+    const p = new URLSearchParams(location.search).get('t');
+    if (p) load().then((d) => { for (const id of p.split(',').slice(0, 12)) { const s = d.find((x) => x[0] === id); if (s) team.push(s); } render(); });
+    else render();
+  </script>
+</Base>
+<style>
+  .slot { position: relative; flex: 1; min-width: 240px; max-width: 420px; } .slot .field { width: 100%; }
+  .acts { display: flex; gap: .4rem; flex-wrap: wrap; margin-left: auto; }
+  .sm { font: inherit; font-weight: 700; font-size: .85rem; padding: .35rem .7rem; border: 2px solid var(--ink); background: #fff7f5; color: var(--ink); cursor: pointer; text-decoration: none; }
+  .sm:hover:not(:disabled) { background: var(--petal-deep); color: var(--ink); }
+  .sm:disabled { opacity: .45; cursor: default; }
+  .team { display: flex; flex-wrap: wrap; gap: .4rem; margin: .6rem 0 1rem; }
+  .team :global(.mon) { display: inline-flex; align-items: center; gap: .25rem; border: 2px solid var(--ink); background: #fff7f5; padding: 0 0 0 .1rem; font-size: .88rem; }
+  .team :global(.mon img) { width: 36px; height: 36px; }
+  .team :global(.mon button) { border: 0; background: none; font: inherit; font-size: 1.1rem; font-weight: 800; cursor: pointer; color: var(--ink-soft); padding: 0 .45rem; }
+  .team :global(.mon button:hover) { color: #a40000; }
+  .big { font-size: 1.15rem; margin: .2rem 0 .6rem; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 2.2rem; align-items: start; }
+  .cols > div { min-width: 0; }
+  @media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
+  .tw :global(td), .tw :global(th) { padding: .2rem .45rem; vertical-align: middle; }
+  .tw :global(tbody tr:nth-child(even)) { background: rgb(255 255 255 / .35); }
+  .tw :global(.who) { font-size: .85rem; white-space: normal; }
+  .tw :global(tr.worst td) { background: #f6d2cd; }
+  .tw :global(.chips) { margin-top: .1rem; }
+  :global(.tchip) { display: inline-block; font-weight: 700; font-size: .68rem; padding: 0 .35rem; margin-right: .2rem; color: #fff; text-shadow: 1px 1px 1px rgb(0 0 0 / .5); border: 1px solid rgb(0 0 0 / .25); }
+  :global(.x4) { font-size: .72rem; background: #a40000; color: #ffdd57; padding: 0 .25rem; }
+</style>
