@@ -237,7 +237,8 @@ fs.writeFileSync('public/potd.json', JSON.stringify([...firstOfNum.values()].sor
 const idx = new Map(out.map((s, i) => [s.id, i]));
 fs.mkdirSync('public', { recursive: true });
 fs.writeFileSync('public/search-index.json', JSON.stringify({
-  species: out.map((s) => [s.id, s.name, s.types, s.art, s.num, urlOf(s)]),
+  species: out.map((s) => [s.id, s.name, s.types, s.art, s.num, urlOf(s), [s.abilities['0'], s.abilities['1']].filter(Boolean), s.abilities.H ?? null]),
+  abilities: abilities.map((a) => a.name),
   moves: Object.fromEntries(moves.map((m) => [m.id, [m.name, m.type, m.cat]])),
   learn: Object.fromEntries(Object.entries(learnedBy).map(([m, l]) => [m, l.flatMap(([sid, mask]) => [idx.get(sid), mask])])),
 }));

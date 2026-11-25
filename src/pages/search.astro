@@ -1,10 +1,11 @@
 ---
 import Base from '../layouts/Base.astro';
 import { GAMES, meta } from '../lib/data';
+import { TYPES } from '../lib/types';
 ---
 <Base title="Moveset search" description="Find every Pokémon that can learn up to four moves together.">
   <h1>Moveset search</h1>
-  <p>Pick up to 4 moves to see every Pokémon that can learn all of them.</p>
+  <p>Pick up to 4 moves to see every Pokémon that can learn all of them. Add an ability or a type to narrow it down.</p>
   <div class="controls">
     <span class="lab">Movepool</span>
     <div class="seg" id="game">
@@ -14,14 +15,16 @@ import { GAMES, meta } from '../lib/data';
     </div>
   </div>
   <form id="f" class="slots">
-    {[0, 1, 2, 3].map((i) => <div class="slot"><input class="field" placeholder="Add a move…" autocomplete="off" /></div>)}
+    {[0, 1, 2, 3].map((i) => <div class="slot"><input class="field mv" placeholder="Add a move…" autocomplete="off" /></div>)}
+    <div class="slot extra"><input class="field" id="ab" placeholder="Ability (optional)…" autocomplete="off" /></div>
+    <div class="slot extra"><select class="field" id="ty"><option value="">Any type</option>{TYPES.map((t) => <option>{t}</option>)}</select></div>
     <button class="block" type="submit">Find Pokémon</button>
   </form>
   <h3 class="sec" id="title" hidden></h3>
   <div class="cards" id="out"></div>
 </Base>
 <script>
-  type Index = { species: [string, string, string[], string | null, number, string][]; moves: Record<string, [string, string, string]>; learn: Record<string, number[]> };
+  type Index = { abilities: string[]; species: [string, string, string[], string | null, number, string, string[], string | null][]; moves: Record<string, [string, string, string]>; learn: Record<string, number[]> };
   let idx: Index | null = null;
   const load = async () => (idx ??= await (await fetch('/search-index.json')).json());
   const toID = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -30,7 +33,10 @@ import { GAMES, meta } from '../lib/data';
   const light = new Set(['Normal', 'Electric', 'Grass', 'Ice', 'Ground', 'Flying', 'Bug', 'Rock', 'Steel', 'Fairy']);
   const chip = (t: string) => `<span style="display:inline-block;font-weight:700;font-size:.7rem;padding:0 .4rem;border:1px solid rgb(0 0 0/.3);background:${TC[t]};color:${light.has(t) ? '#2e1a20' : '#fff'}">${t}</span>`;
   import { autocomplete } from '../lib/ac';
-  const inputs = [...document.querySelectorAll<HTMLInputElement>('#f input')];
+  const inputs = [...document.querySelectorAll<HTMLInputElement>('#f input.mv')];
+  const abIn = document.getElementById('ab') as HTMLInputElement, tySel = document.getElementById('ty') as HTMLSelectElement;
+  autocomplete(abIn, async () => (await load()).abilities.map((label) => ({ label, sub: 'Ability' })), () => {});
+  tySel.addEventListener('change', () => search());
   const moveItems = async () => { const d = await load(); return Object.values(d.moves).map(([label, type, cat]) => ({ label, type, cat })); };
   inputs.forEach((inp, i) => autocomplete(inp, moveItems, () => { (inputs[i + 1] ?? inp).focus(); }));
   let bit = (document.querySelector('#game [aria-pressed="true"]') as HTMLElement).dataset.b!;
@@ -38,37 +44,47 @@ import { GAMES, meta } from '../lib/data';
   const search = async () => {
     const data = await load();
     const ids = inputs.map((i) => toID(i.value)).filter((m) => m && data.moves[m]);
+    const abName = data.abilities.find((a) => a.toLowerCase() === abIn.value.trim().toLowerCase()) ?? '';
+    const ty = tySel.value;
     const out = document.getElementById('out')!, title = document.getElementById('title')!;
-    history.replaceState(null, '', ids.length ? `?m=${ids.join(',')}&g=${bit}` : location.pathname);
-    if (!ids.length) { out.innerHTML = ''; title.hidden = true; return; }
+    const q = new URLSearchParams();
+    if (ids.length) q.set('m', ids.join(',')); if (abName) q.set('a', abName); if (ty) q.set('t', ty); if (ids.length) q.set('g', bit);
+    history.replaceState(null, '', q.toString() ? `?${q}` : location.pathname);
+    if (!ids.length && !abName && !ty) { out.innerHTML = ''; title.hidden = true; return; }
     const want = bit === 'all' ? 0 : 1 << +bit;
-    let result: Set<number> | null = null;
+    let result: Set<number> | null = ids.length ? null : new Set(data.species.map((_, i) => i));
     for (const m of ids) {
       const arr = data.learn[m] ?? []; const set = new Set<number>();
       for (let i = 0; i < arr.length; i += 2) if (!want || arr[i + 1] & want) set.add(arr[i]);
       result = result ? new Set([...result].filter((x) => set.has(x))) : set;
     }
-    const list = [...result!].sort((a, b) => data.species[a][4] - data.species[b][4] || a - b);
+    const hasAb = (i: number) => !abName || data.species[i][6].includes(abName) || data.species[i][7] === abName;
+    const list = [...result!].filter((i) => hasAb(i) && (!ty || data.species[i][2].includes(ty))).sort((a, b) => data.species[a][4] - data.species[b][4] || a - b);
     title.hidden = false;
-    title.textContent = `${list.length} Pokémon learn ${ids.length === 1 ? data.moves[ids[0]][0] : ids.length === 2 ? 'both moves' : `all ${ids.length} moves`}`;
+    const parts = [ids.length ? `learn ${ids.length === 1 ? data.moves[ids[0]][0] : ids.length === 2 ? 'both moves' : `all ${ids.length} moves`}` : '', abName ? `can have ${abName}` : '', ty ? `are ${ty} type` : ''].filter(Boolean);
+    title.textContent = `${list.length} Pokémon ${parts.join(' and ')}`;
     const SPR = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
-    out.innerHTML = list.map((i) => { const [, name, types, art, num, url] = data.species[i];
-      return `<a class="card" href="${url}"><img src="${art ? SPR + art + '.png' : ''}" alt="" loading="lazy" width="52" height="52" /><div><b>${name}</b><small>#${String(num).padStart(4, '0')}</small><div class="chips">${types.map(chip).join(' ')}</div></div></a>`; }).join('');
+    out.innerHTML = list.map((i) => { const [, name, types, art, num, url, , hid] = data.species[i];
+      const hTag = abName && hid === abName ? '<span class="hid">Hidden ability</span>' : '';
+      return `<a class="card" href="${url}"><img src="${art ? SPR + art + '.png' : ''}" alt="" loading="lazy" width="52" height="52" /><div><b>${name}</b><small>#${String(num).padStart(4, '0')}</small><div class="chips">${types.map(chip).join(' ')}</div>${hTag}</div></a>`; }).join('');
   };
   document.getElementById('f')!.addEventListener('submit', (e) => { e.preventDefault(); search(); });
   document.querySelectorAll<HTMLButtonElement>('#game button').forEach((b) => b.addEventListener('click', () => {
     document.querySelectorAll('#game button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-    bit = b.dataset.b!; if (inputs.some((i) => i.value)) search();
+    bit = b.dataset.b!; if (inputs.some((i) => i.value) || abIn.value || tySel.value) search();
   }));
   // restore from a shared link: ?m=rockslide,protect&g=0
   const p = new URLSearchParams(location.search);
-  if (p.get('m')) load().then((data) => {
-    p.get('m')!.split(',').slice(0, 4).forEach((m, i) => { if (data.moves[m]) inputs[i].value = data.moves[m][0]; });
+  if (p.get('m') || p.get('a') || p.get('t')) load().then((data) => {
+    (p.get('m') ?? '').split(',').slice(0, 4).forEach((m, i) => { if (data.moves[m]) inputs[i].value = data.moves[m][0]; });
+    if (p.get('a')) abIn.value = p.get('a')!; if (p.get('t')) tySel.value = p.get('t')!;
     const g = p.get('g'); const btn = g && document.querySelector<HTMLButtonElement>(`#game [data-b="${g}"]`); if (btn) btn.click(); else search();
   });
 </script>
 <style>
   .slot { position: relative; } .slot .field { width: 100%; }
-  .slots { display: grid; grid-template-columns: repeat(4, 1fr) auto; gap: .6rem; margin: .4rem 0 .5rem; }
+  :global(.card .hid) { display: inline-block; margin-top: .2rem; font-size: .7rem; font-weight: 700; background: var(--ink); color: var(--petal); padding: 0 .4rem; }
+  .slots { display: grid; grid-template-columns: repeat(4, 1fr) 1.2fr .8fr auto; gap: .6rem; margin: .4rem 0 .5rem; }
+  @media (max-width: 1100px) { .slots { grid-template-columns: repeat(4, 1fr); } }
   @media (max-width: 800px) { .slots { grid-template-columns: 1fr 1fr; } }
 </style>
