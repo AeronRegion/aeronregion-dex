@@ -108,21 +108,24 @@ for (const s of species) {
 
 function evoLabel(s) {
   if (!s.prevo) return null;
-  if (s.evoType === 'useItem') return s.evoItem;
+  const when = s.evoCondition ? `, ${s.evoCondition}` : '';
+  if (s.evoType === 'useItem') return s.evoItem + when;
   if (s.evoType === 'trade') return s.evoItem ? `Trade holding ${s.evoItem}` : 'Trade';
   if (s.evoType === 'levelFriendship') return `High friendship${s.evoCondition ? ', ' + s.evoCondition : ''}`;
   if (s.evoType === 'levelMove') return `Level up knowing ${s.evoMove}`;
-  if (s.evoType === 'levelHold') return `Level up holding ${s.evoItem}`;
+  if (s.evoType === 'levelHold') return `Level up holding ${s.evoItem}${when}`;
   if (s.evoType === 'levelExtra' || s.evoType === 'other') return s.evoCondition ?? 'Special';
   if (s.evoLevel) return `Lv. ${s.evoLevel}${s.evoCondition ? ', ' + s.evoCondition : ''}`;
   return s.evoCondition ?? 'Level up';
 }
 function chain(s) {
-  let root = Dex.species.get(s.baseSpecies);
+  // regional and other real forms have their own line (Hisuian Sneasel -> Sneasler); Megas use the base line
+  const own = s.forme && !/Mega|Primal/.test(s.forme) && (s.prevo || s.evos?.length);
+  let root = own ? s : Dex.species.get(s.baseSpecies);
   while (root.prevo) root = Dex.species.get(root.prevo);
   const stages = [];
   const walk = (sp, depth) => {
-    (stages[depth] ??= []).push({ id: sp.id, name: sp.name, num: sp.num, types: sp.types, how: evoLabel(sp), art: apiFor(sp)?.id });
+    (stages[depth] ??= []).push({ id: sp.id, name: sp.name, baseSpecies: sp.baseSpecies, forme: sp.forme || null, num: sp.num, types: sp.types, how: evoLabel(sp), art: apiFor(sp)?.id });
     for (const e of sp.evos ?? []) { const n = Dex.species.get(e); if (OK(n)) walk(n, depth + 1); }
   };
   walk(root, 0);

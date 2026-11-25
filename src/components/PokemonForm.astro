@@ -102,7 +102,8 @@ const spawns = s.cobbleverse?.spawns ?? [];
           <div class:list={["stage", { many: stage.length > 2 }]}>{stage.map((e) => (
             <a class:list={['evo', { cur: e.id === s.id }]} href={pokeUrl(e)}>
               <img src={artUrl(e.art)} alt="" width="84" height="84" loading="lazy" />
-              <span class="soft">#{String(e.num).padStart(4, '0')}</span><b>{e.name}</b>
+              <span class="soft">#{String(e.num).padStart(4, '0')}</span><b>{e.forme ? formLabel(e) : e.name}</b>
+              <span class="etypes">{e.types.map((t: string) => <Type type={t} small link={false} />)}</span>
               {stage.length > 1 && e.how && <em>{e.how}</em>}
             </a>
           ))}</div>
@@ -319,6 +320,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .evo img { width: 84px; height: 84px; object-fit: contain; }
   .evo em { font-style: normal; font-size: .75rem; background: var(--petal-deep); padding: 0 .4rem; }
   .evo b { font-weight: 700; }
+  .etypes { display: flex; gap: .2rem; margin-top: .15rem; }
   .arr { display: flex; flex-direction: column; align-items: center; gap: .1rem; color: var(--ink-soft); font-size: 1.4rem; line-height: 1; margin-top: -2.2rem; max-width: 9rem; text-align: center; }
   .evos.branch { flex-direction: column; }
   .evos.branch .arr { margin-top: 0; transform: rotate(90deg); }
