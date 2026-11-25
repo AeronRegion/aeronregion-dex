@@ -13,7 +13,7 @@ const { forms, prev, next } = Astro.props as { forms: any[]; prev: any; next: an
 const base = forms[0];
 const num = (s: any) => '#' + String(s.num).padStart(4, '0');
 ---
-<Base title={base.name} description={`${base.name}: stats, type matchups, evolutions, where to find it and every move it learns.`}>
+<Base title={`${base.name} Pokédex: stats, moves & spawns`} description={`${base.name}: stats, type matchups, evolutions, where to find it and every move it learns.`}>
   <nav class="pn" aria-label="Previous and next Pokémon">
     {prev ? <a href={pokeUrl(prev)} rel="prev">← <span class="soft">{num(prev)}</span> {prev.name}</a> : <span></span>}
     {next ? <a href={pokeUrl(next)} rel="next">{next.name} <span class="soft">{num(next)}</span> →</a> : <span></span>}

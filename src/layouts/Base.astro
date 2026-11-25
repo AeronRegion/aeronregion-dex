@@ -2,7 +2,7 @@
 import '../styles/global.css';
 import { meta } from '../lib/data';
 const { title, description = 'Pokédex, moves, items, type chart and moveset search, with Cobbleverse movepools.' } = Astro.props;
-const fullTitle = title ? `${title} · ARdex` : 'ARdex · Aeron Region Pokédex';
+const fullTitle = title ? `${title} | ARdex` : 'ARdex | Aeron Region Pokédex';
 const path = Astro.url.pathname;
 // Top menu. Entries with `items` open a dropdown; `quick` adds a small "Quick links" part under it.
 const ITEM = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/';

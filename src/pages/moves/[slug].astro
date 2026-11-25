@@ -21,7 +21,7 @@ const single = ['normal', 'adjacentFoe', 'any', 'adjacentAllyOrSelf', 'randomNor
 const gens = [9, 8, 7, 6, 5, 4, 3, 2, 1].filter((g) => learners.some((l) => l.mask & (1 << g)));
 const hasC = learners.some((l) => l.mask & 1);
 ---
-<Base title={m.name} description={`${m.name}: ${m.short}`}>
+<Base title={`${m.name} | Pokémon moves`} description={`${m.name}: ${m.short}`}>
   <h1>{m.name} <em class="kind">(move)</em></h1>
   <div class="two">
     <div>
@@ -55,11 +55,11 @@ const hasC = learners.some((l) => l.mask & 1);
   <h3 class="sec">Learnt by <span class="soft" style="font-weight:500" id="lcount"></span></h3>
   {learners.length === 0 ? <p class="soft">No Pokémon learn this move.</p> : <>
     <div class="controls" style="margin-top:0">
-      <div class="seg" id="game">
-        <button aria-pressed="true" data-b="all">All games</button>
-        {hasC && <button aria-pressed="false" data-b="0">Cobbleverse {meta.cobbleverse}</button>}
-        {gens.map((g) => <button aria-pressed="false" data-b={g}>{GAMES[g]}</button>)}
-      </div>
+      <select class="field" id="game" aria-label="Game">
+        <option value="all" selected>All games</option>
+        {hasC && <option value="0">Cobbleverse {meta.cobbleverse}</option>}
+        {gens.map((g) => <option value={g}>{GAMES[g]}</option>)}
+      </select>
       <input class="field" id="lf" placeholder="Filter by name or type…" style="margin-left:auto;min-width:220px" />
     </div>
     <div class="cards" id="learners">
@@ -74,7 +74,8 @@ const hasC = learners.some((l) => l.mask & 1);
 </Base>
 <script>
   const cards = [...document.querySelectorAll<HTMLElement>('#learners .card')];
-  let bit = (document.querySelector('#game [aria-pressed="true"]') as HTMLElement)?.dataset.b ?? 'all';
+  const gameSel = document.getElementById('game') as HTMLSelectElement | null;
+  let bit = gameSel?.value ?? 'all';
   const run = () => {
     const q = (document.getElementById('lf') as HTMLInputElement)?.value.trim().toLowerCase() ?? '';
     let n = 0;
@@ -85,10 +86,7 @@ const hasC = learners.some((l) => l.mask & 1);
     }
     const el = document.getElementById('lcount'); if (el) el.textContent = `· ${n} Pokémon`;
   };
-  document.querySelectorAll<HTMLButtonElement>('#game button').forEach((b) => b.addEventListener('click', () => {
-    document.querySelectorAll('#game button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-    bit = b.dataset.b!; run();
-  }));
+  gameSel?.addEventListener('change', () => { bit = gameSel.value; run(); });
   document.getElementById('lf')?.addEventListener('input', run);
   run();
 </script>

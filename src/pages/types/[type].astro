@@ -20,7 +20,7 @@ const BADGE: Record<string, string> = { '2×': '#4caf50', '½×': '#d9534f', '0�
 const SWORD = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M6.9 14.3 3 18.2 5.8 21l3.9-3.9 1.6 1.6 1.4-1.4-1.6-1.6L21 5.8V3h-2.8L8.3 12.9l-1.6-1.6-1.4 1.4zM19 4.4v.6l-8.9 8.9-.6-.6L18.4 4.4z"/></svg>';
 const SHIELD = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5zm0 2.2 6 2.2V11c0 3.9-2.5 7.4-6 8.9z"/></svg>';
 ---
-<Base title={`${t} type`} description={`${t}-type Pokémon, moves and type matchups.`}>
+<Base title={`${t} type | Pokémon types`} description={`${t}-type Pokémon, moves and type matchups.`}>
   <h1><span class="sw" style={`background:${typeColors[t]}`}></span>{t} <em class="kind">(type)</em></h1>
   <div class="two">
     <div>
@@ -55,7 +55,7 @@ const SHIELD = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentCol
 
   <section data-panel="moves" hidden>
     <table class="data sortable" style="margin-top:1rem">
-      <thead><tr><th data-sort="text">Move</th><th data-sort="num" class="sorted asc">Cat.</th><th data-sort="num">Pwr</th><th data-sort="num">Acc</th><th data-sort="num">PP</th><th data-sort="num" class="pri">Priority</th><th data-sort="text">Target</th><th>Effect</th></tr></thead>
+      <thead><tr><th data-sort="text">Move</th><th data-sort="num" class="sorted asc">Cat.</th><th data-sort="num">Power</th><th data-sort="num">Acc</th><th data-sort="num">PP</th><th data-sort="num" class="pri">Priority</th><th data-sort="text">Target</th><th>Effect</th></tr></thead>
       <tbody>
         {typeMoves.map((m) => (
           <tr>

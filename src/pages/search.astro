@@ -8,11 +8,11 @@ import { TYPES } from '../lib/types';
   <p>Pick up to 4 moves to see every Pokémon that can learn all of them. Add an ability or a type to narrow it down.</p>
   <div class="controls">
     <span class="lab">Movepool</span>
-    <div class="seg" id="game">
-      <button aria-pressed="true" data-b="all">All games</button>
-      {meta.cobbleverse && <button aria-pressed="false" data-b="0">Cobbleverse {meta.cobbleverse}</button>}
-      {[9, 8, 7].map((g) => <button aria-pressed="false" data-b={g}>{GAMES[g]}</button>)}
-    </div>
+    <select class="field" id="game" aria-label="Movepool">
+      <option value="all" selected>All games</option>
+      {meta.cobbleverse && <option value="0">Cobbleverse {meta.cobbleverse}</option>}
+      {[9, 8, 7].map((g) => <option value={g}>{GAMES[g]}</option>)}
+    </select>
   </div>
   <form id="f" class="slots">
     {[0, 1, 2, 3].map((i) => <div class="slot"><input class="field mv" placeholder="Add a move…" autocomplete="off" /></div>)}
@@ -39,7 +39,8 @@ import { TYPES } from '../lib/types';
   tySel.addEventListener('change', () => search());
   const moveItems = async () => { const d = await load(); return Object.values(d.moves).map(([label, type, cat]) => ({ label, type, cat })); };
   inputs.forEach((inp, i) => autocomplete(inp, moveItems, () => { (inputs[i + 1] ?? inp).focus(); }));
-  let bit = (document.querySelector('#game [aria-pressed="true"]') as HTMLElement).dataset.b!;
+  const gameSel = document.getElementById('game') as HTMLSelectElement;
+  let bit = gameSel.value;
 
   const search = async () => {
     const data = await load();
@@ -69,16 +70,13 @@ import { TYPES } from '../lib/types';
       return `<a class="card" href="${url}"><img src="${art ? SPR + art + '.png' : ''}" alt="" loading="lazy" width="52" height="52" /><div><b>${name}</b><small>#${String(num).padStart(4, '0')}</small><div class="chips">${types.map(chip).join(' ')}</div>${hTag}</div></a>`; }).join('');
   };
   document.getElementById('f')!.addEventListener('submit', (e) => { e.preventDefault(); search(); });
-  document.querySelectorAll<HTMLButtonElement>('#game button').forEach((b) => b.addEventListener('click', () => {
-    document.querySelectorAll('#game button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-    bit = b.dataset.b!; if (inputs.some((i) => i.value) || abIn.value || tySel.value) search();
-  }));
+  gameSel.addEventListener('change', () => { bit = gameSel.value; if (inputs.some((i) => i.value) || abIn.value || tySel.value) search(); });
   // restore from a shared link: ?m=rockslide,protect&g=0
   const p = new URLSearchParams(location.search);
   if (p.get('m') || p.get('a') || p.get('t')) load().then((data) => {
     (p.get('m') ?? '').split(',').slice(0, 4).forEach((m, i) => { if (data.moves[m]) inputs[i].value = data.moves[m][0]; });
     if (p.get('a')) abIn.value = p.get('a')!; if (p.get('t')) tySel.value = p.get('t')!;
-    const g = p.get('g'); const btn = g && document.querySelector<HTMLButtonElement>(`#game [data-b="${g}"]`); if (btn) btn.click(); else search();
+    const g = p.get('g'); if (g && [...gameSel.options].some((o) => o.value === g)) { gameSel.value = g; bit = g; } search();
   });
 </script>
 <style>

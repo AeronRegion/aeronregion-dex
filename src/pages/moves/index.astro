@@ -8,7 +8,7 @@ const catOrder: Record<string, number> = { Physical: 0, Special: 1, Status: 2 };
 const TAGS = ['Multi-hit', 'Priority', 'Negative priority', 'Spread', 'Contact', 'Sound', 'Punch', 'Bite', 'Slicing', 'Pulse', 'Ball / bomb', 'Wind', 'Healing', 'Draining', 'Recoil', 'High crit', 'Pivot (switches out)', 'Two-turn', 'Secondary effect'];
 const list = [...moves].sort((a, b) => catOrder[a.cat] - catOrder[b.cat] || a.name.localeCompare(b.name));
 ---
-<Base title="Moves" description="Every move with type, category, power, accuracy, PP, priority and target.">
+<Base title="Pokémon moves list" description="Every move with type, category, power, accuracy, PP, priority and target.">
   <h1>Moves</h1>
   <div class="controls">
     <input class="field" id="q" placeholder="Search moves or effects…" style="flex:1;min-width:240px" />
@@ -17,7 +17,7 @@ const list = [...moves].sort((a, b) => catOrder[a.cat] - catOrder[b.cat] || a.na
   </div>
   <p class="note" id="count"></p>
   <table class="data sortable" id="mv">
-    <thead><tr><th data-sort="text">Move</th><th data-sort="text">Type</th><th data-sort="num" class="sorted asc">Cat.</th><th data-sort="num">Pwr</th><th data-sort="num">Acc</th><th data-sort="num">PP</th><th data-sort="num" class="pri">Priority</th><th data-sort="text">Target</th><th>Effect</th></tr></thead>
+    <thead><tr><th data-sort="text">Move</th><th data-sort="text">Type</th><th data-sort="num" class="sorted asc">Cat.</th><th data-sort="num">Power</th><th data-sort="num">Acc</th><th data-sort="num">PP</th><th data-sort="num" class="pri">Priority</th><th data-sort="text">Target</th><th>Effect</th></tr></thead>
     <tbody>
       {list.map((m) => (
         <tr data-q={`${m.name} ${m.short}`.toLowerCase()} data-t={m.type} data-g={m.tags.join('|')}>

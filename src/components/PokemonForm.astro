@@ -142,20 +142,17 @@ const spawns = s.cobbleverse?.spawns ?? [];
 
   <section data-panel="moves" class="panel" hidden>
     <div class="controls">
-      <span class="lab">Game</span>
-      <div class="seg game">
-        <button aria-pressed="true" data-g="all">All games</button>
-        {hasCobble && <button aria-pressed="false" data-g="C">Cobbleverse {meta.cobbleverse}</button>}
-        {gens.map((g) => <button aria-pressed="false" data-g={g}>{GAMES[g]}</button>)}
-      </div>
-    </div>
-    <div class="controls">
+      <select class="field game" aria-label="Game">
+        <option value="all" selected>All games</option>
+        {hasCobble && <option value="C">Cobbleverse {meta.cobbleverse}</option>}
+        {gens.map((g) => <option value={g}>{GAMES[g]}</option>)}
+      </select>
       <div class="seg split"><button aria-pressed="true" data-split="0">All moves</button><button aria-pressed="false" data-split="1">Split by how it learns</button></div>
       <input class="field mfilter" placeholder="Filter moves or types…" style="margin-left:auto;min-width:240px" />
     </div>
     <p class="note mcount"></p>
     <table class="data sortable mtable">
-      <thead><tr><th data-sort="text">Move</th><th data-sort="text">Type</th><th data-sort="num" class="sorted asc">Cat.</th><th data-sort="num">Pwr</th><th data-sort="num">Acc</th><th data-sort="num">PP</th><th data-sort="num" class="pri">Priority</th><th data-sort="text">Target</th><th data-sort="num">How</th></tr></thead>
+      <thead><tr><th data-sort="text">Move</th><th data-sort="text">Type</th><th data-sort="num" class="sorted asc">Cat.</th><th data-sort="num">Power</th><th data-sort="num">Acc</th><th data-sort="num">PP</th><th data-sort="num" class="pri">Priority</th><th data-sort="text">Target</th><th data-sort="num">How</th></tr></thead>
       <tbody>
         {rows.map(({ m, src }) => (
           <tr data-src={src.join(',')} data-q={`${m.name} ${m.type} ${m.cat}`.toLowerCase()}>
@@ -206,7 +203,8 @@ const spawns = s.cobbleverse?.spawns ?? [];
     if (!table) continue;
     const body = table.tBodies[0];
     const rows = [...body.rows];
-    let game = (form.querySelector('.game [aria-pressed="true"]') as HTMLElement)?.dataset.g ?? 'all';
+    const gameSel = form.querySelector<HTMLSelectElement>('select.game')!;
+    let game = gameSel.value;
     let split = false;
     const howFor = (src: string[]) => {
       if (game === 'C') return parse(src.filter((c) => c[0] === 'C'));
@@ -248,10 +246,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
       }
       form.querySelector('.mcount')!.textContent = `${n} moves`;
     };
-    form.querySelectorAll<HTMLButtonElement>('.game button').forEach((b) => b.addEventListener('click', () => {
-      form.querySelectorAll('.game button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-      game = b.dataset.g!; render();
-    }));
+    gameSel.addEventListener('change', () => { game = gameSel.value; render(); });
     form.querySelectorAll<HTMLButtonElement>('.split button').forEach((b) => b.addEventListener('click', () => {
       form.querySelectorAll('.split button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
       split = b.dataset.split === '1';
