@@ -1,7 +1,7 @@
 ---
 import Type from './Type.astro';
 import Cat from './Cat.astro';
-import { moveById, pokeUrl, moveUrl, artUrl, STATS, statRange, GAMES, meta, formSlug, formLabel } from '../lib/data';
+import { abilityUrl, abilityByName, moveById, pokeUrl, moveUrl, artUrl, STATS, statRange, GAMES, meta, formSlug, formLabel } from '../lib/data';
 import { TYPES, typeColors, effWith, effText, effBg, ABILITY_DEF } from '../lib/types';
 import learnData from '../data/learn.json';
 
@@ -39,7 +39,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
       <h1>{formLabel(s)}</h1>
       <div class="chips">{s.types.map((t: string) => <Type type={t} />)}</div>
       <table class="kv top" style="margin-top:.8rem">
-        <tr><th>Abilities</th><td>{abil.join(', ')}{s.abilities.H && <><br /><span class="soft">{s.abilities.H} (hidden ability)</span></>}</td></tr>
+        <tr><th>Abilities</th><td>{abil.map((a, i) => <>{i > 0 && ', '}<a class="ab" href={abilityUrl(a)} title={abilityByName.get(a)?.short}>{a}</a></>)}{s.abilities.H && <><br /><a class="ab" href={abilityUrl(s.abilities.H)} title={abilityByName.get(s.abilities.H)?.short}>{s.abilities.H}</a> <span class="soft">(hidden ability)</span></>}</td></tr>
         <tr><th>Height / Weight</th><td>{s.height ?? '—'} m · {s.weight} kg</td></tr>
       </table>
     </div>
@@ -267,6 +267,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .hd { display: grid; grid-template-columns: 200px 1fr 330px; gap: 1.6rem; align-items: start; }
   .art { width: 200px; height: 200px; object-fit: contain; background: #fbe8e4; border: 2px solid var(--ink); }
   .no { font-weight: 600; color: var(--ink-soft); }
+  .ab { color: var(--ink); font-weight: 500; }
   h1 { margin: .1rem 0 .5rem; }
   .tabs { display: flex; border-bottom: 3px solid var(--ink); margin-top: 1.6rem; }
   .tabs button { font: inherit; font-weight: 700; font-size: 1.05rem; padding: .5rem 1.6rem; background: none; border: 3px solid transparent; border-bottom: 0; margin-bottom: -3px; cursor: pointer; color: var(--ink); }

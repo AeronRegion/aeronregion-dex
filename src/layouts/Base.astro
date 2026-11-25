@@ -7,6 +7,7 @@ const path = Astro.url.pathname;
 const nav = [
   { href: '/', label: 'Pokédex', match: (p: string) => p === '/' || p.startsWith('/pokemon/') },
   { href: '/moves/', label: 'Moves', match: (p: string) => p.startsWith('/moves/') },
+  { href: '/abilities/', label: 'Abilities', match: (p: string) => p.startsWith('/abilities/') },
   { href: '/items/', label: 'Items', match: (p: string) => p.startsWith('/items/') },
   { href: '/types/', label: 'Type chart', match: (p: string) => p.startsWith('/types/') },
   { href: '/search/', label: 'Moveset search', match: (p: string) => p.startsWith('/search/') },
@@ -28,9 +29,9 @@ const nav = [
   <body>
     <header class="site-header band">
       <div class="wrap bar">
-        <a href="/" class="brand"><img src="/icon-96.png" alt="" width="36" height="36" /> AR<span>dex</span></a>
+        <a href="/" class="brand"><img src="/icon-96.png" alt="" width="36" height="36" /> <span>AR<em>dex</em></span></a>
         <button class="menu-btn" aria-label="Open menu" aria-expanded="false">☰</button>
-        <form class="find" action="/" role="search"><input id="find" list="find-list" placeholder="Search Pokémon, moves, items…" autocomplete="off" aria-label="Search" /><datalist id="find-list"></datalist></form>
+        <form class="find" action="/" role="search"><input id="find" list="find-list" placeholder="Search Pokémon, moves, abilities…" autocomplete="off" aria-label="Search" /><datalist id="find-list"></datalist></form>
         <nav class="nav">
           {nav.map((n) => <a href={n.href} class:list={['link', { active: n.match(path) }]}>{n.label}</a>)}
           <a href="https://aeronregion.net" class="link home">aeronregion.net ↗</a>
@@ -59,7 +60,7 @@ const nav = [
         return names;
       };
       find.addEventListener('focus', loadNames, { once: true });
-      const go = async () => { const v = find.value.trim().toLowerCase(); if (!v) return; const list = await loadNames(); const hit = list.find(([n]) => n.toLowerCase() === v) ?? list.find(([n]) => n.toLowerCase().startsWith(v.replace(/ \((pokémon|move|item)\)$/, ''))); if (hit) location.href = hit[1]; };
+      const go = async () => { const v = find.value.trim().toLowerCase(); if (!v) return; const list = await loadNames(); const hit = list.find(([n]) => n.toLowerCase() === v) ?? list.find(([n]) => n.toLowerCase().startsWith(v.replace(/ \((pokémon|move|item|ability)\)$/, ''))); if (hit) location.href = hit[1]; };
       find.addEventListener('change', go);
       find.form!.addEventListener('submit', (e) => { e.preventDefault(); go(); });
       // Any <table class="data sortable">: click a header with data-sort to sort by it.
@@ -89,7 +90,7 @@ const nav = [
   .site-header { position: sticky; top: 0; z-index: 50; border-bottom: 4px solid var(--brick-deep); }
   .bar { display: flex; align-items: center; justify-content: space-between; height: 60px; }
   .brand { display: flex; align-items: center; gap: .5rem; font-weight: 800; font-size: 1.3rem; text-decoration: none; color: var(--on-brick); }
-  .brand span { color: var(--blossom); }
+  .brand em { font-style: normal; color: var(--blossom); }
   .brand img { image-rendering: pixelated; }
   .nav { display: flex; align-items: center; gap: 1.3rem; }
   .find { flex: 1; max-width: 320px; margin: 0 1.4rem; }

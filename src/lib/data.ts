@@ -1,11 +1,13 @@
 import speciesData from '../data/species.json';
 import movesData from '../data/moves.json';
 import itemsData from '../data/items.json';
+import abilitiesData from '../data/abilities.json';
 import meta from '../data/meta.json';
 
 export const species = speciesData as any[];
 export const moves = movesData as any[];
 export const items = itemsData as any[];
+export const abilities = abilitiesData as any[];
 export { meta };
 
 export const slug = (name: string) =>
@@ -34,6 +36,8 @@ export const formLabel = (s: any) => {
   return `${s.baseSpecies} (${s.forme.replace(/-/g, ' ')})`;
 };
 export const moveUrl = (m: { name: string }) => `/moves/${slug(m.name)}/`;
+export const abilityUrl = (name: string) => `/abilities/${slug(name)}/`;
+export const abilityByName = new Map(abilities.map((a) => [a.name, a]));
 export const itemUrl = (i: { name: string }) => `/items/${slug(i.name)}/`;
 
 const SPR = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites';

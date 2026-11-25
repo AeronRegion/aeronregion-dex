@@ -197,8 +197,13 @@ const items = Dex.items.all().filter((i) => i.exists && !['CAP', 'Custom', 'LGPE
   };
 }).sort((a, b) => a.name.localeCompare(b.name));
 
+// ── Abilities ────────────────────────────────────────────────────────────
+const abilities = Dex.abilities.all().filter((a) => a.exists && a.num > 0 && !['CAP', 'Custom'].includes(a.isNonstandard)).map((a) => ({
+  id: a.id, name: a.name, gen: a.gen, desc: a.desc || a.shortDesc, short: a.shortDesc || a.desc,
+  holders: out.filter((s) => Object.values(s.abilities).includes(a.name)).map((s) => [s.id, s.abilities.H === a.name ? 'H' : 'N']),
+})).sort((a, b) => a.name.localeCompare(b.name));
 const write = (n, d) => fs.writeFileSync(`${OUT}/${n}.json`, JSON.stringify(d));
-write('species', out); write('moves', moves); write('items', items); write('learn', learn); write('learnedBy', learnedBy);
+write('species', out); write('abilities', abilities); write('moves', moves); write('items', items); write('learn', learn); write('learnedBy', learnedBy);
 // names for the header search box
 const sl = (n) => n.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/♀/g, '-f').replace(/♂/g, '-m').replace(/['’.:%]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const moveNames = new Set(moves.map((m) => m.name)), monNames = new Set(out.map((s) => s.name));
@@ -209,6 +214,7 @@ fs.mkdirSync('public', { recursive: true });
 fs.writeFileSync('public/names.json', JSON.stringify([
   ...out.map((s) => [s.name, urlOf(s)]),
   ...moves.map((m) => [monNames.has(m.name) ? `${m.name} (move)` : m.name, `/moves/${sl(m.name)}/`]),
+  ...abilities.map((a) => [monNames.has(a.name) || moveNames.has(a.name) ? `${a.name} (ability)` : a.name, `/abilities/${sl(a.name)}/`]),
   ...items.map((i) => [monNames.has(i.name) || moveNames.has(i.name) ? `${i.name} (item)` : i.name, `/items/${sl(i.name)}/`]),
 ]));
 // compact index for the moveset search page: species list + move → [speciesIndex, genMask, …]

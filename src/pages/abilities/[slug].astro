@@ -1,0 +1,29 @@
+---
+import Base from '../../layouts/Base.astro';
+import Type from '../../components/Type.astro';
+import { abilities, speciesById, slug, pokeUrl, iconUrl, formLabel } from '../../lib/data';
+export function getStaticPaths() {
+  return abilities.map((a) => ({ params: { slug: slug(a.name) }, props: { a } }));
+}
+const { a } = Astro.props as { a: any };
+const list = a.holders.map(([id, kind]: [string, string]) => ({ s: speciesById.get(id), hidden: kind === 'H' })).filter((x: any) => x.s);
+const normal = list.filter((x: any) => !x.hidden), hidden = list.filter((x: any) => x.hidden);
+---
+<Base title={a.name} description={a.short}>
+  <h1>{a.name}</h1>
+  <h3 class="sec">Effect</h3>
+  <p style="max-width:75ch">{a.desc}</p>
+  <p class="note">Introduced in Generation {a.gen}.</p>
+  {[['Pokémon with ' + a.name, normal], ['As a hidden ability', hidden]].map(([title, group]: any) => group.length > 0 && <>
+    <h3 class="sec">{title} <span class="soft" style="font-weight:500">· {group.length}</span></h3>
+    <div class="cards">
+      {group.map(({ s }: any) => (
+        <a class="card" href={pokeUrl(s)}>
+          <img src={iconUrl(s.art)} alt="" loading="lazy" width="52" height="52" />
+          <div><b>{formLabel(s)}</b><small>#{String(s.num).padStart(4, '0')}</small><div class="chips">{s.types.map((t: string) => <Type type={t} small link={false} />)}</div></div>
+        </a>
+      ))}
+    </div>
+  </>)}
+  {list.length === 0 && <p class="soft">No Pokémon have this ability naturally.</p>}
+</Base>
