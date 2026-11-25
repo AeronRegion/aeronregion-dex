@@ -28,7 +28,7 @@ export const CHART: Record<string, Record<string, number>> = {
 };
 export const eff = (atk: string, defs: string[]) => defs.reduce((m, d) => m * (CHART[atk][d] ?? 1), 1);
 export const effLabel: Record<string, string> = { '4': '4', '2': '2', '1': '', '0.5': '½', '0.25': '¼', '0': '0' };
-export const effColor: Record<string, string> = { '4': '#1f8f3a', '2': '#4caf50', '0.5': '#d9534f', '0.25': '#a3262a', '0': '#2b2b2b' };
+export const effColor: Record<string, string> = { '4': '#73d216', '2': '#4e9a06', '0.5': '#a40000', '0.25': '#7c0000', '0': '#2e3436' };
 
 // Abilities that change how much damage a Pokémon takes from a type (defending side).
 // Numbers multiply the normal type chart; 'se' applies only to super-effective hits.
@@ -56,4 +56,8 @@ export const effWith = (atk: string, defs: string[], ability?: string) => {
 };
 const FRAC: Record<string, string> = { '0': '0', '0.125': '⅛', '0.25': '¼', '0.5': '½', '0.625': '⅝', '1': '', '1.25': '1¼', '1.5': '1½', '2': '2', '2.5': '2½', '3': '3', '4': '4' };
 export const effText = (m: number) => FRAC[String(m)] ?? String(+m.toFixed(2));
-export const effBg = (m: number) => m === 1 ? '' : m === 0 ? '#2b2b2b' : m >= 4 ? '#1f8f3a' : m > 1 ? '#4caf50' : m <= 0.25 ? '#a3262a' : '#d9534f';
+export const effBg = (m: number) => m === 1 ? '' : m === 0 ? '#2e3436' : m >= 4 ? '#73d216' : m > 1 ? '#4e9a06' : m <= 0.25 ? '#7c0000' : '#a40000';
+// Text on effectiveness cells (PokemonDB style): yellow on red/green, white on black
+export const effFg = (m: number) => m === 0 ? '#fff' : '#ffdd57';
+// PokemonDB's type colors, used in the type defenses grid and type chart
+export const dbTypeColors: Record<string, string> = { Normal: '#aaaa99', Fire: '#ff4422', Water: '#3399ff', Electric: '#ffcc33', Grass: '#77cc55', Ice: '#66ccff', Fighting: '#bb5544', Poison: '#aa5599', Ground: '#ddbb55', Flying: '#8899ff', Psychic: '#ff5599', Bug: '#aabb22', Rock: '#bbaa66', Ghost: '#6666bb', Dragon: '#7766ee', Dark: '#775544', Steel: '#aaaabb', Fairy: '#ee99ee' };

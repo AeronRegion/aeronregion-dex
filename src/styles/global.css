@@ -77,12 +77,11 @@ p { margin: 0 0 1em; }
 /* ── Dex ─────────────────────────────────────────────── */
 .wrap { width: min(100% - 2.5rem, 1180px); }
 h1 { font-size: clamp(2rem, 4.5vw, 2.9rem); }
-.sec { font-family: var(--font-ui); font-weight: 700; font-size: 1.15rem; border-bottom: 3px solid var(--ink); padding-bottom: .3rem; margin: 2rem 0 .75rem; }
+.sec { font-family: var(--font-ui); font-weight: 800; font-size: 1.25rem; margin: 2rem 0 .6rem; }
 table { border-collapse: collapse; width: 100%; }
 .kv th { text-align: left; font-weight: 500; color: var(--ink-soft); padding: .35rem .8rem .35rem 0; width: 42%; vertical-align: top; font-size: .95rem; }
 .kv td { padding: .35rem 0; }
-.kv tr { border-bottom: 1px solid #e2c3bf; }
-.kv.top tr:first-child { border-top: 2px solid var(--ink); }
+.kv th, .kv td { padding-top: .28rem; padding-bottom: .28rem; }
 .data { font-size: .95rem; }
 .data th { text-align: left; font-weight: 600; font-size: .82rem; color: var(--ink-soft); padding: .45rem .55rem; border-bottom: 2px solid var(--ink); white-space: nowrap; user-select: none; }
 .data th[data-sort] { cursor: pointer; }

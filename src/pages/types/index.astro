@@ -1,6 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { TYPES, CHART, typeColors, effLabel, effColor } from '../../lib/types';
+import { TYPES, CHART, dbTypeColors as typeColors, effLabel, effColor } from '../../lib/types';
 ---
 <Base title="Type chart" description="Pokémon type effectiveness chart.">
   <h1>Type chart</h1>
@@ -10,7 +10,7 @@ import { TYPES, CHART, typeColors, effLabel, effColor } from '../../lib/types';
       <tr><th class="corner">ATK ↓<br />DEF →</th>{TYPES.map((t) => <th id={t.toLowerCase()}><a href={`/types/${t.toLowerCase()}/`} style={`background:${typeColors[t]}`} title={t}>{t.slice(0, 3).toUpperCase()}</a></th>)}</tr>
       {TYPES.map((a) => (
         <tr><th><a href={`/types/${a.toLowerCase()}/`} style={`background:${typeColors[a]}`} title={a}>{a.slice(0, 3).toUpperCase()}</a></th>
-          {TYPES.map((d) => { const m = String(CHART[a][d] ?? 1); return <td title={`${a} → ${d}: ${m}×`} style={effColor[m] ? `background:${effColor[m]};color:#fff` : ''}>{effLabel[m]}</td>; })}
+          {TYPES.map((d) => { const m = String(CHART[a][d] ?? 1); return <td title={`${a} → ${d}: ${m}×`} style={effColor[m] ? `background:${effColor[m]};color:${m === '0' ? '#fff' : '#ffdd57'}` : ''}>{effLabel[m]}</td>; })}
         </tr>
       ))}
     </table>

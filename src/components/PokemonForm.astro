@@ -2,7 +2,7 @@
 import Type from './Type.astro';
 import Cat from './Cat.astro';
 import { abilityUrl, abilityByName, moveById, pokeUrl, moveUrl, artUrl, STATS, statRange, GAMES, meta, formSlug, formLabel } from '../lib/data';
-import { TYPES, typeColors, effWith, effText, effBg, ABILITY_DEF } from '../lib/types';
+import { TYPES, typeColors, effWith, effText, effBg, effFg, dbTypeColors, ABILITY_DEF } from '../lib/types';
 const LIGHT = new Set(['Normal', 'Electric', 'Grass', 'Ice', 'Ground', 'Flying', 'Bug', 'Rock', 'Steel', 'Fairy']);
 import learnData from '../data/learn.json';
 
@@ -81,7 +81,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
         {variants.map((v, i) => (
           <div class="dt" data-v={i} hidden={i > 0}>
             {TYPES.map((t, j) => { const m = v.cells[j]; const bg = effBg(m); return (
-              <div class="tc"><a href={`/types/${t.toLowerCase()}/`} style={`background:${typeColors[t]};color:${LIGHT.has(t) ? '#2e1a20' : '#fff'}`}>{t.slice(0, 3).toUpperCase()}</a><b class:list={{ chg: m !== plain[j] }} title={m !== plain[j] ? `Changed by ${v.names.join(' / ')} (normally ${effText(plain[j]) || '1'}×)` : undefined} style={bg ? `background:${bg};color:#fff` : ''}>{effText(m)}</b></div>
+              <div class="tc"><a href={`/types/${t.toLowerCase()}/`} style={`background:${dbTypeColors[t]}`}>{t.slice(0, 3).toUpperCase()}</a><b class:list={{ chg: m !== plain[j] }} title={m !== plain[j] ? `Changed by ${v.names.join(' / ')} (normally ${effText(plain[j]) || '1'}×)` : undefined} style={bg ? `background:${bg};color:${effFg(m)}` : ''}>{effText(m)}</b></div>
             ); })}
           </div>
         ))}
@@ -96,12 +96,12 @@ const spawns = s.cobbleverse?.spawns ?? [];
       <h3 class="sec">Evolution</h3>
       <div class="evos">
         {s.evo.map((stage: any[], i: number) => <>
-          {i > 0 && <span class="arr">▶</span>}
-          <div class="stage">{stage.map((e) => (
+          {i > 0 && <span class="arr">{stage.length === 1 && stage[0].how && <em>{stage[0].how}</em>}<span>→</span></span>}
+          <div class:list={["stage", { many: stage.length > 2 }]}>{stage.map((e) => (
             <a class:list={['evo', { cur: e.id === s.id }]} href={pokeUrl(e)}>
               <img src={artUrl(e.art)} alt="" width="84" height="84" loading="lazy" />
-              {e.how && <em>{e.how}</em>}
               <span class="soft">#{String(e.num).padStart(4, '0')}</span><b>{e.name}</b>
+              {stage.length > 1 && e.how && <em>{e.how}</em>}
             </a>
           ))}</div>
         </>)}
@@ -116,11 +116,18 @@ const spawns = s.cobbleverse?.spawns ?? [];
           : spawns.length === 0 ? <span class="soft">Doesn't spawn naturally. Evolve, breed, or check special encounters.</span>
           : spawns.map((sp: any) => (
             <div class="spawn">
-              <span>Rarity</span><div>{sp.bucket}{sp.weight != null && <span class="soft"> · weight {sp.weight}</span>}</div><span>Biomes</span><div>{sp.biomes}</div>
-              <span>Levels</span><div>{sp.levels}</div><span>Time</span><div>{sp.time ?? 'Any'}</div>
-              <span>Weather</span><div>{sp.weather ?? 'Any'}</div><span>Context</span><div>{sp.context}</div>
-              {sp.sky && <><span>Sky light</span><div>{sp.sky}</div></>}
-              {sp.conditions && <><span>Conditions</span><div>{sp.conditions}</div></>}
+              <dl>
+                <dt>Rarity</dt><dd>{sp.bucket}{sp.weight != null && <span class="soft"> · weight {sp.weight}</span>}</dd>
+                <dt>Levels</dt><dd>{sp.levels}</dd>
+                <dt>Weather</dt><dd>{sp.weather ?? 'Any'}</dd>
+                {sp.sky && <><dt>Sky light</dt><dd>{sp.sky}</dd></>}
+              </dl>
+              <dl>
+                <dt>Biomes</dt><dd>{sp.biomes}</dd>
+                <dt>Time</dt><dd>{sp.time ?? 'Any'}</dd>
+                <dt>Context</dt><dd>{sp.context}</dd>
+                {sp.conditions && <><dt>Conditions</dt><dd>{sp.conditions}</dd></>}
+              </dl>
             </div>))}
       </td></tr>
       {s.locations.map((l: any) => <tr><th>{l.game}</th><td>{l.places.join(', ')}</td></tr>)}
@@ -281,31 +288,34 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .tot { border-top: 2px solid var(--ink); margin-top: .3rem; }
   .dt { display: grid; grid-template-columns: repeat(9, 38px); gap: 10px 2px; }
   .tc { display: flex; flex-direction: column; text-align: center; font-weight: 700; font-size: .7rem; }
-  .tc a { height: 24px; line-height: 24px; text-decoration: none; border: 1px solid rgb(0 0 0 / .25); }
+  .tc a { height: 24px; line-height: 24px; text-decoration: none; color: #fff; text-shadow: 1px 1px 1px rgb(0 0 0 / .6); border: 1px solid rgb(0 0 0 / .2); border-radius: 3px 3px 0 0; }
   .abilrow { display: flex; align-items: center; gap: .6rem; margin-bottom: .6rem; flex-wrap: wrap; }
   .abilrow .lab { font-weight: 600; font-size: .85rem; color: var(--ink-soft); }
   .tc b.chg { outline: 2px solid var(--ink); outline-offset: -2px; }
-  .tc b { height: 26px; line-height: 26px; font-size: .78rem; background: #fff7f5; border: 1px solid #e2c3bf; border-top: 0; }
+  .tc b { height: 26px; line-height: 26px; font-size: .8rem; background: #fff7f5; border: 1px solid #e2c3bf; border-top: 0; }
   .evos { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
   .stage { display: flex; flex-direction: column; gap: .6rem; }
+  .stage.many { display: grid; grid-template-columns: repeat(4, minmax(110px, 1fr)); gap: .4rem .6rem; }
   .evo { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--ink); padding: .3rem .6rem; border: 2px solid transparent; }
   .evo.cur b { text-decoration: underline; text-decoration-thickness: 3px; text-decoration-color: #59c4fb; text-underline-offset: 4px; }
   .evo img { width: 84px; height: 84px; object-fit: contain; }
   .evo em { font-style: normal; font-size: .75rem; background: var(--petal-deep); padding: 0 .4rem; }
   .evo b { font-weight: 700; }
-  .arr { color: var(--ink-soft); }
+  .arr { display: flex; flex-direction: column; align-items: center; gap: .1rem; color: var(--ink-soft); font-size: 1.4rem; line-height: 1; margin-top: -2.2rem; max-width: 9rem; text-align: center; }
+  .arr em { font-style: normal; font-size: .75rem; font-weight: 600; color: var(--ink); background: var(--petal-deep); padding: .05rem .45rem; line-height: 1.4; }
   .loc { font-size: .95rem; }
-  .loc th { text-align: left; font-weight: 700; padding: .5rem 1rem .5rem 0; width: 200px; vertical-align: top; border-bottom: 1px solid #e2c3bf; }
-  .loc td { padding: .5rem 0; border-bottom: 1px solid #e2c3bf; vertical-align: top; }
+  .loc th { text-align: left; font-weight: 700; padding: .4rem 1rem .4rem 0; width: 200px; vertical-align: top; }
+  .loc td { padding: .4rem 0; vertical-align: top; }
   .loc .cv th, .loc .cv td { background: #fff7f5; }
   .loc .cv th { border-left: 6px solid var(--teal); padding-left: .7rem; }
   .cvname { display: flex; align-items: center; gap: .45rem; }
   .cvname img { width: 28px; height: 28px; }
-  .spawn { display: grid; grid-template-columns: auto 1fr auto 1fr; gap: .1rem 1.2rem; font-size: .9rem; padding: .2rem .6rem .4rem 0; }
+  .spawn { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; font-size: .9rem; padding: .2rem .6rem .4rem 0; }
+  .spawn dl { display: grid; grid-template-columns: 80px 1fr; gap: .1rem .8rem; margin: 0; align-content: start; }
+  .spawn dt { color: var(--ink-soft); } .spawn dd { margin: 0; }
   .spawn + .spawn { border-top: 1px dashed #e2c3bf; padding-top: .4rem; }
-  .spawn span { color: var(--ink-soft); }
-  .dex th { text-align: left; font-weight: 700; padding: .45rem 1rem .45rem 0; width: 200px; vertical-align: top; border-bottom: 1px solid #e2c3bf; font-size: .92rem; }
-  .dex td { padding: .45rem 0; border-bottom: 1px solid #e2c3bf; }
+  .dex th { text-align: left; font-weight: 700; padding: .35rem 1rem .35rem 0; width: 200px; vertical-align: top; font-size: .92rem; }
+  .dex td { padding: .35rem 0; }
   :global(.data tr.group td) { background: var(--petal-deep) !important; font-weight: 700; padding-top: .6rem; }
   @media (max-width: 900px) {
     .hd { grid-template-columns: 1fr; height: auto; } .art { width: 160px; height: 160px; }
