@@ -155,6 +155,15 @@ const moves = Dex.moves.all().filter((m) => m.exists && !m.isZ && !m.isMax && ![
     pp: m.pp, maxpp: Math.floor(m.pp * 1.6), pri: m.priority, target: TARGET[m.target] ?? m.target, targetKey: m.target,
     contact: !!m.flags.contact, gen: m.gen, desc: m.desc || m.shortDesc, short: m.shortDesc,
     flags: Object.keys(m.flags), past: m.isNonstandard === 'Past',
+    hits: m.multihit ? (Array.isArray(m.multihit) ? m.multihit.join('–') : String(m.multihit)) : null,
+    tags: [
+      m.multihit && 'Multi-hit', m.priority > 0 && 'Priority', m.priority < 0 && 'Negative priority',
+      ['allAdjacentFoes', 'allAdjacent'].includes(m.target) && 'Spread', m.flags.contact && 'Contact',
+      m.flags.sound && 'Sound', m.flags.punch && 'Punch', m.flags.bite && 'Bite', m.flags.slicing && 'Slicing',
+      m.flags.pulse && 'Pulse', m.flags.bullet && 'Ball / bomb', m.flags.wind && 'Wind', m.flags.heal && 'Healing',
+      m.recoil && 'Recoil', m.drain && 'Draining', m.critRatio > 1 && 'High crit', m.selfSwitch && 'Pivot (switches out)',
+      (m.secondary?.chance || m.secondaries?.length) && 'Secondary effect', m.flags.charge && 'Two-turn',
+    ].filter(Boolean),
   })).sort((a, b) => a.name.localeCompare(b.name));
 const moveIds = new Set(moves.map((m) => m.id));
 
@@ -212,10 +221,10 @@ const firstOfNum = new Map(); for (const s of out) if (!firstOfNum.has(s.num) ||
 const urlOf = (s) => { const b = firstOfNum.get(s.num); return `/pokemon/${sl(b.name)}/${b.id !== s.id && s.forme ? '#' + sl(s.forme) : ''}`; };
 fs.mkdirSync('public', { recursive: true });
 fs.writeFileSync('public/names.json', JSON.stringify([
-  ...out.map((s) => [s.name, urlOf(s)]),
-  ...moves.map((m) => [monNames.has(m.name) ? `${m.name} (move)` : m.name, `/moves/${sl(m.name)}/`]),
-  ...abilities.map((a) => [monNames.has(a.name) || moveNames.has(a.name) ? `${a.name} (ability)` : a.name, `/abilities/${sl(a.name)}/`]),
-  ...items.map((i) => [monNames.has(i.name) || moveNames.has(i.name) ? `${i.name} (item)` : i.name, `/items/${sl(i.name)}/`]),
+  ...out.map((s) => [s.name, urlOf(s), 'Pokémon', s.types[0]]),
+  ...moves.map((m) => [m.name, `/moves/${sl(m.name)}/`, 'Move', m.type, m.cat]),
+  ...abilities.map((a) => [a.name, `/abilities/${sl(a.name)}/`, 'Ability']),
+  ...items.map((i) => [i.name, `/items/${sl(i.name)}/`, 'Item']),
 ]));
 // compact index for the moveset search page: species list + move → [speciesIndex, genMask, …]
 const idx = new Map(out.map((s, i) => [s.id, i]));

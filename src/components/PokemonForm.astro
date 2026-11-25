@@ -143,8 +143,8 @@ const spawns = s.cobbleverse?.spawns ?? [];
     <div class="controls">
       <span class="lab">Game</span>
       <div class="seg game">
-        {hasCobble && <button aria-pressed="true" data-g="C">Cobbleverse {meta.cobbleverse}</button>}
-        <button aria-pressed={hasCobble ? 'false' : 'true'} data-g="all">All games</button>
+        <button aria-pressed="true" data-g="all">All games</button>
+        {hasCobble && <button aria-pressed="false" data-g="C">Cobbleverse {meta.cobbleverse}</button>}
         {gens.map((g) => <button aria-pressed="false" data-g={g}>{GAMES[g]}</button>)}
       </div>
     </div>

@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { moves, GAMES, meta } from '../lib/data';
+import { GAMES, meta } from '../lib/data';
 ---
 <Base title="Moveset search" description="Find every Pokémon that can learn up to four moves together.">
   <h1>Moveset search</h1>
@@ -8,16 +8,15 @@ import { moves, GAMES, meta } from '../lib/data';
   <div class="controls">
     <span class="lab">Movepool</span>
     <div class="seg" id="game">
-      {meta.cobbleverse && <button aria-pressed="true" data-b="0">Cobbleverse {meta.cobbleverse}</button>}
-      <button aria-pressed={meta.cobbleverse ? 'false' : 'true'} data-b="all">All games</button>
+      <button aria-pressed="true" data-b="all">All games</button>
+      {meta.cobbleverse && <button aria-pressed="false" data-b="0">Cobbleverse {meta.cobbleverse}</button>}
       {[9, 8, 7].map((g) => <button aria-pressed="false" data-b={g}>{GAMES[g]}</button>)}
     </div>
   </div>
   <form id="f" class="slots">
-    {[0, 1, 2, 3].map((i) => <input class="field" list="movelist" placeholder="Add a move…" autocomplete="off" />)}
+    {[0, 1, 2, 3].map((i) => <div class="slot"><input class="field" placeholder="Add a move…" autocomplete="off" /></div>)}
     <button class="block" type="submit">Find Pokémon</button>
   </form>
-  <datalist id="movelist">{moves.map((m) => <option value={m.name} />)}</datalist>
   <h3 class="sec" id="title" hidden></h3>
   <div class="cards" id="out"></div>
 </Base>
@@ -30,7 +29,10 @@ import { moves, GAMES, meta } from '../lib/data';
   const TC: Record<string, string> = { Normal: '#a8a77a', Fire: '#ee8130', Water: '#6390f0', Electric: '#f7d02c', Grass: '#7ac74c', Ice: '#96d9d6', Fighting: '#c22e28', Poison: '#a33ea1', Ground: '#e2bf65', Flying: '#a98ff3', Psychic: '#f95587', Bug: '#a6b91a', Rock: '#b6a136', Ghost: '#735797', Dragon: '#6f35fc', Dark: '#705746', Steel: '#b7b7ce', Fairy: '#d685ad' };
   const light = new Set(['Normal', 'Electric', 'Grass', 'Ice', 'Ground', 'Flying', 'Bug', 'Rock', 'Steel', 'Fairy']);
   const chip = (t: string) => `<span style="display:inline-block;font-weight:700;font-size:.7rem;padding:0 .4rem;border:1px solid rgb(0 0 0/.3);background:${TC[t]};color:${light.has(t) ? '#2e1a20' : '#fff'}">${t}</span>`;
+  import { autocomplete } from '../lib/ac';
   const inputs = [...document.querySelectorAll<HTMLInputElement>('#f input')];
+  const moveItems = async () => { const d = await load(); return Object.values(d.moves).map(([label, type, cat]) => ({ label, type, cat })); };
+  inputs.forEach((inp, i) => autocomplete(inp, moveItems, () => { (inputs[i + 1] ?? inp).focus(); }));
   let bit = (document.querySelector('#game [aria-pressed="true"]') as HTMLElement).dataset.b!;
 
   const search = async () => {
@@ -66,6 +68,7 @@ import { moves, GAMES, meta } from '../lib/data';
   });
 </script>
 <style>
+  .slot { position: relative; } .slot .field { width: 100%; }
   .slots { display: grid; grid-template-columns: repeat(4, 1fr) auto; gap: .6rem; margin: .4rem 0 .5rem; }
   @media (max-width: 800px) { .slots { grid-template-columns: 1fr 1fr; } }
 </style>

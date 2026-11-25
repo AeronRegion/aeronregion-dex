@@ -115,3 +115,16 @@ table { border-collapse: collapse; width: 100%; }
 .card small { display: block; color: var(--ink-soft); font-size: .78rem; margin-bottom: .15rem; }
 .chips { display: flex; gap: .25rem; flex-wrap: wrap; }
 [hidden] { display: none !important; }
+
+/* Autocomplete list (src/lib/ac.ts) */
+.ac { position: absolute; z-index: 60; background: #fff7f5; border: 2px solid var(--ink); border-top: 0; max-height: 420px; overflow-y: auto; box-shadow: 4px 4px 0 rgb(46 26 32 / .25); text-align: left; }
+.ac-row { display: flex; align-items: center; gap: .5rem; padding: .4rem .7rem; cursor: pointer; color: var(--ink); font-size: .95rem; border-bottom: 1px solid #f0d8d4; }
+.ac-row.on, .ac-row:hover { background: var(--petal-deep); }
+.ac-l { font-weight: 600; flex: 1; }
+.ac-s { color: var(--ink-soft); font-size: .8rem; }
+.ac-t { font-weight: 700; font-size: .7rem; padding: 0 .4rem; border: 1px solid rgb(0 0 0 / .3); }
+.ac-c { font-weight: 700; font-size: .65rem; color: #fff; padding: .05rem .35rem; }
+select.field { appearance: none; -webkit-appearance: none; padding-right: 2.2rem; cursor: pointer; font-weight: 600;
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink) 50%), linear-gradient(135deg, var(--ink) 50%, transparent 50%);
+  background-position: calc(100% - 16px) 55%, calc(100% - 11px) 55%; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }
+select.field option { background: #fff7f5; color: var(--ink); }

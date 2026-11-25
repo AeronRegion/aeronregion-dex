@@ -15,10 +15,10 @@ const tools = [
   <section class="hero">
     <img src="/icon-96.png" alt="" width="88" height="88" />
     <div>
-      <h1><span class="ar">AR</span>dex</h1>
+      <h1 class="logo"><span class="ar">AR</span><span class="dx">dex</span></h1>
       <p class="lede">The Pokédex for Aeron Region. Every Pokémon, move, ability and item, with spawn locations and movepools taken from Cobbleverse {meta.cobbleverse} itself, so what you read here is what you'll find on the server.</p>
       <form class="big" role="search" id="homefind">
-        <input class="field" list="find-list" placeholder="Search a Pokémon, move, ability or item…" autocomplete="off" aria-label="Search" />
+        <input class="field" data-find placeholder="Search a Pokémon, move, ability or item…" autocomplete="off" aria-label="Search" />
         <button class="block" type="submit">Search</button>
       </form>
     </div>
@@ -43,23 +43,15 @@ const tools = [
   </table>
   <p class="note">Last updated {meta.built}. Spotted something wrong? Let us know in the <a href="https://discord.gg/zC4YKx5sDx">Aeron Region Discord</a>.</p>
 </Base>
-<script>
-  // The big search reuses the header search's list and jump logic.
-  const form = document.getElementById('homefind') as HTMLFormElement;
-  const header = document.getElementById('find') as HTMLInputElement;
-  const input = form.querySelector('input')!;
-  input.addEventListener('focus', () => header.dispatchEvent(new Event('focus')), { once: true });
-  const go = () => { header.value = input.value; header.dispatchEvent(new Event('change')); };
-  input.addEventListener('change', go);
-  form.addEventListener('submit', (e) => { e.preventDefault(); go(); });
-</script>
+
 <style>
   .hero { display: grid; grid-template-columns: 88px 1fr; gap: 1.6rem; align-items: start; padding: 1.4rem 0 .6rem; }
   .hero img { image-rendering: pixelated; margin-top: .4rem; }
   h1 { font-size: clamp(2.6rem, 6vw, 3.6rem); margin: 0 0 .4rem; }
-  .ar { color: #2a9bd8; }
+  .logo { -webkit-text-stroke: 7px #0d428c; paint-order: stroke fill; letter-spacing: .02em; }
+  .ar { color: #59c4fb; } .dx { color: #f6e7e2; }
   .lede { font-size: 1.15rem; max-width: 62ch; margin: 0 0 1.2rem; }
-  .big { display: flex; gap: .6rem; max-width: 640px; }
+  .big { display: flex; gap: .6rem; max-width: 640px; position: relative; }
   .big .field { flex: 1; font-size: 1.05rem; padding: .7rem .9rem; }
   .why { max-width: 72ch; }
   .tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; }

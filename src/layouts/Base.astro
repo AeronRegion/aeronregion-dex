@@ -31,7 +31,7 @@ const nav = [
       <div class="wrap bar">
         <a href="/" class="brand"><img src="/icon-96.png" alt="" width="36" height="36" /> <span><i>AR</i><em>dex</em></span></a>
         <button class="menu-btn" aria-label="Open menu" aria-expanded="false">☰</button>
-        <form class="find" action="/pokedex/" role="search"><input id="find" list="find-list" placeholder="Search Pokémon, moves, abilities…" autocomplete="off" aria-label="Search" /><datalist id="find-list"></datalist></form>
+        <form class="find" action="/pokedex/" role="search"><input id="find" placeholder="Search Pokémon, moves, abilities…" autocomplete="off" aria-label="Search" /></form>
         <nav class="nav">
           {nav.map((n) => <a href={n.href} class:list={['link', { active: n.match(path) }]}>{n.label}</a>)}
           <a href="https://aeronregion.net" class="link home">aeronregion.net ↗</a>
@@ -50,19 +50,21 @@ const nav = [
         const open = document.querySelector('.nav')?.classList.toggle('open');
         (e.currentTarget as HTMLElement).setAttribute('aria-expanded', String(!!open));
       });
-      // Header search: loads the name list on first focus, jumps to the page on pick/enter.
-      const find = document.getElementById('find') as HTMLInputElement;
-      let names: [string, string][] | null = null;
-      const loadNames = async () => {
-        if (names) return names;
-        names = await (await fetch('/names.json')).json();
-        document.getElementById('find-list')!.innerHTML = names!.map(([n]) => `<option value="${n}">`).join('');
-        return names;
-      };
-      find.addEventListener('focus', loadNames, { once: true });
-      const go = async () => { const v = find.value.trim().toLowerCase(); if (!v) return; const list = await loadNames(); const hit = list.find(([n]) => n.toLowerCase() === v) ?? list.find(([n]) => n.toLowerCase().startsWith(v.replace(/ \((pokémon|move|item|ability)\)$/, ''))); if (hit) location.href = hit[1]; };
-      find.addEventListener('change', go);
-      find.form!.addEventListener('submit', (e) => { e.preventDefault(); go(); });
+      // Header search (and any input with data-find): themed suggestions, jump to the page on pick/enter.
+      import { autocomplete } from '../lib/ac';
+      let names: Promise<[string, string, string, string?, string?][]> | null = null;
+      const loadNames = () => (names ??= fetch('/names.json').then((r) => r.json()));
+      const items = async () => (await loadNames()).map(([label, value, sub, type, cat]) => ({ label, value, sub, type, cat }));
+      for (const input of document.querySelectorAll<HTMLInputElement>('#find, [data-find]')) {
+        autocomplete(input, items, (it) => { location.href = it.value!; }, 14);
+        input.form?.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const v = input.value.trim().toLowerCase(); if (!v) return;
+          const list = await loadNames();
+          const hit = list.find(([n]) => n.toLowerCase() === v) ?? list.find(([n]) => n.toLowerCase().startsWith(v)) ?? list.find(([n]) => n.toLowerCase().includes(v));
+          if (hit) location.href = hit[1];
+        });
+      }
       // Any <table class="data sortable">: click a header with data-sort to sort by it.
       // Cells can carry data-v for the sort value; numbers sort high→low first.
       document.querySelectorAll<HTMLTableElement>('table.sortable').forEach((table) => {
@@ -90,11 +92,12 @@ const nav = [
   .site-header { position: sticky; top: 0; z-index: 50; border-bottom: 4px solid var(--brick-deep); }
   .bar { display: flex; align-items: center; justify-content: space-between; height: 60px; }
   .brand { display: flex; align-items: center; gap: .5rem; font-weight: 800; font-size: 1.3rem; text-decoration: none; color: var(--on-brick); }
+  .brand > span { -webkit-text-stroke: 4px #0d428c; paint-order: stroke fill; letter-spacing: .02em; }
   .brand i { font-style: normal; color: #59c4fb; }
   .brand em { font-style: normal; color: var(--on-brick); }
   .brand img { image-rendering: pixelated; }
   .nav { display: flex; align-items: center; gap: 1.3rem; }
-  .find { flex: 1; max-width: 320px; margin: 0 1.4rem; }
+  .find { flex: 1; max-width: 320px; margin: 0 1.4rem; position: relative; }
   .find input { width: 100%; font: inherit; font-size: .92rem; padding: .35rem .7rem; border: 2px solid var(--brick-deep); background: #fff7f5; color: var(--ink); }
   .link { font-weight: 600; color: var(--on-brick-soft); text-decoration: none; padding: .2rem 0; border-bottom: 3px solid transparent; }
   .link:hover { color: var(--on-brick); }

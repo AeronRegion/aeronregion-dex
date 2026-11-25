@@ -34,7 +34,9 @@ const hasC = learners.some((l) => l.mask & 1);
         <tr><th>PP</th><td>{m.pp} (max. {m.maxpp})</td></tr>
         <tr><th>Priority</th><td class={m.pri > 0 ? 'pri pos' : m.pri < 0 ? 'pri neg' : ''} style="text-align:left!important">{m.pri > 0 ? `+${m.pri}` : m.pri}</td></tr>
         <tr><th>Makes contact?</th><td>{m.contact ? 'Yes' : 'No'}</td></tr>
+        {m.hits && <tr><th>Hits</th><td>{m.hits} times</td></tr>}
         <tr><th>Introduced</th><td>Generation {m.gen}</td></tr>
+        {m.tags.length > 0 && <tr><th>Tags</th><td>{m.tags.map((t: string, i: number) => <>{i > 0 && ', '}<a href={`/moves/?tag=${encodeURIComponent(t)}`}>{t}</a></>)}</td></tr>}
       </table>
     </div>
     <div>
@@ -54,8 +56,8 @@ const hasC = learners.some((l) => l.mask & 1);
   {learners.length === 0 ? <p class="soft">No Pokémon learn this move.</p> : <>
     <div class="controls" style="margin-top:0">
       <div class="seg" id="game">
-        {hasC && <button aria-pressed="true" data-b="0">Cobbleverse {meta.cobbleverse}</button>}
-        <button aria-pressed={hasC ? 'false' : 'true'} data-b="all">All games</button>
+        <button aria-pressed="true" data-b="all">All games</button>
+        {hasC && <button aria-pressed="false" data-b="0">Cobbleverse {meta.cobbleverse}</button>}
         {gens.map((g) => <button aria-pressed="false" data-b={g}>{GAMES[g]}</button>)}
       </div>
       <input class="field" id="lf" placeholder="Filter by name or type…" style="margin-left:auto;min-width:220px" />
