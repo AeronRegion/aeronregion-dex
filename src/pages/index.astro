@@ -1,68 +1,109 @@
 ---
 import Base from '../layouts/Base.astro';
 import { species, moves, abilities, items, meta, groups } from '../lib/data';
-const spawning = species.filter((s) => s.cobbleverse?.spawns?.length).length;
+import { TYPES, typeColors } from '../lib/types';
+const spawning = groups.filter((g) => g.some((s) => s.cobbleverse?.spawns?.length)).length;
+const ITEM = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/';
+const main = [
+  { href: '/pokedex/', name: 'Pokédex', icon: 'poke-ball', text: `All ${groups.length} Pokémon with forms and Megas: stats, EV yields, matchups and where each one spawns.` },
+  { href: '/moves/', name: 'Moves', icon: 'tm-normal', text: `${moves.length} moves. Sort by category, power or priority, or filter for multi-hit, spread, sound and more.` },
+  { href: '/abilities/', name: 'Abilities', icon: 'ability-capsule', text: `${abilities.length} abilities, what they do in battle, and which Pokémon have them.` },
+  { href: '/items/', name: 'Items', icon: 'leftovers', text: `${items.length} held items, berries and Mega Stones.` },
+];
 const tools = [
-  { href: '/pokedex/', name: 'Pokédex', text: `All ${groups.length} Pokémon with their forms and Megas. Stats, EV yields, matchups with abilities applied, and where each one spawns.` },
-  { href: '/search/', name: 'Moveset search', text: 'Pick up to four moves and see every Pokémon that can learn all of them. Good for finding niche picks.' },
-  { href: '/moves/', name: 'Moves', text: `All ${moves.length} moves, sortable by category, power, accuracy and priority, with who can learn each one.` },
-  { href: '/abilities/', name: 'Abilities', text: `All ${abilities.length} abilities, what they do in battle, and which Pokémon have them.` },
-  { href: '/items/', name: 'Items', text: `Held items, berries and Mega Stones: ${items.length} in total.` },
-  { href: '/types/', name: 'Type chart', text: 'The full chart, plus a page for each type with every Pokémon and move of that type.' },
-  { href: '/natures/', name: 'Natures', text: 'Which stat each nature raises and lowers, in one chart.' },
-  { href: '/regions/', name: 'Pokémon by generation', text: 'Every Pokémon grouped by the generation and region it came from.' },
+  { href: '/search/', name: 'Moveset search', icon: 'poke-radar', text: 'Find every Pokémon that learns up to four moves together.' },
+  { href: '/types/', name: 'Type chart', icon: null, text: 'The full chart, plus a page for every type.' },
+  { href: '/natures/', name: 'Natures', icon: 'adamant-mint', text: 'Which stat each nature raises and lowers.' },
+  { href: '/regions/', name: 'Pokémon by generation', icon: 'town-map', text: 'Every Pokémon grouped by the region it came from.' },
 ];
 ---
 <Base description="ARdex: the Aeron Region Pokédex, with Cobbleverse spawns and movepools.">
-  <section class="hero">
-    <img src="/icon-96.png" alt="" width="88" height="88" />
-    <div>
-      <h1 class="logo"><span class="ar">AR</span><span class="dx">dex</span></h1>
-      <p class="lede">The Pokédex for Aeron Region. Every Pokémon, move, ability and item, with spawn locations and movepools taken from Cobbleverse {meta.cobbleverse} itself, so what you read here is what you'll find on the server.</p>
-      <form class="big" role="search" id="homefind">
-        <input class="field" data-find placeholder="Search a Pokémon, move, ability or item…" autocomplete="off" aria-label="Search" />
-        <button class="block" type="submit">Search</button>
-      </form>
+  <section class="hero band">
+    <div class="hero-in">
+      <img class="mascot" src="/icon-96.png" alt="" width="104" height="104" />
+      <div class="hero-text">
+        <h1 class="logo"><span class="ar">AR</span><span class="dx">dex</span></h1>
+        <p class="lede">The Pokédex for Aeron Region. Spawns and movepools come straight from Cobbleverse {meta.cobbleverse}, so what you read here is what you'll find on the server.</p>
+        <form class="big" role="search">
+          <input class="field" data-find placeholder="Search a Pokémon, move, ability or item…" autocomplete="off" aria-label="Search" />
+          <button class="block" type="submit">Search</button>
+        </form>
+        <p class="stats">{groups.length} Pokémon · {spawning} with Cobbleverse spawns · {moves.length} moves · {abilities.length} abilities · {items.length} items</p>
+      </div>
     </div>
   </section>
 
-  <h3 class="sec">What it's for</h3>
-  <div class="why">
-    <p>ARdex is built for team building and hunting. Check a Pokémon's EV yield before you go training, see exactly which biome and time of day it spawns in, and find which Pokémon can learn the moves you want, using the same movepools Cobbleverse uses.</p>
-    <p>It's a neutral reference tool. Nothing here is for sale, and it works the same whether or not you play on Aeron Region.</p>
+  <h2 class="h">Browse</h2>
+  <div class="main">
+    {main.map((t) => (
+      <a href={t.href} class="tile">
+        <img src={ITEM + t.icon + '.png'} alt="" width="48" height="48" />
+        <div><b>{t.name}</b><span>{t.text}</span></div>
+      </a>
+    ))}
   </div>
 
-  <h3 class="sec">Tools</h3>
+  <h2 class="h">Tools and mechanics</h2>
   <div class="tools">
-    {tools.map((t) => <a href={t.href} class="tool"><b>{t.name}</b><span>{t.text}</span></a>)}
+    {tools.map((t) => (
+      <a href={t.href} class="tool">
+        {t.icon ? <img src={ITEM + t.icon + '.png'} alt="" width="40" height="40" />
+          : <span class="mini">{TYPES.slice(0, 9).map((x) => <i style={`background:${typeColors[x]}`}></i>)}</span>}
+        <div><b>{t.name}</b><span>{t.text}</span></div>
+      </a>
+    ))}
   </div>
 
-  <h3 class="sec">Where the data comes from</h3>
-  <table class="kv src">
-    <tr><th>Cobbleverse {meta.cobbleverse}</th><td>Spawns ({spawning} Pokémon), drops and movepools, read from the Cobblemon, Mega Showdown and Cobbleverse datapack files.</td></tr>
-    <tr><th>Pokémon Showdown</th><td>Stats, types, abilities, move and item effects, and learnsets for every main game.</td></tr>
-    <tr><th>PokéAPI</th><td>EV yields, catch rates, growth rates, egg cycles, Pokédex entries and main-game locations.</td></tr>
-  </table>
-  <p class="note">Last updated {meta.built}. Spotted something wrong? Let us know in the <a href="https://discord.gg/zC4YKx5sDx">Aeron Region Discord</a>.</p>
+  <div class="about">
+    <div>
+      <h2 class="h">What it's for</h2>
+      <p>ARdex is built for team building and hunting. Check a Pokémon's EV yield before training, see which biome and time it spawns in, and find who can learn the moves you want, using the same movepools Cobbleverse uses.</p>
+      <p>It's a neutral reference tool. Nothing here is for sale, and it works the same whether or not you play on Aeron Region.</p>
+    </div>
+    <div>
+      <h2 class="h">Where the data comes from</h2>
+      <dl class="src">
+        <dt>Cobbleverse {meta.cobbleverse}</dt><dd>Spawns, drops and movepools from the pack's own files.</dd>
+        <dt>Pokémon Showdown</dt><dd>Stats, types, abilities, move and item effects, learnsets.</dd>
+        <dt>PokéAPI</dt><dd>EV yields, catch rates, egg cycles, dex entries, game locations.</dd>
+      </dl>
+      <p class="note">Updated {meta.built}. Spotted a mistake? Tell us in the <a href="https://discord.gg/zC4YKx5sDx">Aeron Region Discord</a>.</p>
+    </div>
+  </div>
 </Base>
-
 <style>
-  .hero { display: grid; grid-template-columns: 88px 1fr; gap: 1.6rem; align-items: start; padding: 1.4rem 0 .6rem; }
-  .hero img { image-rendering: pixelated; margin-top: .4rem; }
-  h1 { font-size: clamp(2.6rem, 6vw, 3.6rem); margin: 0 0 .4rem; }
-  .logo { -webkit-text-stroke: 7px #0d428c; paint-order: stroke fill; letter-spacing: .02em; }
+  .hero { margin: -1.4rem calc(50% - 50vw) 0; padding: 2.6rem 0 2.4rem; border-bottom: 4px solid var(--brick-deep);
+    background: radial-gradient(circle at 12% 30%, rgb(89 196 251 / .16), transparent 45%), var(--brick); }
+  .hero-in { width: min(100% - 2.5rem, 1180px); margin: 0 auto; display: grid; grid-template-columns: 120px 1fr; gap: 1.8rem; align-items: start; }
+  .mascot { width: 104px; height: 104px; image-rendering: pixelated; filter: drop-shadow(4px 4px 0 rgb(0 0 0 / .35)); margin-top: .3rem; }
+  .logo { font-size: clamp(3rem, 7vw, 4.4rem); margin: 0 0 .5rem; -webkit-text-stroke: 7px #07142a; paint-order: stroke fill; letter-spacing: .02em; line-height: 1; }
   .ar { color: #59c4fb; } .dx { color: #f6e7e2; }
-  .lede { font-size: 1.15rem; max-width: 62ch; margin: 0 0 1.2rem; }
+  .lede { font-size: 1.15rem; max-width: 60ch; color: var(--on-brick); margin: 0 0 1.2rem; }
   .big { display: flex; gap: .6rem; max-width: 640px; position: relative; }
-  .big .field { flex: 1; font-size: 1.05rem; padding: .7rem .9rem; }
-  .why { max-width: 72ch; }
-  .tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; }
-  .tool { display: flex; flex-direction: column; gap: .3rem; padding: 1rem 1.1rem; background: #fff7f5; border: 2px solid var(--ink); text-decoration: none; color: var(--ink); }
-  .tool:hover { background: var(--petal-deep); color: var(--ink); }
-  .tool b { font-size: 1.15rem; }
-  .tool span { color: var(--ink-soft); font-size: .95rem; line-height: 1.45; }
-  .src { max-width: 880px; }
-  .src th { width: 200px; font-weight: 600; color: var(--ink); }
-  @media (max-width: 900px) { .tools { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 600px) { .tools { grid-template-columns: 1fr; } .hero { grid-template-columns: 1fr; } .hero img { width: 64px; height: 64px; } }
+  .big .field { flex: 1; font-size: 1.05rem; padding: .75rem .9rem; border-color: var(--brick-deep); }
+  .stats { margin: .9rem 0 0; font-size: .88rem; color: var(--on-brick-soft); }
+  .h { font-size: 1.5rem; margin: 2.4rem 0 .9rem; }
+  .main { display: grid; grid-template-columns: repeat(4, 1fr); gap: .9rem; }
+  .tile { display: flex; flex-direction: column; gap: .7rem; padding: 1.1rem 1.1rem 1.2rem; background: #fff7f5; border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); text-decoration: none; color: var(--ink); transition: transform .08s, box-shadow .08s; }
+  .tile:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); color: var(--ink); }
+  .tile img { width: 60px; height: 60px; margin: -6px 0 -6px -6px; image-rendering: pixelated; }
+  .tile b { display: block; font-size: 1.25rem; margin-bottom: .2rem; }
+  .tile span { color: var(--ink-soft); font-size: .93rem; line-height: 1.45; }
+  .tools { display: grid; grid-template-columns: repeat(4, 1fr); gap: .7rem; }
+  .tool { display: grid; grid-template-columns: 40px 1fr; gap: .7rem; align-items: center; padding: .7rem .9rem; border: 2px solid #d9b9b4; background: rgb(255 255 255 / .35); text-decoration: none; color: var(--ink); }
+  .tool:hover { border-color: var(--ink); background: #fff7f5; color: var(--ink); }
+  .tool img { width: 40px; height: 40px; image-rendering: pixelated; }
+  .tool b { display: block; }
+  .tool span { color: var(--ink-soft); font-size: .85rem; line-height: 1.35; }
+  .mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; width: 34px; height: 34px; margin: 3px; }
+  .mini i { display: block; border: 1px solid rgb(0 0 0 / .25); }
+  .about { display: grid; grid-template-columns: 1fr 1fr; gap: 2.6rem; margin-top: 1rem; }
+  .about p { max-width: 62ch; }
+  .src { display: grid; grid-template-columns: 200px 1fr; gap: .45rem 1rem; margin: 0 0 1rem; }
+  .src dt { font-weight: 700; } .src dd { margin: 0; color: var(--ink-soft); }
+  @media (max-width: 1000px) { .main, .tools { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 700px) {
+    .hero-in { grid-template-columns: 1fr; } .mascot { width: 72px; height: 72px; }
+    .main, .tools, .about { grid-template-columns: 1fr; } .src { grid-template-columns: 1fr; gap: 0 1rem; } .src dd { margin-bottom: .5rem; }
+  }
 </style>
