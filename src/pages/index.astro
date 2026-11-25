@@ -20,7 +20,7 @@ const _tries = [['Garchomp', '/pokemon/garchomp/'], ['Fake Out', '/moves/fake-ou
           <input data-find placeholder="Search a Pokémon, move, ability or item…" autocomplete="off" aria-label="Search" />
           <button type="submit">Search</button>
         </form>
-        <span class="pl">Pokémon of the day · <span id="pnum"></span></span>
+        <span class="pl">Pokémon of the day · <span id="pnum"></span><span class="pnext" id="pnext" title="Time until the next Pokémon of the day"></span></span>
         <a class="pn" id="pname" href="/pokedex/">&nbsp;</a>
         <span class="pty" id="ptypes"></span>
         <span class="pinfo"><span id="pev"></span><span id="pspawn"></span></span>
@@ -51,6 +51,9 @@ const _tries = [['Garchomp', '/pokemon/garchomp/'], ['Fake Out', '/moves/fake-ou
 
 <script>
   // Pokémon of the day: same pick for everyone on a given date (local time).
+  const nextEl = document.getElementById('pnext')!;
+  const tickNext = () => { const n = new Date(), m = new Date(n.getFullYear(), n.getMonth(), n.getDate() + 1); const mins = Math.ceil((+m - +n) / 60000); nextEl.textContent = `next in ${Math.floor(mins / 60)}h ${String(mins % 60).padStart(2, '0')}m`; if (mins <= 0) location.reload(); };
+  tickNext(); setInterval(tickNext, 30000);
   const TC: Record<string, string> = { Normal: '#a8a77a', Fire: '#ee8130', Water: '#6390f0', Electric: '#f7d02c', Grass: '#7ac74c', Ice: '#96d9d6', Fighting: '#c22e28', Poison: '#a33ea1', Ground: '#e2bf65', Flying: '#a98ff3', Psychic: '#f95587', Bug: '#a6b91a', Rock: '#b6a136', Ghost: '#735797', Dragon: '#6f35fc', Dark: '#705746', Steel: '#b7b7ce', Fairy: '#d685ad' };
   const LIGHT = new Set(['Normal', 'Electric', 'Grass', 'Ice', 'Ground', 'Flying', 'Bug', 'Rock', 'Steel', 'Fairy']);
   const shade = (hex: string, f: number) => '#' + [1, 3, 5].map((i) => Math.round(parseInt(hex.slice(i, i + 2), 16) * f).toString(16).padStart(2, '0')).join('');
@@ -117,14 +120,17 @@ const _tries = [['Garchomp', '/pokemon/garchomp/'], ['Fake Out', '/moves/fake-ou
   .mini i { display: block; border: 1px solid rgb(0 0 0 / .25); }
   .about { text-align: center; margin-top: 2.4rem; }
   .about p { max-width: 60ch; margin: 0 auto .5rem; color: var(--ink-soft); }
+  .pnext { margin-left: .6rem; font-weight: 500; font-size: .72rem; opacity: .55; }
   @media (prefers-reduced-motion: reduce) { .pa img { animation: none; } }
-  @media (max-width: 960px) { .hero-in { grid-template-columns: 1fr; } .right { order: -1; } .pa img { width: 220px; height: 220px; } .tiles { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 960px) { .hero-in { grid-template-columns: 1fr; } .pa img { width: 220px; height: 220px; } .tiles { grid-template-columns: 1fr 1fr; } }
   @media (max-width: 520px) {
     .hero { padding: 1.6rem 1rem 4rem; min-height: 0; }
     .tiles { grid-template-columns: 1fr 1fr; gap: .6rem; }
     .tile { padding: .6rem; gap: .5rem; } .tile img { width: 36px; height: 36px; } .tile small { display: none; }
     .big { margin-bottom: 1.4rem; } .big input { font-size: 1rem; padding: .7rem .8rem; } .big button { padding: 0 .9rem; font-size: .95rem; }
-    .pa img { width: 180px; height: 180px; } .pstats { width: 100%; }
+    .right { display: grid !important; grid-template-columns: 120px 1fr; align-items: center; gap: .8rem; margin-top: 1rem; }
+    .pa img { width: 120px; height: 120px; }
+    .pstats { width: 100%; padding: .6rem .7rem !important; font-size: .82rem; }
     .pinfo { gap: .4rem 1rem; }
   }
 </style>
