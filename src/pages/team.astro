@@ -2,9 +2,9 @@
 import Base from '../layouts/Base.astro';
 import { TYPES, CHART, dbTypeColors } from '../lib/types';
 ---
-<Base title="Team weaknesses" description="Add up to 12 Pokémon to count their weaknesses by type, and copy the team into Pokémon Showdown.">
-  <h1>Team weaknesses</h1>
-  <p class="note">Add 1 to 12 Pokémon. A Pokémon counts once for each type it's weak to; 4× weaknesses count once and are marked 4×.</p>
+<Base title="Team builder" description="Add up to 12 Pokémon to check type coverage, and copy the team into Pokémon Showdown.">
+  <h1>Team builder</h1>
+  <p class="note">Add 1 to 12 Pokémon to see how the team holds up against each type.</p>
   <div class="controls">
     <div class="slot"><input class="field" id="add" placeholder="Add a Pokémon…" autocomplete="off" /></div>
     <span class="soft" id="n">0 / 12</span>
@@ -18,17 +18,9 @@ import { TYPES, CHART, dbTypeColors } from '../lib/types';
   <p class="note" id="msg" aria-live="polite"></p>
   <div id="team" class="team"></div>
   <div id="res" hidden>
-    <p class="big" id="total"></p>
-    <div class="cols">
-      <div>
-        <h3 class="sec">Weaknesses per Pokémon</h3>
-        <table class="data tw" id="per"><thead><tr><th></th><th>Pokémon</th><th>Weak to</th><th class="n">#</th></tr></thead><tbody></tbody></table>
-      </div>
-      <div>
-        <h3 class="sec">By attacking type</h3>
-        <table class="data tw sortable" id="bytype"><thead><tr><th data-sort="text">Type</th><th data-sort="num" class="n">Weak</th><th data-sort="num" class="n">Resist</th><th data-sort="num" class="n">Immune</th><th>Weak Pokémon</th></tr></thead><tbody></tbody></table>
-      </div>
-    </div>
+    <h3 class="sec">Defensive coverage</h3>
+    <p class="note">How much damage each attacking type does to each team member. Totals on the right; the most shared weakness is highlighted.</p>
+    <div class="mx-wrap"><table class="mx" id="mx"></table></div>
   </div>
   <script define:vars={{ TYPES, CHART, COLORS: dbTypeColors }}>
     window.__TW = { TYPES, CHART, COLORS };
@@ -55,23 +47,12 @@ import { TYPES, CHART, dbTypeColors } from '../lib/types';
       const q = new URLSearchParams(); if (team.length) q.set('t', team.map((s) => s[0]).join(','));
       history.replaceState(null, '', team.length ? `?${q}` : location.pathname);
       $('res').hidden = !team.length; if (!team.length) return;
-      let total = 0;
-      const per = team.map((s) => {
-        const w = TYPES.map((t) => [t, mult(t, s[2])] as const).filter(([, m]) => m > 1);
-        total += w.length; return { s, w };
-      });
-      ($('per') as HTMLTableElement).tBodies[0].innerHTML = per.sort((a, b) => b.w.length - a.w.length).map(({ s, w }) =>
-        `<tr><td><img class="sprite" src="${s[3] ? SPR + s[3] + '.png' : ''}" alt="" width="32" height="32" /></td><td><a href="${s[5]}">${esc(s[1])}</a><div class="chips">${s[2].map(chip).join('')}</div></td><td>${w.map(([t, m]) => `${t}${m >= 4 ? ' <b class="x4">4×</b>' : ''}`).join(', ') || '<span class="soft">None</span>'}</td><td class="n"><b>${w.length}</b></td></tr>`).join('');
-      const rows = TYPES.map((t) => {
-        const ms = team.map((s) => [s, mult(t, s[2])] as const);
-        const weak = ms.filter(([, m]) => m > 1), res = ms.filter(([, m]) => m > 0 && m < 1).length, imm = ms.filter(([, m]) => m === 0).length;
-        return { t, weak, res, imm };
-      });
-      const max = Math.max(...rows.map((r) => r.weak.length));
-      ($('bytype') as HTMLTableElement).tBodies[0].innerHTML = rows.map((r) =>
-        `<tr class="${r.weak.length && r.weak.length === max ? 'worst' : ''}"><td data-v="${r.t}">${chip(r.t)}</td><td class="n" data-v="${r.weak.length}"><b>${r.weak.length}</b></td><td class="n" data-v="${r.res}">${r.res || ''}</td><td class="n" data-v="${r.imm}">${r.imm || ''}</td><td class="who">${r.weak.map(([s, m]) => esc(s[1]) + (m >= 4 ? ' <b class="x4">4×</b>' : '')).join(', ')}</td></tr>`).join('');
-      const worst = rows.filter((r) => r.weak.length === max && max > 0).map((r) => r.t);
-      $('total').innerHTML = `<b>${total}</b> weaknesses across ${team.length} Pokémon` + (worst.length ? `. Most weak to <b>${worst.join(', ')}</b> (${max} of ${team.length}).` : '.');
+      const txt = (m: number) => m === 1 ? '' : m === 0 ? '0' : m === 0.5 ? '½' : m === 0.25 ? '¼' : String(m);
+      const bg = (m: number) => m === 1 ? '' : m === 0 ? '#2e3436' : m >= 4 ? '#73d216' : m > 1 ? '#4e9a06' : m <= 0.25 ? '#7c0000' : '#a40000';
+      const rows = TYPES.map((t) => { const ms = team.map((s) => mult(t, s[2])); return { t, ms, w: ms.filter((m) => m > 1).length, r: ms.filter((m) => m > 0 && m < 1).length, i: ms.filter((m) => m === 0).length }; });
+      const maxW = Math.max(...rows.map((r) => r.w));
+      $('mx').innerHTML = `<thead><tr><th></th>${team.map((s) => `<th class="mh" title="${esc(s[1])}"><a href="${s[5]}"><img src="${s[3] ? SPR + s[3] + '.png' : ''}" alt="${esc(s[1])}" width="44" height="44" /><span>${esc(s[1])}</span></a></th>`).join('')}<th class="tot">Weak</th><th class="tot">Resist</th></tr></thead><tbody>` +
+        rows.map((r) => `<tr class="${r.w && r.w === maxW ? 'worst' : ''}"><th>${chip(r.t)}</th>${r.ms.map((m) => `<td style="${bg(m) ? `background:${bg(m)};color:${m === 0 ? '#fff' : '#ffdd57'}` : ''}">${txt(m)}</td>`).join('')}<td class="tot w${r.w >= 3 ? ' hi' : ''}">${r.w || ''}</td><td class="tot">${r.r + r.i || ''}</td></tr>`).join('') + '</tbody>';
     };
 
     const addMon = async (name: string) => {
@@ -105,7 +86,19 @@ import { TYPES, CHART, dbTypeColors } from '../lib/types';
   .team :global(.mon img) { width: 36px; height: 36px; }
   .team :global(.mon button) { border: 0; background: none; font: inherit; font-size: 1.1rem; font-weight: 800; cursor: pointer; color: var(--ink-soft); padding: 0 .45rem; }
   .team :global(.mon button:hover) { color: #a40000; }
-  .big { font-size: 1.15rem; margin: .2rem 0 .6rem; }
+  .mx-wrap { overflow-x: auto; }
+  .mx { border-collapse: separate; border-spacing: 2px; width: auto; }
+  .mx :global(th), .mx :global(td) { padding: 0; }
+  .mx :global(tbody th) { text-align: left; padding-right: .5rem; }
+  .mx :global(td) { width: 52px; height: 28px; text-align: center; font-weight: 800; font-size: .85rem; background: #fff7f5; border: 1px solid #e2c3bf; }
+  .mx :global(.mh) { vertical-align: bottom; width: 52px; }
+  .mx :global(.mh a) { display: flex; flex-direction: column; align-items: center; font-size: .66rem; line-height: 1.1; color: var(--ink); }
+  .mx :global(.mh span) { max-width: 52px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mx :global(.tot) { width: 52px; font-size: .78rem; color: var(--ink-soft); }
+  .mx :global(td.tot) { background: transparent; border-color: transparent; color: var(--ink); font-size: .95rem; }
+  .mx :global(td.tot.hi) { color: #a40000; }
+  .mx :global(tr.worst th .tchip) { outline: 2px solid var(--ink); outline-offset: 1px; }
+  .mx :global(tr.worst td.w) { background: #f6d2cd; border-color: #a40000; }
   .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 2.2rem; align-items: start; }
   .cols > div { min-width: 0; }
   @media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
