@@ -29,7 +29,7 @@ const nav = [
   <body>
     <header class="site-header band">
       <div class="wrap bar">
-        <a href="/" class="brand"><img src="/icon-96.png" alt="" width="36" height="36" /> <span>AR<em>dex</em></span></a>
+        <a href="/" class="brand"><img src="/icon-96.png" alt="" width="36" height="36" /> <span><i>AR</i><em>dex</em></span></a>
         <button class="menu-btn" aria-label="Open menu" aria-expanded="false">☰</button>
         <form class="find" action="/" role="search"><input id="find" list="find-list" placeholder="Search Pokémon, moves, abilities…" autocomplete="off" aria-label="Search" /><datalist id="find-list"></datalist></form>
         <nav class="nav">
@@ -90,6 +90,7 @@ const nav = [
   .site-header { position: sticky; top: 0; z-index: 50; border-bottom: 4px solid var(--brick-deep); }
   .bar { display: flex; align-items: center; justify-content: space-between; height: 60px; }
   .brand { display: flex; align-items: center; gap: .5rem; font-weight: 800; font-size: 1.3rem; text-decoration: none; color: var(--on-brick); }
+  .brand i { font-style: normal; color: #59c4fb; }
   .brand em { font-style: normal; color: var(--blossom); }
   .brand img { image-rendering: pixelated; }
   .nav { display: flex; align-items: center; gap: 1.3rem; }
