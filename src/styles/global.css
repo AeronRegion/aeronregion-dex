@@ -301,3 +301,8 @@ table.data td { padding-top: .3rem; padding-bottom: .3rem; }
 #ed .col.c table.stt { align-self: flex-start; justify-self: start; }
 /* Teambuilder: like Showdown, the pick list takes the stats panel's place while it's open, right under the moves */
 #ed:has(> .mlist:not([hidden])) > .col.c { display: none; }
+/* Teambuilder: held item icon beside the Item box and on the artwork, like Showdown */
+#ed .itemic { width: 30px; height: 30px; margin: -4px -2px -4px -4px; image-rendering: pixelated; flex: none; }
+#ed .who { position: relative; }
+#ed .whoitem { position: absolute; right: 8px; bottom: 4px; width: 40px !important; height: 40px !important; image-rendering: pixelated; background: var(--card); border: 1px solid var(--line); border-radius: 50%; }
+#ed td.sbar { min-width: 122px !important; width: 122px !important; }
