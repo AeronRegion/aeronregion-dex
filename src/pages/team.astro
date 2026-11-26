@@ -163,7 +163,7 @@ import { GAMES, meta } from '../lib/data';
     };
     const drawStrip = () => {
       const t = team();
-      $('strip').innerHTML = t.mons.map((m, k) => { const s = spOf(m); return `<button type="button" class="slotb${k === sel ? ' on' : ''}" data-k="${k}"><img src="${s[3] ? SPR + 'pokemon/' + s[3] + '.png' : ''}" alt="" width="56" height="56" /><span>${esc(s[1])}</span></button>`; }).join('') +
+      $('strip').innerHTML = t.mons.map((m, k) => { const s = spOf(m); return `<button type="button" class="slotb${k === sel ? ' on' : ''}" data-k="${k}" draggable="true" title="Drag to reorder"><img src="${s[3] ? SPR + 'pokemon/' + s[3] + '.png' : ''}" alt="" width="56" height="56" /><span>${esc(s[1])}</span></button>`; }).join('') +
         (t.mons.length < 12 ? `<div class="slotadd"><input class="field" id="addmon" placeholder="+ Add Pokémon" autocomplete="off" /></div>` : '');
       const addIn = document.getElementById('addmon') as HTMLInputElement | null;
       if (addIn) autocomplete(addIn, () => idx.species.map((s) => ({ label: s[1], sub: s[2].join(' / ') })), (it) => { const i = findSpecies(it.label); if (i < 0) return; t.mons.push(newMon(i)); sel = t.mons.length - 1; save(); drawTeams(); drawStrip(); drawEd(); });
@@ -187,6 +187,7 @@ import { GAMES, meta } from '../lib/data';
             <label class="fl">Level<input class="field" id="f-lv" type="number" min="1" max="100" value="${c ? 50 : m.level}"${c ? ' disabled title="Champions battles are always Lv. 50"' : ''} /></label>
             <label class="fl">Tera type<select class="field" id="f-tera">${[...TYPES, 'Stellar'].map((x) => `<option${x === m.tera ? ' selected' : ''}>${x}</option>`).join('')}</select></label>
           </div>
+          <div class="order"><button type="button" class="sm" id="f-left"${sel === 0 ? ' disabled' : ''} aria-label="Move earlier in the team">← Move</button><button type="button" class="sm" id="f-right"${sel === t.mons.length - 1 ? ' disabled' : ''} aria-label="Move later in the team">Move →</button></div>
           <button type="button" class="sm danger" id="f-rm">Remove from team</button>
         </div>
         <div class="col b">
@@ -236,6 +237,9 @@ import { GAMES, meta } from '../lib/data';
         else m.nature = Object.keys(NAT).find((n) => NAT[n][0] === nu && NAT[n][1] === nd)!;
         save(); drawEd();
       }));
+      const shift = (dir: number) => { const to = sel + dir; if (to < 0 || to >= t.mons.length) return; [t.mons[sel], t.mons[to]] = [t.mons[to], t.mons[sel]]; sel = to; save(); drawStrip(); drawEd(); };
+      ed.querySelector('#f-left')!.addEventListener('click', () => shift(-1));
+      ed.querySelector('#f-right')!.addEventListener('click', () => shift(1));
       ed.querySelector('#f-rm')!.addEventListener('click', () => { t.mons.splice(sel, 1); sel = Math.max(0, sel - 1); save(); drawTeams(); drawStrip(); drawEd(); });
       const i = spIndex.get(m.sp)!;
       ed.querySelectorAll<HTMLInputElement>('.mvin').forEach((inp) => {
@@ -260,6 +264,16 @@ import { GAMES, meta } from '../lib/data';
 
     // ---------- controls ----------
     const blank = (): Team => ({ id: Math.random().toString(36).slice(2, 9), name: 'Untitled team', fmt: 'all', mons: [] });
+    // drag a Pokémon in the row to reorder the team
+    let dragFrom = -1;
+    $('strip').addEventListener('dragstart', (e) => { const b = (e.target as HTMLElement).closest<HTMLElement>('.slotb'); if (!b) return; dragFrom = +b.dataset.k!; b.classList.add('dragging'); e.dataTransfer!.effectAllowed = 'move'; e.dataTransfer!.setData('text/plain', String(dragFrom)); });
+    $('strip').addEventListener('dragover', (e) => { const b = (e.target as HTMLElement).closest<HTMLElement>('.slotb'); if (!b || dragFrom < 0) return; e.preventDefault(); $('strip').querySelectorAll('.slotb').forEach((x) => x.classList.toggle('over', x === b)); });
+    $('strip').addEventListener('dragend', () => { dragFrom = -1; $('strip').querySelectorAll('.slotb').forEach((x) => x.classList.remove('over', 'dragging')); });
+    $('strip').addEventListener('drop', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLElement>('.slotb'); if (!b || dragFrom < 0) return; e.preventDefault();
+      const to = +b.dataset.k!, mons = team().mons; const cur2 = mons[sel];
+      const [m] = mons.splice(dragFrom, 1); mons.splice(to, 0, m); sel = mons.indexOf(cur2); dragFrom = -1; save(); drawStrip(); drawEd();
+    });
     $('strip').addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest<HTMLElement>('.slotb'); if (b) { sel = +b.dataset.k!; drawStrip(); drawEd(); } });
     ($('teams') as HTMLSelectElement).addEventListener('change', (e) => { cur = +(e.target as HTMLSelectElement).value; sel = 0; drawAll(); });
     ($('tname') as HTMLInputElement).addEventListener('input', (e) => { team().name = (e.target as HTMLInputElement).value; save(); drawTeams(); });
@@ -338,6 +352,12 @@ import { GAMES, meta } from '../lib/data';
   .strip :global(.slotb) { display: flex; flex-direction: column; align-items: center; gap: .1rem; width: 96px; padding: .3rem; font: inherit; font-size: .75rem; font-weight: 700; border: 2px solid var(--line-2); background: var(--card); color: var(--ink); cursor: pointer; }
   .strip :global(.slotb span) { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .strip :global(.slotb.on) { border-color: var(--ink); background: var(--petal-deep); box-shadow: 3px 3px 0 var(--shadow); }
+  .strip :global(.slotb) { cursor: grab; }
+  .strip :global(.slotb.dragging) { opacity: .4; }
+  .strip :global(.slotb.over) { outline: 3px dashed var(--ink); outline-offset: 2px; }
+  .ed :global(.order) { display: flex; gap: .4rem; }
+  .ed :global(.order .sm) { flex: 1; font-size: .8rem; padding: .25rem .4rem; }
+  .ed :global(.order .sm:disabled) { opacity: .4; cursor: default; }
   .strip :global(.slotadd) { position: relative; display: flex; align-items: center; width: 200px; }
   .strip :global(.slotadd .field) { width: 100%; }
   .ed { display: grid; grid-template-columns: 240px 1fr 1.3fr; gap: 1.6rem; border: 2px solid var(--ink); background: var(--card); padding: 1rem; }

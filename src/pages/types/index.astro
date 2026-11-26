@@ -4,15 +4,8 @@ import { TYPES, CHART, dbTypeColors as typeColors, effLabel, effColor } from '..
 ---
 <Base title="Types and type chart" description="Pokémon types and the type effectiveness chart.">
   <h1 id="pick">Types</h1>
-  <div class="controls"><span class="lab">Show</span><div class="seg" id="want"><button aria-pressed="true" data-w="">Pokémon</button><button aria-pressed="false" data-w="#moves">Moves</button></div></div>
+  <p class="note">Pick a type to see its Pokémon, its moves and its matchups.</p>
   <div class="pick">{TYPES.map((t) => <a href={`/types/${t.toLowerCase()}/`} data-base={`/types/${t.toLowerCase()}/`} style={`background:${typeColors[t]}`}>{t}</a>)}</div>
-  <script>
-    const bs = [...document.querySelectorAll<HTMLButtonElement>('#want button')];
-    bs.forEach((b) => b.addEventListener('click', () => {
-      bs.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-      document.querySelectorAll<HTMLAnchorElement>('.pick a').forEach((a) => (a.href = a.dataset.base! + b.dataset.w));
-    }));
-  </script>
   <h2 class="sec" id="chart">Type chart</h2>
   <p class="note">Attacking type down the side, defending type across the top. Blank = 1×. Click a type to see every Pokémon and move of that type.</p>
   <div class="scroll">
