@@ -210,3 +210,7 @@ main a:not(.chip):not(.block):not(.tile):not(.sm):not(.tc a):not(.tchart a):not(
 main a:not(.chip):not(.block):not(.tile):not(.sm):not(.evb):not(.card):not(.evo):not(.tc a):not(.tchart a):not(.pick a):not(.hero a):not(.dexl):not([class*='chip']), main .card b, main .evo b, main p a:not([class]), main .note a, .ab { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; text-decoration-color: color-mix(in srgb, var(--link) 45%, transparent); transition: color .12s, text-decoration-color .12s; }
 main a:not(.chip):not(.block):not(.tile):not(.sm):not(.evb):not(.card):not(.evo):not(.tc a):not(.tchart a):not(.pick a):not(.hero a):not(.dexl):not([class*='chip']):hover, main .card:hover b, main .evo a:hover b, main p a:not([class]):hover, main .note a:hover, .ab:hover { color: var(--link-hover, #0d4a85) !important; text-decoration-color: currentColor; text-decoration-thickness: 2px; }
 html[data-theme='dark'] { --link-hover: #9cc8f5; }
+/* dark mode: the matchup chart sits on one light panel so it reads as a single card, not white tiles on black */
+html[data-theme='dark'] .tchart { background: #dfe4ea; padding: 4px; border-radius: 4px; }
+html[data-theme='dark'] .tchart tbody th { background: transparent; }
+html[data-theme='dark'] .tchart td[style*='background'] { border-color: rgb(0 0 0 / .15) !important; }
