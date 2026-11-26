@@ -161,14 +161,16 @@ const TARGET = {
   self: 'User', adjacentAlly: 'Adjacent ally', adjacentAllyOrSelf: 'User or adjacent ally', allySide: "User's side", foeSide: "Foes' side",
   allyTeam: "User's team", allies: 'User and allies', all: 'Entire field', any: 'Any Pokémon', randomNormal: 'Random adjacent foe', scripted: 'Varies',
 };
-const moves = Dex.moves.all().filter((m) => m.exists && !(m.id === 'hiddenpower' && m.name !== 'Hidden Power') && !m.isZ && !m.isMax && !['CAP', 'Custom', 'LGPE'].includes(m.isNonstandard))
+const moves = Dex.moves.all().filter((m) => m.exists && !(m.id === 'hiddenpower' && m.name !== 'Hidden Power') && !['CAP', 'Custom'].includes(m.isNonstandard))
   .map((m) => ({
     id: m.id, name: m.name, type: m.type, cat: m.category, power: m.basePower || null, acc: m.accuracy === true ? null : m.accuracy,
     pp: m.pp, maxpp: Math.floor(m.pp * 1.6), pri: m.priority, target: TARGET[m.target] ?? m.target, targetKey: m.target,
     contact: !!m.flags.contact, gen: m.gen, desc: m.desc || m.shortDesc, short: m.shortDesc,
     flags: Object.keys(m.flags), past: m.isNonstandard === 'Past',
     hits: m.multihit ? (Array.isArray(m.multihit) ? m.multihit.join('–') : String(m.multihit)) : null,
+    kind: m.isZ ? 'Z-Move' : m.isMax ? (m.isMax === true ? 'Max Move' : 'G-Max Move') : m.isNonstandard === 'LGPE' ? "Let's Go" : null,
     tags: [
+      m.isZ && 'Z-Move', m.isMax && (m.isMax === true ? 'Max Move' : 'G-Max Move'), m.isNonstandard === 'LGPE' && "Let's Go exclusive",
       m.multihit && 'Multi-hit', m.priority > 0 && 'Priority', m.priority < 0 && 'Negative priority',
       ['allAdjacentFoes', 'allAdjacent'].includes(m.target) && 'Spread', m.flags.contact && 'Contact',
       m.flags.sound && 'Sound', m.flags.punch && 'Punch', m.flags.bite && 'Bite', m.flags.slicing && 'Slicing',
