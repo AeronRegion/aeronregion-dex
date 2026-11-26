@@ -11,3 +11,4 @@
 - 2026-11-25: Teambuilder: empty slot from +, fresh EVs on species change, Showdown-style stat bars that follow the calculated stats, + or - after EVs sets the nature, item icons, move type/category/power/accuracy beside each move, details | stats | moves layout, custom EV sliders, shiny art aligned to the normal art
 - 2026-11-26: Added CLAUDE.md with working rules and locked decisions; started docs/
 - 2026-11-26: README brought up to date (current pages, Teambuilder and Coverage checker, data files, known gaps)
+- 2026-11-26: CLAUDE.md locked decisions updated to match the live site (look, top bar, types page, hosting, data source) and Teambuilder rules added
