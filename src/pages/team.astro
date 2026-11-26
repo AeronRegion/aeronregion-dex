@@ -23,15 +23,14 @@ import { GAMES, meta } from '../lib/data';
   </div>
   <div class="bar">
     <button class="sm" id="imp" type="button">Import</button>
-    <button class="sm" id="exp" type="button">Copy for Showdown</button>
     <button class="sm" id="paste" type="button">Create PokéPaste ↗</button>
     <button class="sm" id="share" type="button">Copy link</button>
     <a class="sm" id="cov" href="/coverage/">Check coverage</a>
     <span class="soft" id="saved" aria-live="polite"></span>
   </div>
   <div id="impbox" class="impbox" hidden>
-    <textarea class="field" id="imptext" rows="10" placeholder="Paste a team in Showdown format, or a link to one…"></textarea>
-    <div><button class="sm" id="impgo" type="button">Load into this team</button> <button class="sm" id="impx" type="button">Cancel</button></div>
+    <textarea class="field" id="imptext" rows="10" placeholder="Paste a whole team or a single Pokémon in Showdown format, or a link to one…"></textarea>
+    <div><button class="sm" id="impgo" type="button">Replace team</button> <button class="sm" id="impadd" type="button">Add to team</button> <button class="sm" id="impx" type="button">Cancel</button></div>
   </div>
   <p class="note" id="msg" aria-live="polite"></p>
 
@@ -294,7 +293,6 @@ import { GAMES, meta } from '../lib/data';
       if (was !== now) say(now ? 'Switched to Champions: EV spreads were converted to Stat Points.' : 'Switched away from Champions: Stat Points were converted to EVs.');
       save(); drawEd();
     });
-    $('exp').addEventListener('click', async () => { if (!team().mons.length) return; await navigator.clipboard.writeText(exportText()); say('Copied. In Showdown: Teambuilder → New team → Import from text, then paste.'); });
     $('share').addEventListener('click', async () => {
       if (!team().mons.length) return;
       const u = `${location.origin}/team/?team=${encodeURIComponent(b64(exportText()))}&name=${encodeURIComponent(team().name)}`;
@@ -311,16 +309,21 @@ import { GAMES, meta } from '../lib/data';
     });
     $('imp').addEventListener('click', () => { $('impbox').hidden = false; ($('imptext') as HTMLTextAreaElement).focus(); });
     $('impx').addEventListener('click', () => { $('impbox').hidden = true; });
-    $('impgo').addEventListener('click', () => {
+    const doImport = (append: boolean) => {
       const v = ($('imptext') as HTMLTextAreaElement).value.trim(); const { out, miss, looksSp } = parseTeam(fromLink(v) ?? v);
       if (!out.length) { say("Couldn't read any Pokémon from that. Paste the team in Showdown's export format."); return; }
-      if (looksSp && !champ()) { team().fmt = 'champ'; miss.unshift('__sp'); }
+      if (looksSp && !champ() && (!append || !team().mons.length)) { team().fmt = 'champ'; miss.unshift('__sp'); }
       if (champ() && !looksSp) for (const m of out) m.evs = m.evs.map(evToSp) as Set6;
       if (champ()) for (const m of out) { m.level = 50; m.ivs = [31, 31, 31, 31, 31, 31]; }
-      team().mons = out; sel = 0; $('impbox').hidden = true; ($('imptext') as HTMLTextAreaElement).value = ''; drawAll();
+      let added = out.length, dropped = 0;
+      if (append) { const room = 12 - team().mons.length; added = Math.min(room, out.length); dropped = out.length - added; team().mons.push(...out.slice(0, added)); sel = team().mons.length - 1; }
+      else { team().mons = out; sel = 0; }
+      $('impbox').hidden = true; ($('imptext') as HTMLTextAreaElement).value = ''; drawAll();
       const sp = miss[0] === '__sp'; if (sp) miss.shift();
-      say(`Loaded ${out.length} Pokémon.${sp ? ' The spreads look like Champions Stat Points, so the format was set to Pokémon Champions.' : ''}${miss.length ? ` Not found: ${miss.join(', ')}.` : ''}`);
-    });
+      say(`${append ? 'Added' : 'Loaded'} ${added} Pokémon.${dropped ? ` ${dropped} didn't fit (12 max).` : ''}${sp ? ' The spreads look like Champions Stat Points, so the format was set to Pokémon Champions.' : ''}${miss.length ? ` Not found: ${miss.join(', ')}.` : ''}`);
+    };
+    $('impgo').addEventListener('click', () => doImport(false));
+    $('impadd').addEventListener('click', () => doImport(true));
 
     Promise.all([fetch('/search-index.json').then((r) => r.json()), fetch('/tb.json').then((r) => r.json())]).then(([a, b]) => {
       idx = a; tb = b; idx.species.forEach((s, i) => spIndex.set(s[0], i));

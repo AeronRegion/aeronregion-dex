@@ -21,7 +21,6 @@ import { GAMES, meta } from '../lib/data';
     <div class="slot addslot"><input class="field" id="add" placeholder="Add a Pokémon…" autocomplete="off" /></div>
     <span class="soft" id="n">0 / 12</span>
     <div class="acts">
-      <button class="sm" id="copy" type="button" disabled>Copy for Showdown</button>
       <a class="sm" href="https://play.pokemonshowdown.com/teambuilder" target="_blank" rel="noopener">Open Showdown ↗</a>
       <button class="sm" id="imp" type="button">Import</button>
       <button class="sm" id="paste" type="button" disabled>Create PokéPaste ↗</button>
@@ -30,8 +29,8 @@ import { GAMES, meta } from '../lib/data';
     </div>
   </div>
   <div id="impbox" class="impbox" hidden>
-    <textarea class="field" id="imptext" rows="8" placeholder="Paste a team in Showdown format (from Showdown's Export, PokéPaste or a mypokemonteam.com link)…"></textarea>
-    <div><button class="sm" id="impgo" type="button">Load team</button> <button class="sm" id="impx" type="button">Cancel</button></div>
+    <textarea class="field" id="imptext" rows="8" placeholder="Paste a whole team or a single Pokémon in Showdown format (from Showdown, PokéPaste or a mypokemonteam.com link)…"></textarea>
+    <div><button class="sm" id="impgo" type="button">Replace team</button> <button class="sm" id="impadd" type="button">Add to team</button> <button class="sm" id="impx" type="button">Cancel</button></div>
   </div>
   <p class="note" id="msg" aria-live="polite"></p>
   <div id="team" class="team"></div>
@@ -122,7 +121,7 @@ import { GAMES, meta } from '../lib/data';
       const d = idx!;
       $('n').textContent = `${team.length} / 12`;
       add.disabled = team.length >= 12; add.placeholder = team.length >= 12 ? 'Team is full' : 'Add a Pokémon…';
-      ['copy', 'share', 'clear', 'paste'].forEach((k) => (($(k) as HTMLButtonElement).disabled = !team.length));
+      ['share', 'clear', 'paste'].forEach((k) => (($(k) as HTMLButtonElement).disabled = !team.length));
       const q = team.map((t) => [d.species[t.i][0], t.moves.filter(Boolean).join('.'), toID(t.ab)].join(':').replace(/:+$/, '')).join(',');
       history.replaceState(null, '', team.length ? `?t=${q}` : location.pathname);
       $('res').hidden = !team.length; if (!team.length) return;
@@ -190,12 +189,6 @@ import { GAMES, meta } from '../lib/data';
     $('team').addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest('.rm'); if (b) { team.splice(+b.closest<HTMLElement>('.mon')!.dataset.k!, 1); cards(); } });
     $('clear').addEventListener('click', () => { team.length = 0; cards(); });
     const say = (t: string) => { $('msg').textContent = t; setTimeout(() => ($('msg').textContent = ''), 6000); };
-    $('copy').addEventListener('click', async () => {
-      const d = idx!;
-      const text = team.map((t) => [d.species[t.i][1], ...(t.ab ? [`Ability: ${t.ab}`] : []), ...t.moves.map((m) => m && mv(m)).filter(Boolean).map((x) => `- ${x![0]}`)].join('\n')).join('\n\n') + '\n';
-      await navigator.clipboard.writeText(text);
-      say('Copied. In Showdown: Teambuilder → New team → Import from text, then paste.');
-    });
     $('share').addEventListener('click', async () => { await navigator.clipboard.writeText(location.href); say('Link copied.'); });
     $('paste').addEventListener('click', () => {
       const d = idx!; if (!team.length) return;
@@ -207,7 +200,7 @@ import { GAMES, meta } from '../lib/data';
     fmtSel.addEventListener('change', () => cards());
 
     // import a Showdown-format team (also what mypokemonteam.com links carry, base64-encoded)
-    const importText = async (text: string) => {
+    const importText = async (text: string, append = false) => {
       const d = await load(); const out: Member[] = []; const miss: string[] = [];
       const sets = parseShowdown(text, (n) => !!d.moves[moveId(n, TYPES)] || /^hiddenpower-/.test(moveId(n, TYPES)), (n) => findSpecies(d, n) >= 0);
       for (const x of sets) {
@@ -216,14 +209,16 @@ import { GAMES, meta } from '../lib/data';
         out.push({ i, moves, ab: x.ability || abilitiesOf(d.species[i])[0] || '' }); if (out.length >= 12) break;
       }
       if (!out.length) { say("Couldn't read any Pokémon from that. Paste the team in Showdown's export format."); return; }
-      team.length = 0; team.push(...out); cards();
-      say(`Loaded ${out.length} Pokémon.${miss.length ? ` Not found: ${miss.join(', ')}.` : ''}`);
+      let added = out.length;
+      if (append) { added = Math.min(12 - team.length, out.length); team.push(...out.slice(0, added)); } else { team.length = 0; team.push(...out); }
+      cards();
+      say(`${append ? 'Added' : 'Loaded'} ${added} Pokémon.${out.length > added ? ` ${out.length - added} didn't fit (12 max).` : ''}${miss.length ? ` Not found: ${miss.join(', ')}.` : ''}`);
     };
     const fromLink = (s: string) => { try { const u = new URL(s); const t = u.searchParams.get('team'); return t ? decodeURIComponent(escape(atob(t))) : null; } catch { return null; } };
     $('imp').addEventListener('click', () => { $('impbox').hidden = false; ($('imptext') as HTMLTextAreaElement).focus(); });
     $('impx').addEventListener('click', () => { $('impbox').hidden = true; });
-    $('impgo').addEventListener('click', async () => {
-      const v = ($('imptext') as HTMLTextAreaElement).value.trim(); await importText(fromLink(v) ?? v);
+    for (const [id, append] of [['impgo', false], ['impadd', true]] as const) $(id).addEventListener('click', async () => {
+      const v = ($('imptext') as HTMLTextAreaElement).value.trim(); await importText(fromLink(v) ?? v, append);
       $('impbox').hidden = true; ($('imptext') as HTMLTextAreaElement).value = '';
     });
 
