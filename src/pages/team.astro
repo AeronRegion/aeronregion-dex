@@ -46,7 +46,7 @@ import { GAMES, meta } from '../lib/data';
     const { TYPES, COLORS } = (window as any).__TB as { TYPES: string[]; COLORS: Record<string, string> };
     type Sp = [string, string, string[], string | null, number, string, string[], string | null];
     type Idx = { species: Sp[]; moves: Record<string, [string, string, string]>; learn: Record<string, number[]> };
-    type Tb = { stats: number[][]; items: [string, string, string][]; moves: Record<string, [number | null, number | null, number, string]> };
+    type Tb = { stats: number[][]; items: [string, string, string][]; abilities: Record<string, string>; moves: Record<string, [number | null, number | null, number, string]> };
     type Set6 = [number, number, number, number, number, number];
     type Mon = { sp: string; ab: string; item: string; moves: string[]; nature: string; evs: Set6; ivs: Set6; level: number; tera: string };
     type Team = { id: string; name: string; fmt: string; mons: Mon[] };
@@ -180,7 +180,7 @@ import { GAMES, meta } from '../lib/data';
           <div class="who"><img src="${s[3] ? SPR + 'pokemon/other/official-artwork/' + s[3] + '.png' : ''}" alt="" width="150" height="150" /></div>
           <div class="slot"><label class="fl">Pokémon<input class="field" id="f-sp" value="${esc(s[1])}" autocomplete="off" /></label></div>
           <div class="types">${s[2].map(chip).join(' ')} <a href="${s[5]}" class="dexl">Dex page</a></div>
-          <label class="fl">Ability<select class="field" id="f-ab">${abilitiesOf(s).map((a) => `<option${a === m.ab ? ' selected' : ''}>${esc(a)}</option>`).join('')}</select></label>
+          <div class="slot"><label class="fl">Ability<input class="field" id="f-ab" value="${esc(m.ab)}" autocomplete="off" /></label></div>
           <div class="slot"><label class="fl">Item<input class="field" id="f-item" value="${esc(m.item)}" placeholder="No item" autocomplete="off" /></label></div>
           <div class="pair">
             <label class="fl">Level<input class="field" id="f-lv" type="number" min="1" max="100" value="${c ? 50 : m.level}"${c ? ' disabled title="Champions battles are always Lv. 50"' : ''} /></label>
@@ -214,15 +214,6 @@ import { GAMES, meta } from '../lib/data';
         const tot = m.evs.reduce((a, b) => a + b, 0); const el = ed.querySelector('.evleft')!; el.textContent = `${cap.label} left: ${cap.total - tot}`; el.classList.toggle('over', tot > cap.total);
         save();
       };
-      autocomplete(ed.querySelector<HTMLInputElement>('#f-sp')!, () => idx.species.map((x) => ({ label: x[1], sub: x[2].join(' / ') })), (it) => {
-        const i = findSpecies(it.label); if (i < 0) return;
-        t.mons[sel] = { ...newMon(i), item: m.item, nature: m.nature, evs: m.evs, ivs: m.ivs, level: m.level };
-        save(); drawTeams(); drawStrip(); drawEd();
-      });
-      ed.querySelector<HTMLSelectElement>('#f-ab')!.addEventListener('change', (e) => { m.ab = (e.target as HTMLSelectElement).value; save(); });
-      const itemIn = ed.querySelector<HTMLInputElement>('#f-item')!;
-      autocomplete(itemIn, () => tb.items.map(([label, , desc]) => ({ label, sub: desc.length > 48 ? desc.slice(0, 48) + '…' : desc })), (it) => { m.item = it.label; save(); });
-      itemIn.addEventListener('change', () => { const v = itemIn.value.trim(); const hit = tb.items.find(([n]) => n.toLowerCase() === v.toLowerCase()); m.item = hit ? hit[0] : v; save(); });
       ed.querySelector<HTMLInputElement>('#f-lv')!.addEventListener('change', (e) => { const el = e.target as HTMLInputElement; m.level = Math.max(1, Math.min(100, Math.round(+el.value) || 50)); el.value = String(m.level); reStats(); });
       ed.querySelector<HTMLSelectElement>('#f-tera')!.addEventListener('change', (e) => { m.tera = (e.target as HTMLSelectElement).value; save(); });
       ed.querySelector<HTMLSelectElement>('#f-nat')!.addEventListener('change', (e) => { m.nature = (e.target as HTMLSelectElement).value; save(); drawEd(); });
@@ -241,35 +232,75 @@ import { GAMES, meta } from '../lib/data';
       ed.querySelector('#f-right')!.addEventListener('click', () => shift(1));
       ed.querySelector('#f-rm')!.addEventListener('click', () => { t.mons.splice(sel, 1); sel = Math.max(0, sel - 1); save(); drawTeams(); drawStrip(); drawEd(); });
       const i = spIndex.get(m.sp)!;
-      // Showdown-style move list: opens under the editor while a move box has focus, filters as you type
-      ed.insertAdjacentHTML('beforeend', '<div class="mlist" hidden><div class="mhead"><span>Name</span><span>Type</span><span>Cat</span><span class="r">Pow</span><span class="r">Acc</span><span class="r">PP</span><span>Description</span></div><div class="mbody"></div></div>');
-      const list = ed.querySelector<HTMLElement>('.mlist')!, body = list.querySelector<HTMLElement>('.mbody')!;
-      const pool = learnOf(i).filter((x) => idx.moves[x]).sort((a, b) => idx.moves[a][0].localeCompare(idx.moves[b][0]));
-      let slot = -1, shown: string[] = [], act = -1;
-      const row = (x: string, k: number) => {
-        const [name, type, cat] = idx.moves[x]; const md = tb.moves[x] ?? [null, null, 0, ''];
-        return `<div class="mr${k === act ? ' on' : ''}${m.moves.includes(x) ? ' has' : ''}" data-x="${x}"><b>${esc(name)}</b>${chip(type)}<svg viewBox="0 0 28 14" width="30" height="15" role="img" aria-label="${cat}"><title>${cat}</title>${CAT_SVG[cat] ?? ''}</svg><span class="r">${md[0] ?? '—'}</span><span class="r">${md[1] ?? '—'}</span><span class="r">${md[2]}</span><span class="d">${esc(md[3])}</span></div>`;
+      // Showdown-style picker: a list under the editor for whichever box has focus (Pokémon, ability, item or a move).
+      // Each row carries the information you need to choose, and typing filters it.
+      ed.insertAdjacentHTML('beforeend', '<div class="mlist" hidden><div class="mhead"></div><div class="mbody"></div></div>');
+      const list = ed.querySelector<HTMLElement>('.mlist')!, headEl = list.querySelector<HTMLElement>('.mhead')!, body = list.querySelector<HTMLElement>('.mbody')!;
+      type Kind = 'sp' | 'ab' | 'item' | 'mv';
+      const movePool = learnOf(i).filter((x) => idx.moves[x]).sort((a, b) => idx.moves[a][0].localeCompare(idx.moves[b][0]));
+      const HEAD: Record<Kind, string> = {
+        mv: '<span>Move</span><span>Type</span><span>Cat</span><span class="r">Pow</span><span class="r">Acc</span><span class="r">PP</span><span>Description</span>',
+        sp: '<span></span><span>Pokémon</span><span>Types</span><span>Abilities</span>' + ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe', 'BST'].map((x) => `<span class="r">${x}</span>`).join(''),
+        ab: '<span>Ability</span><span>Description</span>',
+        item: '<span></span><span>Item</span><span>Description</span>',
       };
+      const poolOf = (k: Kind): string[] => k === 'mv' ? movePool : k === 'sp' ? idx.species.map((_, x) => String(x)) : k === 'ab' ? abilitiesOf(s) : tb.items.map((_, x) => String(x));
+      const nameOf = (k: Kind, key: string) => k === 'mv' ? idx.moves[key][0] : k === 'sp' ? idx.species[+key][1] : k === 'ab' ? key : tb.items[+key][0];
+      const extraMatch = (k: Kind, key: string, v: string) => k === 'mv' ? idx.moves[key][1].toLowerCase() === v : k === 'sp' ? idx.species[+key][2].some((t) => t.toLowerCase() === v) : false;
+      const rowOf = (k: Kind, key: string, on: boolean) => {
+        const cls = `mr${on ? ' on' : ''}`;
+        if (k === 'mv') {
+          const [name, type, cat] = idx.moves[key]; const md = tb.moves[key] ?? [null, null, 0, ''];
+          return `<div class="${cls}${m.moves.includes(key) ? ' has' : ''}" data-x="${key}"><b>${esc(name)}</b>${chip(type)}<svg viewBox="0 0 28 14" width="30" height="15" role="img" aria-label="${cat}"><title>${cat}</title>${CAT_SVG[cat] ?? ''}</svg><span class="r">${md[0] ?? '—'}</span><span class="r">${md[1] ?? '—'}</span><span class="r">${md[2]}</span><span class="d">${esc(md[3])}</span></div>`;
+        }
+        if (k === 'sp') {
+          const x = idx.species[+key], st = tb.stats[+key];
+          return `<div class="${cls}${x[0] === m.sp ? ' has' : ''}" data-x="${key}"><img src="${x[3] ? SPR + 'pokemon/' + x[3] + '.png' : ''}" alt="" width="32" height="32" loading="lazy" /><b>${esc(x[1])}</b><span>${x[2].map(chip).join(' ')}</span><span class="d">${esc([...x[6], ...(x[7] ? [x[7] + ' (H)'] : [])].join(', '))}</span>${st.map((v) => `<span class="r">${v}</span>`).join('')}<span class="r"><b>${st.reduce((a, b) => a + b, 0)}</b></span></div>`;
+        }
+        if (k === 'ab') return `<div class="${cls}${key === m.ab ? ' has' : ''}" data-x="${esc(key)}"><b>${esc(key)}${key === s[7] ? ' <span class="soft">(hidden)</span>' : ''}</b><span class="d">${esc(tb.abilities[key] ?? '')}</span></div>`;
+        const [name, icon, desc] = tb.items[+key];
+        return `<div class="${cls}${name === m.item ? ' has' : ''}" data-x="${key}"><img src="${icon ? SPR + 'items/' + icon + '.png' : ''}" alt="" width="30" height="30" loading="lazy" /><b>${esc(name)}</b><span class="d">${esc(desc)}</span></div>`;
+      };
+      let kind: Kind = 'mv', slot = -1, shown: string[] = [], act = -1, field: HTMLInputElement | null = null;
+      const LIMIT = 150;
       const fill = (q: string) => {
-        const v = q.trim().toLowerCase();
-        shown = !v ? pool : [...pool.filter((x) => idx.moves[x][0].toLowerCase().startsWith(v)), ...pool.filter((x) => !idx.moves[x][0].toLowerCase().startsWith(v) && (idx.moves[x][0].toLowerCase().includes(v) || idx.moves[x][1].toLowerCase() === v))];
+        const v = q.trim().toLowerCase(), pool = poolOf(kind);
+        shown = !v ? pool : [...pool.filter((x) => nameOf(kind, x).toLowerCase().startsWith(v)), ...pool.filter((x) => { const n = nameOf(kind, x).toLowerCase(); return !n.startsWith(v) && (n.includes(v) || extraMatch(kind, x, v)); })];
         act = v && shown.length ? 0 : -1;
-        body.innerHTML = shown.length ? shown.map(row).join('') : '<p class="note" style="padding:.5rem">No moves match.</p>';
+        body.innerHTML = shown.length ? shown.slice(0, LIMIT).map((x, k) => rowOf(kind, x, k === act)).join('') + (shown.length > LIMIT ? `<p class="note" style="padding:.5rem .7rem">Showing ${LIMIT} of ${shown.length}. Type to narrow it down.</p>` : '') : '<p class="note" style="padding:.5rem .7rem">Nothing matches.</p>';
       };
-      const choose = (x: string) => { m.moves[slot] = x; save(); const next = slot + 1; drawEd(); if (next < 4) (ed.querySelectorAll<HTMLInputElement>('.mvin')[next])?.focus(); };
-      ed.querySelectorAll<HTMLInputElement>('.mvin').forEach((inp) => {
-        const j = +inp.dataset.j!;
-        inp.addEventListener('focus', () => { slot = j; list.hidden = false; inp.select(); fill(''); body.scrollTop = 0; if (list.getBoundingClientRect().top > innerHeight - 120) list.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
+      const open = (k: Kind, inp: HTMLInputElement, j = -1) => {
+        kind = k; slot = j; field = inp; list.dataset.kind = k; headEl.innerHTML = HEAD[k]; list.hidden = false; inp.select(); fill(''); body.scrollTop = 0;
+        if (list.getBoundingClientRect().top > innerHeight - 120) list.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      };
+      const focusNext = (sel2: string) => (ed.querySelector<HTMLInputElement>(sel2))?.focus();
+      const choose = (key: string) => {
+        if (kind === 'mv') { m.moves[slot] = key; save(); const next = slot + 1; drawEd(); if (next < 4) ed.querySelectorAll<HTMLInputElement>('.mvin')[next]?.focus(); return; }
+        if (kind === 'sp') { const n = +key; t.mons[sel] = { ...newMon(n), item: m.item, nature: m.nature, evs: m.evs, ivs: m.ivs, level: m.level }; save(); drawTeams(); drawStrip(); drawEd(); focusNext('#f-ab'); return; }
+        if (kind === 'ab') { m.ab = key; save(); drawEd(); focusNext('#f-item'); return; }
+        m.item = tb.items[+key][0]; save(); drawEd(); focusNext('.mvin');
+      };
+      const wire = (inp: HTMLInputElement, k: Kind, j = -1) => {
+        inp.addEventListener('focus', () => open(k, inp, j));
         inp.addEventListener('input', () => fill(inp.value));
         inp.addEventListener('keydown', (e) => {
-          if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); act = Math.max(0, Math.min(shown.length - 1, act + (e.key === 'ArrowDown' ? 1 : -1))); body.querySelectorAll('.mr').forEach((r, k) => r.classList.toggle('on', k === act)); body.querySelectorAll('.mr')[act]?.scrollIntoView({ block: 'nearest' }); }
+          const rows = body.querySelectorAll('.mr');
+          if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); act = Math.max(0, Math.min(rows.length - 1, act + (e.key === 'ArrowDown' ? 1 : -1))); rows.forEach((r, x) => r.classList.toggle('on', x === act)); rows[act]?.scrollIntoView({ block: 'nearest' }); }
           else if (e.key === 'Enter' && act >= 0) { e.preventDefault(); choose(shown[act]); }
           else if (e.key === 'Escape') { list.hidden = true; inp.blur(); }
         });
-        inp.addEventListener('change', () => { const v = inp.value.trim().toLowerCase(); if (!v) { m.moves[j] = ''; save(); } else { const hit = pool.find((x) => idx.moves[x][0].toLowerCase() === v); if (hit) { m.moves[j] = hit; save(); } } });
+      };
+      wire(ed.querySelector<HTMLInputElement>('#f-sp')!, 'sp');
+      wire(ed.querySelector<HTMLInputElement>('#f-ab')!, 'ab');
+      const itemIn = ed.querySelector<HTMLInputElement>('#f-item')!;
+      wire(itemIn, 'item');
+      itemIn.addEventListener('change', () => { const v = itemIn.value.trim(); const hit = tb.items.find(([n]) => n.toLowerCase() === v.toLowerCase()); m.item = hit ? hit[0] : v; save(); });
+      ed.querySelectorAll<HTMLInputElement>('.mvin').forEach((inp) => {
+        const j = +inp.dataset.j!; wire(inp, 'mv', j);
+        inp.addEventListener('change', () => { const v = inp.value.trim().toLowerCase(); if (!v) { m.moves[j] = ''; save(); } else { const hit = movePool.find((x) => idx.moves[x][0].toLowerCase() === v); if (hit) { m.moves[j] = hit; save(); } } });
       });
       body.addEventListener('mousedown', (e) => { const r = (e.target as HTMLElement).closest<HTMLElement>('.mr'); if (r) { e.preventDefault(); choose(r.dataset.x!); } });
-      document.addEventListener('mousedown', (e) => { if (!list.hidden && !(e.target as HTMLElement).closest('.mlist, .mvin')) list.hidden = true; });
+      document.addEventListener('mousedown', (e) => { if (!list.hidden && !(e.target as HTMLElement).closest('.mlist') && e.target !== field) list.hidden = true; });
       const clampEv = (k: number, v: number) => { const others = m.evs.reduce((a, b, x) => a + (x === k ? 0 : b), 0); return Math.max(0, Math.min(cap.per, v, cap.total - others)); };
       ed.querySelectorAll<HTMLInputElement>('.evr').forEach((r) => r.addEventListener('input', () => {
         const k = +r.dataset.k!; m.evs[k] = clampEv(k, +r.value); r.value = String(m.evs[k]); (ed.querySelector(`.ev[data-k="${k}"]`) as HTMLInputElement).value = String(m.evs[k]); reStats();
@@ -402,6 +433,10 @@ import { GAMES, meta } from '../lib/data';
   .ed :global(.mrow .tchip) { width: 64px; text-align: center; }
   .ed :global(.mlist) { grid-column: 1 / -1; border: 2px solid var(--ink); background: var(--card); }
   .ed :global(.mhead), .ed :global(.mr) { display: grid; grid-template-columns: 11rem 4.6rem 2.4rem 2.8rem 2.8rem 2.4rem 1fr; gap: .6rem; align-items: center; padding: .3rem .7rem; }
+  .ed :global(.mlist[data-kind='sp'] .mhead), .ed :global(.mlist[data-kind='sp'] .mr) { grid-template-columns: 32px 10rem 8.5rem 1fr repeat(7, 2.3rem); }
+  .ed :global(.mlist[data-kind='ab'] .mhead), .ed :global(.mlist[data-kind='ab'] .mr) { grid-template-columns: 13rem 1fr; }
+  .ed :global(.mlist[data-kind='item'] .mhead), .ed :global(.mlist[data-kind='item'] .mr) { grid-template-columns: 30px 12rem 1fr; }
+  .ed :global(.mr img) { width: 32px; height: 32px; object-fit: contain; image-rendering: pixelated; }
   .ed :global(.mhead) { font-size: .75rem; font-weight: 700; color: var(--ink-soft); border-bottom: 2px solid var(--ink); background: var(--petal-deep); }
   .ed :global(.mbody) { max-height: 360px; overflow-y: auto; }
   .ed :global(.mr) { font-size: .9rem; border-bottom: 1px solid var(--line); cursor: pointer; }
@@ -411,7 +446,14 @@ import { GAMES, meta } from '../lib/data';
   .ed :global(.mr .r), .ed :global(.mhead .r) { text-align: right; font-variant-numeric: tabular-nums; }
   .ed :global(.mr .r) { font-weight: 700; }
   .ed :global(.mr .d) { font-size: .8rem; color: var(--ink-soft); line-height: 1.3; }
-  @media (max-width: 700px) { .ed :global(.mhead), .ed :global(.mr) { grid-template-columns: 1fr 4.4rem 2.2rem 2.6rem; } .ed :global(.mhead > :nth-child(n+5)), .ed :global(.mr > :nth-child(n+5)) { display: none; } }
+  @media (max-width: 700px) {
+    .ed :global(.mlist[data-kind='mv'] .mhead), .ed :global(.mlist[data-kind='mv'] .mr) { grid-template-columns: 1fr 4.4rem 2.2rem 2.6rem; }
+    .ed :global(.mlist[data-kind='mv'] .mhead > :nth-child(n+5)), .ed :global(.mlist[data-kind='mv'] .mr > :nth-child(n+5)) { display: none; }
+    .ed :global(.mlist[data-kind='sp'] .mhead), .ed :global(.mlist[data-kind='sp'] .mr) { grid-template-columns: 32px 1fr 2.6rem; }
+    .ed :global(.mlist[data-kind='sp'] .mhead > :nth-child(n+3):not(:last-child)), .ed :global(.mlist[data-kind='sp'] .mr > :nth-child(n+3):not(:last-child)) { display: none; }
+    .ed :global(.mlist[data-kind='ab'] .mhead), .ed :global(.mlist[data-kind='ab'] .mr), .ed :global(.mlist[data-kind='item'] .mr) { grid-template-columns: 30px 1fr; }
+    .ed :global(.mlist[data-kind='ab'] .mr) { grid-template-columns: 1fr; } .ed :global(.mlist[data-kind='item'] .mr .d) { grid-column: 2; }
+  }
   .ed :global(.danger) { border-color: #a40000; color: #a40000; align-self: flex-start; }
   .ed :global(.stt) { width: 100%; border-collapse: collapse; }
   .ed :global(.stt th), .ed :global(.stt td) { padding: .15rem .3rem; font-size: .88rem; }
