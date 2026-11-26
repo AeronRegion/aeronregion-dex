@@ -172,6 +172,21 @@ import { GAMES, meta } from '../lib/data';
       document.getElementById('plus')?.addEventListener('click', () => { const m = newMon(0); m.sp = ''; m.ab = ''; t.mons.push(m); sel = t.mons.length - 1; drawTeams(); drawStrip(); drawEd(); setTimeout(() => { const f = $('f-sp') as HTMLInputElement | null; f?.focus(); f?.dispatchEvent(new Event('focus')); }, 0); });
     };
     const sortState: Record<string, { by: string; dir: number } | null> = {};
+    const bboxCache = new Map<string, Promise<number[] | null>>();
+    const bbox = (url: string) => {
+      if (!bboxCache.has(url)) bboxCache.set(url, new Promise((res) => {
+        const im = new Image(); im.crossOrigin = 'anonymous';
+        im.onload = () => { try { const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; const x = c.getContext('2d')!; x.drawImage(im, 0, 0); const d = x.getImageData(0, 0, c.width, c.height).data; let t = c.height, b = -1, l = c.width, r = -1; for (let y = 0; y < c.height; y += 2) for (let xx = 0; xx < c.width; xx += 2) if (d[(y * c.width + xx) * 4 + 3] > 20) { if (y < t) t = y; if (y > b) b = y; if (xx < l) l = xx; if (xx > r) r = xx; } res(b < 0 ? null : [l, t, r, b, c.width]); } catch { res(null); } };
+        im.onerror = () => res(null); im.src = url;
+      }));
+      return bboxCache.get(url)!;
+    };
+    const fitShiny = async (img: HTMLImageElement, normalUrl: string) => {
+      const [n, sh] = await Promise.all([bbox(normalUrl), bbox(img.src)]); if (!n || !sh) return;
+      const size = (q: number[]) => Math.max(q[2] - q[0], q[3] - q[1]) / q[4];
+      const k = size(n) / size(sh); if (Math.abs(1 - k) < 0.08) return;
+      img.style.transform = `scale(${k.toFixed(3)})`; img.style.transformOrigin = 'center bottom';
+    };
     const drawEd = () => {
       const t = team(); const ed = $('ed');
       if (!t.mons.length) { ed.hidden = true; return; }
@@ -220,6 +235,9 @@ import { GAMES, meta } from '../lib/data';
           </table>
           <p class="note">Base stat total ${base.reduce((a, b) => a + b, 0)}. ${c ? 'Champions: up to 32 Stat Points per stat and 66 in total; each point adds 1 to the stat. Always Lv. 50 with perfect IVs. Copy for Showdown converts the points to EVs.' : 'EVs go up to 252 per stat and 510 in total.'}</p>
         </div>`;
+      // Some shiny artwork (e.g. Indeedee-F) is drawn at a different scale than the normal art; scale it to match
+      const art = ed.querySelector<HTMLImageElement>('.who img:not(.whoitem)');
+      if (art && m.shiny && s[3]) fitShiny(art, SPR + 'pokemon/other/official-artwork/' + s[3] + '.png');
       const reStats = () => { // update numbers without rebuilding the inputs, so sliders keep focus while dragging
         const st2 = statsOf(m); ed.querySelectorAll<HTMLElement>('.stt tbody tr').forEach((tr, k) => { tr.querySelector('td:last-child b')!.textContent = String(st2[k]); tr.querySelector<HTMLElement>('.sbar i')!.setAttribute('style', sdBar(st2[k] * 100 / (champ() ? 50 : m.level || 100), k)); });
         const tot = m.evs.reduce((a, b) => a + b, 0); const el = ed.querySelector('.evleft')!; el.textContent = `${cap.label} left: ${cap.total - tot}`; el.classList.toggle('over', tot > cap.total);
