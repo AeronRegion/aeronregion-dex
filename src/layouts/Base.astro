@@ -30,6 +30,12 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta name="theme-color" content="#2e1a20" />
+    <script is:inline>
+      // pick the theme before the page paints: saved choice, otherwise the system setting
+      (function () { var t = null; try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t; })();
+    </script>
   </head>
   <body>
     <header class="site-header">
@@ -46,6 +52,7 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
             </div>
           ) : <a href={m.href} class:list={['lnk', { on: isOn(m) }]}>{m.label}</a>)}
         </nav>
+        <button type="button" class="mode" id="mode" aria-label="Switch to dark mode" title="Dark mode"><span class="moon" aria-hidden="true">☾</span><span class="sun" aria-hidden="true">☀</span></button>
         <a class="ar" href="https://aeronregion.net"><span class="arl">Aeron Region</span> <span aria-hidden="true">↗</span></a>
         <form class="find" action="/pokedex/" role="search"><input id="find" placeholder="Search Pokémon, moves, abilities…" autocomplete="off" aria-label="Search" /></form>
       </div>
@@ -58,6 +65,14 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
       </div>
     </footer>
     <script>
+      // Light / dark toggle, remembered in this browser
+      const modeBtn = document.getElementById('mode')!;
+      const setLabel = () => { const dark = document.documentElement.dataset.theme === 'dark'; modeBtn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode'); modeBtn.title = dark ? 'Light mode' : 'Dark mode'; };
+      setLabel();
+      modeBtn.addEventListener('click', () => {
+        const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = next; try { localStorage.setItem('theme', next); } catch {} setLabel();
+      });
       // Header search (and any input with data-find): themed suggestions, jump to the page on pick/enter.
       import { autocomplete } from '../lib/ac';
       let names: Promise<[string, string, string, string?, string?][]> | null = null;
@@ -125,8 +140,13 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
   .qh { font-size: .7rem; font-weight: 700; letter-spacing: .04em; color: var(--on-brick-soft); background: rgb(255 255 255 / .08); padding: .3rem .8rem; margin: .3rem -.3rem; }
   .ar { font-weight: 700; font-size: .9rem; color: var(--on-brick); text-decoration: none; padding: .32rem .8rem; border: 2px solid var(--brick); white-space: nowrap; }
   .ar:hover { background: var(--brick); color: #fff; }
+  .mode { background: none; border: 2px solid var(--brick); color: var(--on-brick); font-size: 1rem; line-height: 1; width: 2.1rem; height: 2.1rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
+  .mode:hover { background: var(--brick); }
+  .mode .sun { display: none; }
+  :global(html[data-theme='dark']) .mode .sun { display: inline; }
+  :global(html[data-theme='dark']) .mode .moon { display: none; }
   .find { width: 300px; position: relative; }
-  .find input { width: 100%; font: inherit; font-size: .9rem; padding: .38rem .7rem; border: 2px solid var(--brick); background: #fff7f5; color: var(--ink); }
+  .find input { width: 100%; font: inherit; font-size: .9rem; padding: .38rem .7rem; border: 2px solid var(--brick); background: var(--card); color: var(--ink); }
   @media (max-width: 700px) {
     .bar { flex-wrap: wrap; height: auto; gap: 0 .9rem; padding-top: .3rem; row-gap: 0; }
     .brand { font-size: 1.15rem; margin-right: auto; } .brand img { width: 30px; height: 30px; }

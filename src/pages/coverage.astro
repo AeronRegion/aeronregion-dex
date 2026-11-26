@@ -259,11 +259,11 @@ import { GAMES, meta } from '../lib/data';
 <style>
   .addslot { position: relative; flex: 1; min-width: 240px; max-width: 420px; } .addslot .field { width: 100%; }
   .acts { display: flex; gap: .4rem; flex-wrap: wrap; margin-left: auto; }
-  .sm { font: inherit; font-weight: 700; font-size: .85rem; padding: .35rem .7rem; border: 2px solid var(--ink); background: #fff7f5; color: var(--ink); cursor: pointer; text-decoration: none; }
+  .sm { font: inherit; font-weight: 700; font-size: .85rem; padding: .35rem .7rem; border: 2px solid var(--ink); background: var(--card); color: var(--ink); cursor: pointer; text-decoration: none; }
   .sm:hover:not(:disabled) { background: var(--petal-deep); color: var(--ink); }
   .sm:disabled { opacity: .45; cursor: default; }
   .team { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: .6rem; margin: .6rem 0 1.4rem; }
-  .team :global(.mon) { border: 2px solid var(--ink); background: #fff7f5; padding: .4rem; display: flex; flex-direction: column; gap: .3rem; }
+  .team :global(.mon) { border: 2px solid var(--ink); background: var(--card); padding: .4rem; display: flex; flex-direction: column; gap: .3rem; }
   .team :global(.top) { display: flex; align-items: center; gap: .4rem; }
   .team :global(.top img) { width: 48px; height: 48px; }
   .team :global(.top > div) { flex: 1; min-width: 0; }
@@ -277,7 +277,7 @@ import { GAMES, meta } from '../lib/data';
   @media (max-width: 1000px) { .sums { grid-template-columns: 1fr; } }
   .sum { display: grid; grid-template-columns: repeat(6, 1fr); gap: .3rem; }
   @media (max-width: 520px) { .sum { grid-template-columns: repeat(3, 1fr); } }
-  .sum :global(.sc) { display: flex; flex-direction: column; align-items: stretch; text-align: center; border: 1px solid #e2c3bf; background: #fff7f5; }
+  .sum :global(.sc) { display: flex; flex-direction: column; align-items: stretch; text-align: center; border: 1px solid var(--line); background: var(--card); }
   .sum :global(.sc .tchip) { display: block; margin: 0; padding: .1rem 0; font-size: .72rem; }
   .sum :global(.sc b) { font-size: 1.05rem; padding: .1rem 0; }
   :global(b.pos) { color: #2f7d0a; } :global(b.neg) { color: #b3261e; } :global(b.z) { color: var(--ink-soft); font-weight: 600; }
@@ -291,24 +291,24 @@ import { GAMES, meta } from '../lib/data';
   .num { width: 4.2rem; }
   #rand:disabled { opacity: .55; cursor: default; }
   .key { display: inline-block; font-weight: 800; font-size: .78rem; padding: 0 .4rem; border: 2px solid; }
-  .key.weak { color: #a40000; border-color: #a40000; background: #fbe3e0; }
-  .key.res { color: #2f6b06; border-color: #4e9a06; background: #e4f2d9; }
+  .key.weak { color: #a40000; border-color: #a40000; background: var(--weak-bg); }
+  .key.res { color: #2f6b06; border-color: #4e9a06; background: var(--res-bg); }
   .mx-wrap { overflow-x: auto; }
   .mx { border-collapse: separate; border-spacing: 2px; width: auto; }
   .mx :global(th), .mx :global(td) { padding: 0; }
   .mx :global(tbody th) { text-align: left; padding-right: .5rem; }
-  .mx :global(td) { width: 52px; height: 28px; text-align: center; font-weight: 800; font-size: .85rem; background: #fff7f5; border: 1px solid #e2c3bf; }
-  .mx :global(td.none) { background: repeating-linear-gradient(45deg, #f3e4e1 0 4px, #fff7f5 4px 8px); }
+  .mx :global(td) { width: 52px; height: 28px; text-align: center; font-weight: 800; font-size: .85rem; background: var(--card); border: 1px solid var(--line); }
+  .mx :global(td.none) { background: repeating-linear-gradient(45deg, var(--stripe) 0 4px, var(--card) 4px 8px); }
   .mx :global(.mh) { vertical-align: bottom; width: 52px; font-size: .66rem; line-height: 1.1; }
   .mx :global(.mh img) { display: block; margin: 0 auto; }
   .mx :global(.mh span) { display: block; max-width: 52px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .mx :global(.gap) { width: 14px; background: transparent !important; border: 0 !important; }
   .mx :global(th.tot) { width: 58px; font-size: .78rem; text-align: center; }
   .mx :global(td.tot) { width: 58px; font-size: .95rem; border-width: 2px; }
-  .mx :global(td.weak) { color: #a40000; border-color: #a40000; background: #fbe3e0; }
-  .mx :global(td.res) { color: #2f6b06; border-color: #4e9a06; background: #e4f2d9; }
-  .mx :global(td.cov) { color: #1f5f8a; border-color: #59c4fb; background: #e3f4fd; }
-  .mx :global(td.tot.zero) { color: var(--ink-soft); background: #fff7f5; border-color: #e2c3bf; font-weight: 500; }
+  .mx :global(td.weak) { color: #a40000; border-color: #a40000; background: var(--weak-bg); }
+  .mx :global(td.res) { color: #2f6b06; border-color: #4e9a06; background: var(--res-bg); }
+  .mx :global(td.cov) { color: #1f5f8a; border-color: #59c4fb; background: var(--cov-bg); }
+  .mx :global(td.tot.zero) { color: var(--ink-soft); background: var(--card); border-color: var(--line); font-weight: 500; }
   .mx :global(tr.worst td.weak) { background: #a40000; color: #fff; }
   .mx :global(tr.hole td.cov) { background: #a40000; border-color: #a40000; color: #fff; font-weight: 800; }
   :global(.tchip) { display: inline-block; font-weight: 700; font-size: .68rem; padding: 0 .35rem; margin-right: .2rem; color: #fff; text-shadow: 1px 1px 1px rgb(0 0 0 / .5); border: 1px solid rgb(0 0 0 / .25); }

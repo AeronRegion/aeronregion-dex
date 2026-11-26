@@ -291,17 +291,17 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .art { width: 210px; height: 210px; object-fit: contain; margin-top: -6px; }
   .no { font-weight: 600; color: var(--ink-soft); }
   .ab { color: var(--ink); font-weight: 700; text-decoration: none; }
-  .ab:hover { color: #1f7fb8; }
+  .ab:hover { color: var(--hover); }
   h1 { margin: .1rem 0 .5rem; }
   .tabs { display: flex; border-bottom: 3px solid var(--ink); margin-top: 1.6rem; }
   .tabs button { font: inherit; font-weight: 700; font-size: 1.05rem; padding: .5rem 1.6rem; background: none; border: 3px solid transparent; border-bottom: 0; margin-bottom: -3px; cursor: pointer; color: var(--ink); }
-  .tabs button[aria-selected='true'] { border-color: var(--ink); background: #fff7f5; }
+  .tabs button[aria-selected='true'] { border-color: var(--ink); background: var(--card); }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 2.2rem; }
   .st { display: grid; grid-template-columns: 80px 40px 1fr 80px; gap: .6rem; align-items: center; padding: .22rem 0; }
   .st > span:first-child { text-align: right; color: var(--ink-soft); font-weight: 500; }
   .st span:first-child { font-weight: 500; }
   .st b { text-align: right; }
-  .bar { height: 12px; background: #ead1cd; } .bar i { display: block; height: 100%; }
+  .bar { height: 12px; background: var(--track); } .bar i { display: block; height: 100%; }
   .tot .mm { grid-column: 3 / 5; white-space: nowrap; }
   .mm { color: var(--ink-soft); font-size: .82rem; text-align: right; }
   .tot { border-top: 2px solid var(--ink); margin-top: .3rem; }
@@ -311,7 +311,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .abilrow { display: flex; align-items: center; gap: .6rem; margin-bottom: .6rem; flex-wrap: wrap; }
   .abilrow .lab { font-weight: 600; font-size: .85rem; color: var(--ink-soft); }
   .tc b.chg { outline: 2px solid var(--ink); outline-offset: -2px; }
-  .tc b { height: 26px; line-height: 26px; box-sizing: border-box; font-size: .8rem; background: #fff7f5; border: 1px solid #e2c3bf; border-top: 0; }
+  .tc b { height: 26px; line-height: 26px; box-sizing: border-box; font-size: .8rem; background: var(--card); border: 1px solid var(--line); border-top: 0; }
   .evos { display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; }
   .stage { display: flex; flex-direction: column; align-items: center; gap: .6rem; }
   .stage.many { display: grid; grid-template-columns: repeat(4, minmax(110px, 1fr)); gap: .4rem .6rem; }
@@ -328,14 +328,14 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .loc { font-size: .95rem; }
   .loc th { text-align: left; font-weight: 700; padding: .4rem 1rem .4rem 0; width: 200px; vertical-align: top; }
   .loc td { padding: .4rem 0; vertical-align: top; }
-  .loc .cv th, .loc .cv td { background: #fff7f5; }
+  .loc .cv th, .loc .cv td { background: var(--card); }
   .loc .cv th { border-left: 6px solid var(--teal); padding-left: .7rem; }
   .cvname { display: flex; align-items: center; gap: .45rem; }
   .cvname img { width: 28px; height: 28px; }
   .spawn { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; font-size: .9rem; padding: .2rem .6rem .4rem 0; }
   .spawn dl { display: grid; grid-template-columns: 80px 1fr; gap: .1rem .8rem; margin: 0; align-content: start; }
   .spawn dt { color: var(--ink-soft); text-align: right; } .spawn dd { margin: 0; }
-  .spawn + .spawn { border-top: 1px dashed #e2c3bf; padding-top: .4rem; }
+  .spawn + .spawn { border-top: 1px dashed var(--line); padding-top: .4rem; }
   .dex th { text-align: left; font-weight: 700; padding: .35rem 1rem .35rem 0; width: 200px; vertical-align: top; font-size: .92rem; }
   .dex td { padding: .35rem 0; }
   :global(.data tr.group td) { background: var(--petal-deep) !important; font-weight: 700; padding-top: .6rem; }
@@ -353,7 +353,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .mtable th:nth-child(8), .mtable td:nth-child(8), .mtable th:nth-child(9), .mtable td:nth-child(9) { display: none; }
   .mtable td:nth-child(3), .mtable th:nth-child(3) { text-align: center; }
   .mtable th:nth-child(n+4):nth-child(-n+6) { text-align: right; } .mtable th:nth-child(7), .mtable td:nth-child(7) { text-align: center; }
-  .mtable tbody tr:nth-child(even) { background: rgb(255 255 255 / .35); }
+  .mtable tbody tr:nth-child(even) { background: var(--zebra); }
   .msplit { display: grid; grid-template-columns: 1fr 1fr; gap: 0 2.4rem; align-items: start; }
   .msplit:empty { display: none; }
   .msplit > :global(div) { min-width: 0; }
@@ -364,7 +364,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .msplit :global(.mini td), .msplit :global(.mini th) { padding: .16rem .45rem; }
   .msplit :global(.mini .c) { text-align: center; }
   .msplit :global(.mini .lv) { color: var(--ink-soft); width: 2.4rem; }
-  .msplit :global(.mini tbody tr:nth-child(even)) { background: rgb(255 255 255 / .35); }
+  .msplit :global(.mini tbody tr:nth-child(even)) { background: var(--zebra); }
   @media (max-width: 900px) { .msplit { grid-template-columns: 1fr; } }
   @media (max-width: 600px) { .evos { flex-direction: column; gap: .4rem; } .arr { margin-top: 0; } .arr > span { transform: rotate(90deg); } }
 </style>

@@ -20,6 +20,18 @@
   --teal:         #56c6bb;  /* online / live */
   --teal-ink:     #1f6f67;  /* teal text on petal */
   --leaf:         #b4c07c;
+  --card:         #fff7f5;  /* inputs, cards, table cells */
+  --line:         #e2c3bf;  /* hairlines, empty cells */
+  --line-2:       #d9b9b4;
+  --stripe:       #f3e4e1;
+  --zebra:        rgb(255 255 255 / .35);
+  --shadow:       var(--ink);
+  --hover:        #1f7fb8;
+  --worst:        #f6d2cd;
+  --weak-bg:      #fbe3e0;
+  --res-bg:       #e4f2d9;
+  --cov-bg:       #e3f4fd;
+  --track:        #ead1cd;
 
   /* Nametag plate (the floating label above players) */
   --tag-bg:       rgb(0 0 0 / .32);
@@ -33,4 +45,26 @@
   /* Shape — blocks are square; only plates get stepped "pixel" corners */
   --px:           4px;      /* one "pixel" at site scale */
   --max-w:        1080px;
+}
+
+/* Dark mode: set on <html data-theme="dark"> (chosen with the header toggle, or the system setting) */
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --petal:        #1c1417;
+  --petal-deep:   #3a2a31;
+  --ink:          #f1e3e1;
+  --ink-soft:     #b7a0a4;
+  --card:         #281d22;
+  --line:         #44333a;
+  --line-2:       #574450;
+  --stripe:       #33262c;
+  --zebra:        rgb(255 255 255 / .035);
+  --shadow:       #000;
+  --hover:        #7fd0ff;
+  --worst:        #5a2326;
+  --weak-bg:      #3d1f22;
+  --res-bg:       #1f3319;
+  --cov-bg:       #16303d;
+  --track:        #3a2d33;
+  --teal-ink:     #7fd8ce;
 }

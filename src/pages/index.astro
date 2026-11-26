@@ -85,7 +85,7 @@ const _tries = [['Garchomp', '/pokemon/garchomp/'], ['Fake Out', '/moves/fake-ou
   .hero-in { width: min(100%, 1180px); margin: 0 auto; display: grid; grid-template-columns: 1fr 420px; gap: 2rem; align-items: center; }
   .hero a { color: #fff; }
   h1 { font-size: 1.45rem; font-weight: 600; margin: 0 0 1.1rem; opacity: .95; text-shadow: 0 1px 3px rgb(0 0 0 / .3); }
-  .big { display: flex; max-width: 580px; background: #fff7f5; border: 3px solid #07142a; box-shadow: 5px 5px 0 #07142a; position: relative; margin-bottom: 2.2rem; }
+  .big { display: flex; max-width: 580px; background: var(--card); border: 3px solid #07142a; box-shadow: 5px 5px 0 #07142a; position: relative; margin-bottom: 2.2rem; }
   .big input { flex: 1; border: 0; background: none; font: inherit; font-size: 1.08rem; padding: .85rem 1rem; color: var(--ink); min-width: 0; }
   .big input:focus { outline: none; }
   .big button { font: inherit; font-weight: 800; font-size: 1.05rem; background: #59c4fb; color: #07142a; border: 0; border-left: 3px solid #07142a; padding: 0 1.4rem; cursor: pointer; }
@@ -111,8 +111,8 @@ const _tries = [['Garchomp', '/pokemon/garchomp/'], ['Fake Out', '/moves/fake-ou
   .pstats :global(.ps.tot i) { background: none; }
   .pstats :global(.ps u) { display: block; height: 100%; }
   .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: -2.8rem; position: relative; }
-  .tile { display: flex; gap: .8rem; align-items: center; padding: .9rem 1rem; background: #fff7f5; border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); text-decoration: none; color: var(--ink); transition: transform .08s, box-shadow .08s; }
-  .tile:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); color: var(--ink); }
+  .tile { display: flex; gap: .8rem; align-items: center; padding: .9rem 1rem; background: var(--card); border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--shadow); text-decoration: none; color: var(--ink); transition: transform .08s, box-shadow .08s; }
+  .tile:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--shadow); color: var(--ink); }
   .tile img { width: 48px; height: 48px; image-rendering: pixelated; margin: -4px; flex: none; }
   .tile b { display: block; font-size: 1.05rem; }
   .tile small { display: block; color: var(--ink-soft); font-size: .84rem; line-height: 1.3; }

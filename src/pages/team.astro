@@ -317,19 +317,20 @@ import { GAMES, meta } from '../lib/data';
 </Base>
 <style>
   .bar { display: flex; align-items: center; gap: .5rem .7rem; flex-wrap: wrap; margin: .5rem 0; }
-  .lab2 { display: inline-flex; align-items: center; gap: .5rem; font-weight: 600; font-size: .9rem; color: var(--ink-soft); }
+  .lab2 { display: inline-flex; align-items: center; gap: .5rem; font-weight: 600; font-size: .9rem; color: var(--ink-soft); max-width: 100%; }
+  .lab2 .field { max-width: 100%; min-width: 0; }
   .tname { width: 220px; }
-  .sm { font: inherit; font-weight: 700; font-size: .85rem; padding: .35rem .7rem; border: 2px solid var(--ink); background: #fff7f5; color: var(--ink); cursor: pointer; text-decoration: none; }
+  .sm { font: inherit; font-weight: 700; font-size: .85rem; padding: .35rem .7rem; border: 2px solid var(--ink); background: var(--card); color: var(--ink); cursor: pointer; text-decoration: none; }
   .sm:hover { background: var(--petal-deep); color: var(--ink); }
   .impbox { display: flex; flex-direction: column; gap: .4rem; margin: .6rem 0; }
   .impbox textarea { width: 100%; font: inherit; font-size: .85rem; }
   .strip { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; align-items: stretch; }
-  .strip :global(.slotb) { display: flex; flex-direction: column; align-items: center; gap: .1rem; width: 96px; padding: .3rem; font: inherit; font-size: .75rem; font-weight: 700; border: 2px solid #d9b9b4; background: #fff7f5; color: var(--ink); cursor: pointer; }
+  .strip :global(.slotb) { display: flex; flex-direction: column; align-items: center; gap: .1rem; width: 96px; padding: .3rem; font: inherit; font-size: .75rem; font-weight: 700; border: 2px solid var(--line-2); background: var(--card); color: var(--ink); cursor: pointer; }
   .strip :global(.slotb span) { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .strip :global(.slotb.on) { border-color: var(--ink); background: var(--petal-deep); box-shadow: 3px 3px 0 var(--ink); }
+  .strip :global(.slotb.on) { border-color: var(--ink); background: var(--petal-deep); box-shadow: 3px 3px 0 var(--shadow); }
   .strip :global(.slotadd) { position: relative; display: flex; align-items: center; width: 200px; }
   .strip :global(.slotadd .field) { width: 100%; }
-  .ed { display: grid; grid-template-columns: 240px 1fr 1.3fr; gap: 1.6rem; border: 2px solid var(--ink); background: #fff7f5; padding: 1rem; }
+  .ed { display: grid; grid-template-columns: 240px 1fr 1.3fr; gap: 1.6rem; border: 2px solid var(--ink); background: var(--card); padding: 1rem; }
   @media (max-width: 1000px) { .ed { grid-template-columns: 1fr 1fr; } .ed :global(.col.c) { grid-column: 1 / -1; } }
   @media (max-width: 640px) { .ed { grid-template-columns: 1fr; } }
   .ed :global(.col) { display: flex; flex-direction: column; gap: .5rem; min-width: 0; }
