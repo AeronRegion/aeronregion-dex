@@ -1,9 +1,9 @@
 export const TYPES = ['Normal','Fire','Water','Electric','Grass','Ice','Fighting','Poison','Ground','Flying','Psychic','Bug','Rock','Ghost','Dragon','Dark','Steel','Fairy'];
 export const typeColors: Record<string, string> = {
-  Normal: '#a8a77a', Fire: '#ee8130', Water: '#2f6fe4', Electric: '#f7d02c', Grass: '#7ac74c',
-  Ice: '#96d9d6', Fighting: '#c22e28', Poison: '#a33ea1', Ground: '#e2bf65', Flying: '#a98ff3',
-  Psychic: '#f95587', Bug: '#a6b91a', Rock: '#b6a136', Ghost: '#735797', Dragon: '#6f35fc',
-  Dark: '#705746', Steel: '#b7b7ce', Fairy: '#d685ad',
+  Normal: '#999870', Fire: '#e0701f', Water: '#2f6fe4', Electric: '#ddb216', Grass: '#5fb33a',
+  Ice: '#5bbdb9', Fighting: '#c22e28', Poison: '#a33ea1', Ground: '#c9a240', Flying: '#8f75e6',
+  Psychic: '#f95587', Bug: '#93a614', Rock: '#a48f2c', Ghost: '#735797', Dragon: '#6f35fc',
+  Dark: '#705746', Steel: '#9393b3', Fairy: '#cc6ca0',
 };
 // attacker → defender multipliers (only non-1 entries)
 export const CHART: Record<string, Record<string, number>> = {
@@ -60,4 +60,4 @@ export const effBg = (m: number) => m === 1 ? '' : m === 0 ? '#2e3436' : m >= 4 
 // Text on effectiveness cells (PokemonDB style): yellow on red/green, white on black
 export const effFg = (m: number) => m === 0 ? '#fff' : '#ffdd57';
 // PokemonDB's type colors, used in the type defenses grid and type chart
-export const dbTypeColors: Record<string, string> = { Normal: '#aaaa99', Fire: '#ff4422', Water: '#1f6fe0', Electric: '#ffcc33', Grass: '#77cc55', Ice: '#66ccff', Fighting: '#bb5544', Poison: '#aa5599', Ground: '#ddbb55', Flying: '#8899ff', Psychic: '#ff5599', Bug: '#aabb22', Rock: '#bbaa66', Ghost: '#6666bb', Dragon: '#7766ee', Dark: '#775544', Steel: '#aaaabb', Fairy: '#ee99ee' };
+export const dbTypeColors: Record<string, string> = { Normal: '#999988', Fire: '#ff4422', Water: '#1f6fe0', Electric: '#e6b318', Grass: '#5fb83d', Ice: '#3db5e6', Fighting: '#bb5544', Poison: '#aa5599', Ground: '#c9a23e', Flying: '#7080f0', Psychic: '#ff5599', Bug: '#93a614', Rock: '#a6944f', Ghost: '#6666bb', Dragon: '#7766ee', Dark: '#775544', Steel: '#9090a8', Fairy: '#d97fd9' };

@@ -240,3 +240,5 @@ main a:not(.chip):not(.block):not(.tile):not(.sm):not(.tc a):not(.tchart a):not(
 main .card .chip.chip, .card span.chip.chip { display: inline !important; background: none !important; border: 0 !important; padding: 0 !important; font-size: .8rem !important; font-weight: 600 !important; text-shadow: none !important; color: color-mix(in srgb, var(--c) 58%, #000) !important; }
 html[data-theme='dark'] .card .chip { color: color-mix(in srgb, var(--c) 75%, #fff) !important; }
 .card .chip + .chip::before { content: '\00a0·\00a0'; color: var(--ink-soft); font-weight: 400; }
+/* type labels: always white text, with a slight shadow so lighter types stay legible */
+.chip:not(.card .chip), .ac-t, .mvt, .tchip, .tc a, .tchart th a, .tchart thead a, .pick a, #ptypes a { color: #fff !important; text-shadow: 0 1px 1px rgb(0 0 0 / .55) !important; }

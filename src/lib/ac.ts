@@ -1,6 +1,6 @@
 // Small themed autocomplete used instead of the browser's <datalist> popup.
 export type AcItem = { label: string; sub?: string; type?: string; cat?: string; value?: string; move?: { pow: number | null; acc: number | true | null; pp: number; desc: string } };
-const TC: Record<string, string> = { Normal: '#a8a77a', Fire: '#ee8130', Water: '#2f6fe4', Electric: '#f7d02c', Grass: '#7ac74c', Ice: '#96d9d6', Fighting: '#c22e28', Poison: '#a33ea1', Ground: '#e2bf65', Flying: '#a98ff3', Psychic: '#f95587', Bug: '#a6b91a', Rock: '#b6a136', Ghost: '#735797', Dragon: '#6f35fc', Dark: '#705746', Steel: '#b7b7ce', Fairy: '#d685ad' };
+const TC: Record<string, string> = { Normal: '#999870', Fire: '#e0701f', Water: '#2f6fe4', Electric: '#ddb216', Grass: '#5fb33a', Ice: '#5bbdb9', Fighting: '#c22e28', Poison: '#a33ea1', Ground: '#c9a240', Flying: '#8f75e6', Psychic: '#f95587', Bug: '#93a614', Rock: '#a48f2c', Ghost: '#735797', Dragon: '#6f35fc', Dark: '#705746', Steel: '#9393b3', Fairy: '#cc6ca0' };
 const LIGHT = new Set(['Normal', 'Electric', 'Grass', 'Ice', 'Ground', 'Flying', 'Bug', 'Rock', 'Steel', 'Fairy']);
 // same category icons as the rest of the site (components/Cat.astro)
 export const CAT_SVG: Record<string, string> = {
@@ -31,7 +31,7 @@ export function autocomplete(input: HTMLInputElement, getItems: () => Promise<Ac
     box.innerHTML = shown.map((it, i) => `<div class="ac-row${i === active ? ' on' : ''}" role="option" data-i="${i}">` +
       `<span class="ac-l">${esc(it.label)}</span>` +
       (it.sub ? `<span class="ac-s">${esc(it.sub)}</span>` : '') +
-      (it.type ? `<span class="ac-t" style="background:${TC[it.type]};color:${LIGHT.has(it.type) ? '#2e1a20' : '#fff'}">${it.type}</span>` : '') +
+      (it.type ? `<span class="ac-t" style="background:${TC[it.type]};color:#fff">${it.type}</span>` : '') +
       (it.cat ? `<span class="ac-c" title="${it.cat}"><svg viewBox="0 0 28 14" width="30" height="15" aria-label="${it.cat}" role="img">${CAT_SVG[it.cat] ?? ''}</svg></span>` : '') +
       (it.move ? `<span class="ac-n"><small>Pow</small>${it.move.pow ?? '—'}</span><span class="ac-n"><small>Acc</small>${it.move.acc === true ? '—' : it.move.acc ?? '—'}</span><span class="ac-n"><small>PP</small>${it.move.pp}</span><span class="ac-d">${esc(it.move.desc)}</span>` : '') +
       `</div>`).join('');
