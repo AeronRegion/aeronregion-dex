@@ -281,3 +281,9 @@ table.data td { padding-top: .3rem; padding-bottom: .3rem; }
 .pstats .ps u { border-radius: 0 !important; }
 .pstats .ps > span:first-child { text-align: right; }
 .pstats .ps b { font-weight: 700 !important; text-align: right; }
+.mlist .mr .chip, .mlist .mr .tchip, .mlist .mr .ac-t { margin-right: 2px; }
+.mlist .mr > span:has(.chip), .mlist .mr > span:has(.tchip) { white-space: nowrap; }
+.ed td.sbar { min-width: 90px; width: 90px; padding: 0 .5rem 0 .2rem; }
+.ed td.sbar i { display: block; height: 11px; }
+.ed .stt td.n b { font-weight: 700 !important; }
+@media (max-width: 640px) { .ed td.sbar { min-width: 30px; width: 30px; padding: 0 .3rem 0 0; } }

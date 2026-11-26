@@ -204,10 +204,11 @@ import { GAMES, meta } from '../lib/data';
         <div class="col c">
           <h3 class="sec">Stats <span class="soft evleft${evTotal > cap.total ? ' over' : ''}">${cap.label} left: ${cap.total - evTotal}</span></h3>
           <table class="stt">
-            <thead><tr><th></th><th class="n">Base</th><th></th><th>${c ? 'SP' : 'EVs'}</th>${c ? '' : '<th>IVs</th>'}<th class="n">Stat</th></tr></thead>
+            <thead><tr><th></th><th class="n">Base</th><th class="sbh"></th><th></th><th>${c ? 'SP' : 'EVs'}</th>${c ? '' : '<th>IVs</th>'}<th class="n">Stat</th></tr></thead>
             <tbody>${base.map((b, k) => `<tr>
               <th class="${mark(k)}">${STATNAME[k]}${k ? `<span class="nb"><button type="button" class="np${mark(k) === 'up' ? ' on' : ''}" data-k="${k}" data-d="1" title="Nature raises ${STATNAME[k]}" aria-label="Nature raises ${STATNAME[k]}">+</button><button type="button" class="np${mark(k) === 'down' ? ' on' : ''}" data-k="${k}" data-d="-1" title="Nature lowers ${STATNAME[k]}" aria-label="Nature lowers ${STATNAME[k]}">−</button></span>` : ''}</th>
-              <td class="n soft">${b}</td>
+              <td class="n"><b>${b}</b></td>
+              <td class="sbar"><i style="width:${Math.min(100, b / 1.8)}%;background:hsl(${Math.min(360, Math.floor(b * 180 / 255))}, 85%, 45%)"></i></td>
               <td class="barc"><input type="range" class="evr" data-k="${k}" min="0" max="${cap.per}" step="${cap.step}" value="${m.evs[k]}" aria-label="${STATNAME[k]} ${cap.label}" /></td>
               <td><input class="field num ev" data-k="${k}" type="number" min="0" max="${cap.per}" step="${cap.step}" value="${m.evs[k]}" aria-label="${STATNAME[k]} ${cap.label}" /></td>
               ${c ? '' : `<td><input class="field num iv" data-k="${k}" type="number" min="0" max="31" value="${m.ivs[k]}" aria-label="${STATNAME[k]} IVs" /></td>`}
@@ -475,7 +476,7 @@ import { GAMES, meta } from '../lib/data';
   .ed :global(.mrow .tchip) { width: 64px; text-align: center; }
   .ed :global(.mlist) { grid-column: 1 / -1; border: 2px solid var(--ink); background: var(--card); }
   .ed :global(.mhead), .ed :global(.mr) { display: grid; grid-template-columns: 11rem 4.6rem 2.4rem 2.8rem 2.8rem 2.4rem 1fr; gap: .6rem; align-items: center; padding: .3rem .7rem; }
-  .ed :global(.mlist[data-kind='sp'] .mhead), .ed :global(.mlist[data-kind='sp'] .mr) { grid-template-columns: 32px 10rem 8.5rem 1fr repeat(7, 2.3rem); }
+  .ed :global(.mlist[data-kind='sp'] .mhead), .ed :global(.mlist[data-kind='sp'] .mr) { grid-template-columns: 32px 10rem 10.6rem 1fr repeat(7, 2.3rem); }
   .ed :global(.mlist[data-kind='ab'] .mhead), .ed :global(.mlist[data-kind='ab'] .mr) { grid-template-columns: 13rem 1fr; }
   .ed :global(.mlist[data-kind='item'] .mhead), .ed :global(.mlist[data-kind='item'] .mr) { grid-template-columns: 30px 12rem 1fr; }
   .ed :global(.mr img) { width: 32px; height: 32px; object-fit: contain; image-rendering: pixelated; }
@@ -519,7 +520,8 @@ import { GAMES, meta } from '../lib/data';
   .ed :global(.np.on[data-d='1']) { background: #2f7d0a; border-color: #2f7d0a; color: #fff; }
   .ed :global(.np.on[data-d='-1']) { background: #b3261e; border-color: #b3261e; color: #fff; }
   .ed :global(.stt .n) { text-align: right; }
-  .ed :global(.barc) { width: 40%; } .ed :global(.barc input) { width: 100%; accent-color: #59c4fb; }
+  .ed :global(.sbar) { width: 90px; padding: 0 .4rem 0 .2rem; } .ed :global(.sbar i) { display: block; height: 11px; }
+  .ed :global(.barc) { width: 34%; } .ed :global(.barc input) { width: 100%; accent-color: #59c4fb; }
   .ed :global(.num) { width: 4.2rem; padding: .2rem .35rem; }
   .ed :global(.evleft) { font-size: .8rem; font-weight: 600; margin-left: .4rem; }
   .ed :global(.evleft.over) { color: #b3261e; }
