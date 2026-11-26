@@ -305,4 +305,8 @@ table.data td { padding-top: .3rem; padding-bottom: .3rem; }
 #ed .itemic { width: 30px; height: 30px; margin: -4px -2px -4px -4px; image-rendering: pixelated; flex: none; }
 #ed .who { position: relative; }
 #ed .whoitem { position: absolute; right: 8px; bottom: 4px; width: 40px !important; height: 40px !important; image-rendering: pixelated; background: var(--card); border: 1px solid var(--line); border-radius: 50%; }
-#ed td.sbar { min-width: 122px !important; width: 122px !important; }
+#ed td.sbar { min-width: 184px !important; width: 184px !important; }
+/* Teambuilder: moves and nature stay a sensible width instead of stretching across the page */
+#ed { grid-template-columns: 240px minmax(0, 440px) !important; }
+#ed > .col.c, #ed > .mlist { grid-column: 1 / -1; }
+@media (max-width: 640px) { #ed { grid-template-columns: 1fr !important; } }

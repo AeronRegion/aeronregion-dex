@@ -77,7 +77,7 @@ import { GAMES, meta } from '../lib/data';
     const isEmpty = (m: Mon) => !spIndex.has(m.sp);
     const itemIcon = (name: string) => { const it = name ? tb.items.find((x) => x[0] === name) : null; return it?.[1] ? SPR + 'items/' + it[1] + '.png' : ''; };
     // Showdown teambuilder bars: length and color come from the calculated stat, so they move with EVs, IVs, nature and level
-    const sdBar = (v: number, k: number) => `width:${Math.round(Math.min(179, Math.floor(v * 180 / (k ? 504 : 704))) * 0.65)}px;background:hsl(${Math.min(360, Math.floor(v * 180 / 714))}, 85%, 45%)`;
+    const sdBar = (v: number, k: number) => `width:${Math.min(179, Math.floor(v * 180 / (k ? 504 : 704)))}px;background:hsl(${Math.min(360, Math.floor(v * 180 / 714))}, 85%, 45%)`;
     const abilitiesOf = (s: Sp) => [...s[6], ...(s[7] ? [s[7]] : [])];
     const cap = (s: string) => s[0].toUpperCase() + s.slice(1);
     const moveName = (id: string) => { const hp = id.match(/^hiddenpower-(\w+)$/); if (hp) return `Hidden Power [${cap(hp[1])}]`; return idx.moves[id]?.[0] ?? ''; };
