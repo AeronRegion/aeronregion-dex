@@ -162,7 +162,7 @@ html[data-theme='dark'] .evb, html[data-theme='dark'] a.evb:hover { color: #2e1a
 html[data-theme='dark'] b.pos { color: #7bd35a; } html[data-theme='dark'] b.neg { color: #ff7a6e; }
 
 /* ── Utility look (concept A2, Showdown-like light blue): small plain type, thin lines, bold only for titles and headings ── */
-html, body { font-family: Verdana, Geneva, Tahoma, sans-serif !important; font-size: 14px !important; }
+html, body { font-family: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif !important; font-size: 15px !important; }
 body * { font-weight: 400 !important; letter-spacing: 0 !important; }
 h1, h1 * { font-weight: 700 !important; font-size: 22px; }
 h1 .kind { font-weight: 400 !important; }
@@ -195,3 +195,7 @@ main p a:not([class]):hover, main .note a:hover { text-decoration: underline; }
 /* type chips: a little larger and always readable */
 .chip { font-size: .78rem !important; }
 .chip.small { font-size: .72rem !important; }
+
+/* readability: names and key values a little heavier, secondary text darker */
+table.data td a, .mr b, .evo b, .card b, .kv td, .st b, .slotb span, .tabs button, .ed .fl .ll, .tchip, .chip { font-weight: 600 !important; }
+.mr .r, .tc b, h1 .kind { font-weight: 600 !important; }

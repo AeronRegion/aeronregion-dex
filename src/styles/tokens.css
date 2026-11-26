@@ -12,7 +12,7 @@
   --petal-deep:   #cddcef;  /* hover rows, subtle fills */
   --blossom:      #e895b0;  /* primary buttons */
   --ink:          #1c2733;  /* text, outlines */
-  --ink-soft:     #4a5b6e;  /* secondary text on petal */
+  --ink-soft:     #3e4c5d;  /* secondary text on petal */
   --brick:        #3e5f86;  /* dark bands, nav, footer */
   --brick-deep:   #2b4566;
   --on-brick:     #f2f6fb;
@@ -22,7 +22,7 @@
   --leaf:         #b4c07c;
   --card:         #f4f7fb;  /* inputs, cards, table cells */
   --line:         #b8c6d6;  /* hairlines, empty cells */
-  --line-2:       #7f95ad;
+  --line-2:       #6f87a1;
   --stripe:       #e6edf5;
   --zebra:        rgb(255 255 255 / .55);
   --shadow:       var(--ink);
@@ -54,7 +54,7 @@ html[data-theme='dark'] {
   --petal:        #16181b;
   --petal-deep:   #2e3238;
   --ink:          #eceef1;
-  --ink-soft:     #a3aab4;
+  --ink-soft:     #b9c0c9;
   --card:         #202328;
   --line:         #363a41;
   --line-2:       #474c55;

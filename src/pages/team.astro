@@ -163,7 +163,7 @@ import { GAMES, meta } from '../lib/data';
     };
     const drawStrip = () => {
       const t = team();
-      $('strip').innerHTML = t.mons.map((m, k) => { const s = spOf(m); return `<button type="button" class="slotb${k === sel ? ' on' : ''}" data-k="${k}" draggable="true" title="Drag to reorder"><img src="${s[3] ? SPR + 'pokemon/' + (m.shiny ? 'shiny/' : '') + s[3] + '.png' : ''}" alt="" width="56" height="56" /><span>${esc(s[1])}</span></button>`; }).join('') +
+      $('strip').innerHTML = t.mons.map((m, k) => { const s = spOf(m); return `<button type="button" class="slotb${k === sel ? ' on' : ''}" data-k="${k}" draggable="true" title="Drag to reorder"><img src="${s[3] ? (m.shiny ? SPR + 'pokemon/shiny/' + s[3] + '.png' : SPR + 'pokemon/versions/generation-vii/icons/' + s[3] + '.png') : ''}" onerror="this.onerror=null;this.src=this.dataset.fb" data-fb="${s[3] ? SPR + 'pokemon/' + (m.shiny ? 'shiny/' : '') + s[3] + '.png' : ''}" alt="" width="56" height="56" /><span>${esc(s[1])}</span></button>`; }).join('') +
         (t.mons.length < 14 ? `<button type="button" class="slotplus" id="plus" title="Add a Pokémon" aria-label="Add a Pokémon">+</button><div class="slotadd" hidden><input class="field" id="addmon" placeholder="Add a Pokémon…" autocomplete="off" /></div>` : '');
       const addIn = document.getElementById('addmon') as HTMLInputElement | null;
       document.getElementById('plus')?.addEventListener('click', () => { const w = addIn!.parentElement!; w.hidden = false; document.getElementById('plus')!.hidden = true; addIn!.focus(); });
@@ -434,7 +434,8 @@ import { GAMES, meta } from '../lib/data';
   /* team row: Showdown-style tabs with a small sprite and the name */
   .strip { display: flex; flex-wrap: wrap; gap: 2px; margin: 1rem 0 0; align-items: flex-end; }
   .strip :global(.slotb) { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 72px; height: 62px; padding: 2px 3px 3px; font: inherit; font-size: 11px; border: 1px solid var(--line-2); border-bottom: 0; border-radius: 4px 4px 0 0; background: var(--petal-deep); color: var(--ink); cursor: grab; }
-  .strip :global(.slotb img) { width: 40px; height: 40px; object-fit: contain; image-rendering: pixelated; }
+  .strip :global(.slotb img) { width: 40px; height: 30px; object-fit: contain; image-rendering: pixelated; margin-bottom: 4px; }
+  .strip :global(.slotb img[src*='/pokemon/'][src$='.png']:not([src*='icons'])) { width: 44px; height: 44px; margin: -8px 0 -2px; image-rendering: auto; }
   .strip :global(.slotb span) { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.2; }
   .strip :global(.slotb.on) { background: var(--card); height: 66px; }
   .strip :global(.slotplus) { width: 54px; height: 62px; font: inherit; font-size: 1.6rem; line-height: 1; border: 1px solid var(--line-2); border-bottom: 0; border-radius: 4px 4px 0 0; background: var(--petal-deep); color: var(--ink-soft); cursor: pointer; }
