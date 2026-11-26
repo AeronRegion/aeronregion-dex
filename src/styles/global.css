@@ -317,3 +317,11 @@ table.data td { padding-top: .3rem; padding-bottom: .3rem; }
 #ed .col.c .stt input.num { width: 3.6rem !important; }
 @media (max-width: 1100px) { #ed { grid-template-columns: 240px 1fr !important; } #ed > .col.c { grid-column: 1 / -1 !important; order: 3; } #ed > .col.b { order: 2; } }
 @media (max-width: 640px) { #ed { grid-template-columns: 1fr !important; } #ed > .col.c { order: 3; } }
+/* Teambuilder: full-length stat bars (as in Showdown), narrow moves column, editor only as wide as its contents */
+#ed { grid-template-columns: 240px auto 230px !important; gap: 1.2rem !important; width: fit-content; max-width: 100%; }
+#ed td.sbar { min-width: 184px !important; width: 184px !important; }
+#ed .col.c .stt .barc { width: 110px !important; } #ed .col.c .stt .barc input { width: 100px !important; }
+#ed .col.c .stt input.num { width: 3.3rem !important; }
+@media (max-width: 1180px) { #ed { grid-template-columns: 240px 1fr !important; width: auto; } #ed > .col.c { grid-column: 1 / -1 !important; order: 3; } #ed > .col.b { order: 2; } }
+@media (max-width: 640px) { #ed { grid-template-columns: 1fr !important; } }
+@media (max-width: 640px) { #ed { width: auto !important; } #ed td.sbar { min-width: 0 !important; width: 40px !important; max-width: 40px; } #ed td.sbar i { transform: scaleX(.22); transform-origin: left center; } #ed .col.c .stt input.num { width: 3rem !important; } }
