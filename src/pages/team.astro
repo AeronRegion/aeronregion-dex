@@ -24,6 +24,7 @@ import { GAMES, meta } from '../lib/data';
   <div class="bar">
     <button class="sm" id="imp" type="button">Import</button>
     <button class="sm" id="exp" type="button">Copy for Showdown</button>
+    <button class="sm" id="paste" type="button">Create PokéPaste ↗</button>
     <button class="sm" id="share" type="button">Copy link</button>
     <a class="sm" id="cov" href="/coverage/">Check coverage</a>
     <span class="soft" id="saved" aria-live="polite"></span>
@@ -42,6 +43,7 @@ import { GAMES, meta } from '../lib/data';
   </script>
   <script>
     import { autocomplete } from '../lib/ac';
+    import { parseShowdown, moveId } from '../lib/showdown';
     const { TYPES, COLORS } = (window as any).__TB as { TYPES: string[]; COLORS: Record<string, string> };
     type Sp = [string, string, string[], string | null, number, string, string[], string | null];
     type Idx = { species: Sp[]; moves: Record<string, [string, string, string]>; learn: Record<string, number[]> };
@@ -135,33 +137,21 @@ import { GAMES, meta } from '../lib/data';
       if (i < 0 && name.includes('-')) i = idx.species.findIndex((x) => toID(x[1]) === toID(name.split('-')[0]));
       return i;
     };
-    const parseStats = (line: string, into: Set6) => { for (const part of line.split('/')) { const m = part.trim().match(/^(\d+)\s+(\w+)/); if (m) { const k = STAT.findIndex((x) => x.toLowerCase() === m[2].toLowerCase()); if (k >= 0) into[k] = +m[1]; } } };
     const parseTeam = (text: string) => {
       const out: Mon[] = []; const miss: string[] = [];
-      for (const block of text.replace(/\r/g, '').split(/\n\s*\n/)) {
-        const lines = block.split('\n').map((l) => l.trim()).filter(Boolean); if (!lines.length) continue;
-        const [headRaw, item = ''] = lines[0].split(' @ ');
-        let head = headRaw.replace(/\s*\((M|F)\)\s*$/, '').trim(); const paren = head.match(/\(([^)]+)\)\s*$/); if (paren) head = paren[1];
-        const i = findSpecies(head); if (i < 0) { miss.push(head); continue; }
-        const m = newMon(i); m.item = item.trim(); m.level = 100; m.moves = [];
-        for (const l of lines.slice(1)) {
-          if (/^Ability:/i.test(l)) m.ab = l.replace(/^Ability:\s*/i, '');
-          else if (/^Level:/i.test(l)) m.level = Math.max(1, Math.min(100, +l.replace(/\D/g, '') || 100));
-          else if (/^Tera Type:/i.test(l)) m.tera = l.replace(/^Tera Type:\s*/i, '');
-          else if (/^EVs:/i.test(l)) parseStats(l.slice(4), m.evs);
-          else if (/^IVs:/i.test(l)) parseStats(l.slice(4), m.ivs);
-          else if (/Nature$/i.test(l)) { const n = l.replace(/\s*Nature$/i, ''); if (NAT[n]) m.nature = n; }
-          else if (l.startsWith('-')) {
-            const name = l.replace(/^-\s*/, ''); const hp = name.match(/^Hidden Power\s*\[?(\w+)\]?/i);
-            if (hp && TYPES.some((t) => t.toLowerCase() === hp[1].toLowerCase())) m.moves.push(`hiddenpower-${hp[1].toLowerCase()}`);
-            else if (idx.moves[toID(name)]) m.moves.push(toID(name));
-          }
-        }
-        while (m.moves.length < 4) m.moves.push(''); m.moves = m.moves.slice(0, 4);
-        if (champ()) { const tot = m.evs.reduce((a, b) => a + b, 0); if (tot > 66 || m.evs.some((v) => v > 32)) m.evs = m.evs.map(evToSp) as Set6; m.level = 50; m.ivs = [31, 31, 31, 31, 31, 31]; }
+      const sets = parseShowdown(text, (n) => !!idx.moves[moveId(n, TYPES)] || /^hiddenpower-/.test(moveId(n, TYPES)), (n) => findSpecies(n) >= 0);
+      // Champions spreads (66 points, 32 max) pasted as "EVs:" lines
+      const looksSp = sets.some((x) => x.evs) && sets.every((x) => !x.evs || (x.evs.every((v) => v <= 32) && x.evs.reduce((a, b) => a + b, 0) <= 66));
+      for (const x of sets) {
+        const i = findSpecies(x.species); if (i < 0) { miss.push(x.species); continue; }
+        const m = newMon(i); m.item = x.item; m.level = x.level ?? 100;
+        if (x.ability) m.ab = x.ability; if (x.tera) m.tera = x.tera; if (x.nature && NAT[x.nature]) m.nature = x.nature;
+        if (x.evs) m.evs = x.evs as Set6; if (x.ivs) m.ivs = x.ivs as Set6;
+        m.moves = x.moves.map((n) => moveId(n, TYPES)).filter((id) => idx.moves[id] || /^hiddenpower-\w+$/.test(id)).slice(0, 4);
+        while (m.moves.length < 4) m.moves.push('');
         out.push(m); if (out.length >= 12) break;
       }
-      return { out, miss };
+      return { out, miss, looksSp };
     };
     const fromLink = (s: string) => { try { const u = new URL(s); const t = u.searchParams.get('team'); return t ? unb64(t) : null; } catch { return null; } };
 
@@ -286,13 +276,26 @@ import { GAMES, meta } from '../lib/data';
       const u = `${location.origin}/team/?team=${encodeURIComponent(b64(exportText()))}&name=${encodeURIComponent(team().name)}`;
       await navigator.clipboard.writeText(u); say('Link copied. Opening it adds this team to that browser.');
     });
+    // PokéPaste takes a plain form post and redirects to the new paste
+    $('paste').addEventListener('click', () => {
+      if (!team().mons.length) return;
+      const f = document.createElement('form'); f.method = 'post'; f.action = 'https://pokepast.es/create'; f.target = '_blank';
+      for (const [k, v] of [['paste', exportText()], ['title', team().name || 'ARdex team'], ['author', ''], ['notes', champ() ? 'Pokémon Champions team (Stat Points shown as EVs). Made with ARdex.' : 'Made with ARdex.']]) {
+        const t = document.createElement('textarea'); t.name = k; t.value = v; f.appendChild(t);
+      }
+      f.hidden = true; document.body.appendChild(f); f.submit(); f.remove();
+    });
     $('imp').addEventListener('click', () => { $('impbox').hidden = false; ($('imptext') as HTMLTextAreaElement).focus(); });
     $('impx').addEventListener('click', () => { $('impbox').hidden = true; });
     $('impgo').addEventListener('click', () => {
-      const v = ($('imptext') as HTMLTextAreaElement).value.trim(); const { out, miss } = parseTeam(fromLink(v) ?? v);
+      const v = ($('imptext') as HTMLTextAreaElement).value.trim(); const { out, miss, looksSp } = parseTeam(fromLink(v) ?? v);
       if (!out.length) { say("Couldn't read any Pokémon from that. Paste the team in Showdown's export format."); return; }
+      if (looksSp && !champ()) { team().fmt = 'champ'; miss.unshift('__sp'); }
+      if (champ() && !looksSp) for (const m of out) m.evs = m.evs.map(evToSp) as Set6;
+      if (champ()) for (const m of out) { m.level = 50; m.ivs = [31, 31, 31, 31, 31, 31]; }
       team().mons = out; sel = 0; $('impbox').hidden = true; ($('imptext') as HTMLTextAreaElement).value = ''; drawAll();
-      say(`Loaded ${out.length} Pokémon.${miss.length ? ` Not found: ${miss.join(', ')}.` : ''}`);
+      const sp = miss[0] === '__sp'; if (sp) miss.shift();
+      say(`Loaded ${out.length} Pokémon.${sp ? ' The spreads look like Champions Stat Points, so the format was set to Pokémon Champions.' : ''}${miss.length ? ` Not found: ${miss.join(', ')}.` : ''}`);
     });
 
     Promise.all([fetch('/search-index.json').then((r) => r.json()), fetch('/tb.json').then((r) => r.json())]).then(([a, b]) => {
@@ -302,8 +305,8 @@ import { GAMES, meta } from '../lib/data';
       const shared = p.get('team');
       if (shared) {
         try {
-          const { out } = parseTeam(unb64(shared));
-          if (out.length) { teams.push({ ...blank(), name: p.get('name') || 'Shared team', mons: out }); cur = teams.length - 1; say(`Loaded a shared team with ${out.length} Pokémon. It's now saved in this browser.`); }
+          const { out, looksSp } = parseTeam(unb64(shared));
+          if (out.length) { teams.push({ ...blank(), name: p.get('name') || 'Shared team', fmt: looksSp ? 'champ' : 'all', mons: out }); cur = teams.length - 1; say(`Loaded a shared team with ${out.length} Pokémon. It's now saved in this browser.`); }
         } catch { say("That team link couldn't be read."); }
         history.replaceState(null, '', location.pathname);
       }

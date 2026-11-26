@@ -24,6 +24,7 @@ import { GAMES, meta } from '../lib/data';
       <button class="sm" id="copy" type="button" disabled>Copy for Showdown</button>
       <a class="sm" href="https://play.pokemonshowdown.com/teambuilder" target="_blank" rel="noopener">Open Showdown ↗</a>
       <button class="sm" id="imp" type="button">Import</button>
+      <button class="sm" id="paste" type="button" disabled>Create PokéPaste ↗</button>
       <button class="sm" id="share" type="button" disabled>Copy link</button>
       <button class="sm" id="clear" type="button" disabled>Clear</button>
     </div>
@@ -65,6 +66,7 @@ import { GAMES, meta } from '../lib/data';
   </script>
   <script>
     import { autocomplete } from '../lib/ac';
+    import { parseShowdown, moveId } from '../lib/showdown';
     const { TYPES, CHART, COLORS, ABDEF } = (window as any).__TW as { TYPES: string[]; CHART: Record<string, Record<string, number>>; COLORS: Record<string, string>; ABDEF: Record<string, any> };
     type Sp = [string, string, string[], string | null, number, string, string[], string | null];
     type Idx = { species: Sp[]; moves: Record<string, [string, string, string]>; learn: Record<string, number[]> };
@@ -118,7 +120,7 @@ import { GAMES, meta } from '../lib/data';
       const d = idx!;
       $('n').textContent = `${team.length} / 12`;
       add.disabled = team.length >= 12; add.placeholder = team.length >= 12 ? 'Team is full' : 'Add a Pokémon…';
-      ['copy', 'share', 'clear'].forEach((k) => (($(k) as HTMLButtonElement).disabled = !team.length));
+      ['copy', 'share', 'clear', 'paste'].forEach((k) => (($(k) as HTMLButtonElement).disabled = !team.length));
       const q = team.map((t) => [d.species[t.i][0], t.moves.filter(Boolean).join('.'), toID(t.ab)].join(':').replace(/:+$/, '')).join(',');
       history.replaceState(null, '', team.length ? `?t=${q}` : location.pathname);
       $('res').hidden = !team.length; if (!team.length) return;
@@ -193,24 +195,23 @@ import { GAMES, meta } from '../lib/data';
       say('Copied. In Showdown: Teambuilder → New team → Import from text, then paste.');
     });
     $('share').addEventListener('click', async () => { await navigator.clipboard.writeText(location.href); say('Link copied.'); });
+    $('paste').addEventListener('click', () => {
+      const d = idx!; if (!team.length) return;
+      const text = team.map((t) => [d.species[t.i][1], ...(t.ab ? [`Ability: ${t.ab}`] : []), ...t.moves.map((m) => m && mv(m)).filter(Boolean).map((x) => `- ${x![0]}`)].join('\n')).join('\n\n') + '\n';
+      const f = document.createElement('form'); f.method = 'post'; f.action = 'https://pokepast.es/create'; f.target = '_blank';
+      for (const [k, v] of [['paste', text], ['title', 'ARdex team'], ['author', ''], ['notes', 'Made with ARdex.']]) { const ta = document.createElement('textarea'); ta.name = k; ta.value = v; f.appendChild(ta); }
+      f.hidden = true; document.body.appendChild(f); f.submit(); f.remove();
+    });
     fmtSel.addEventListener('change', () => cards());
 
     // import a Showdown-format team (also what mypokemonteam.com links carry, base64-encoded)
     const importText = async (text: string) => {
       const d = await load(); const out: Member[] = []; const miss: string[] = [];
-      for (const block of text.replace(/\r/g, '').split(/\n\s*\n/)) {
-        const lines = block.split('\n').map((l) => l.trim()).filter(Boolean); if (!lines.length) continue;
-        let head = lines[0].split(' @ ')[0].replace(/\s*\((M|F)\)\s*$/, '').trim();
-        const paren = head.match(/\(([^)]+)\)\s*$/); if (paren) head = paren[1];
-        const i = findSpecies(d, head); if (i < 0) { miss.push(head); continue; }
-        const abLine = lines.find((l) => /^Ability:/i.test(l));
-        const ab = abLine ? abLine.replace(/^Ability:\s*/i, '') : abilitiesOf(d.species[i])[0] ?? '';
-        const moves = lines.filter((l) => l.startsWith('-')).map((l) => {
-          const name = l.replace(/^-\s*/, ''); const hp = name.match(/^Hidden Power\s*\[?(\w+)\]?/i);
-          if (hp && TYPES.some((t) => t.toLowerCase() === hp[1].toLowerCase())) return `hiddenpower-${hp[1].toLowerCase()}`;
-          const id = toID(name); return d.moves[id] ? id : '';
-        }).filter(Boolean).slice(0, 4);
-        out.push({ i, moves, ab }); if (out.length >= 12) break;
+      const sets = parseShowdown(text, (n) => !!d.moves[moveId(n, TYPES)] || /^hiddenpower-/.test(moveId(n, TYPES)), (n) => findSpecies(d, n) >= 0);
+      for (const x of sets) {
+        const i = findSpecies(d, x.species); if (i < 0) { miss.push(x.species); continue; }
+        const moves = x.moves.map((n) => moveId(n, TYPES)).filter((id) => d.moves[id] || /^hiddenpower-\w+$/.test(id)).slice(0, 4);
+        out.push({ i, moves, ab: x.ability || abilitiesOf(d.species[i])[0] || '' }); if (out.length >= 12) break;
       }
       if (!out.length) { say("Couldn't read any Pokémon from that. Paste the team in Showdown's export format."); return; }
       team.length = 0; team.push(...out); cards();
