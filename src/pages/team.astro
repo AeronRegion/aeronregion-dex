@@ -46,7 +46,7 @@ import { GAMES, meta } from '../lib/data';
     const { TYPES, COLORS } = (window as any).__TB as { TYPES: string[]; COLORS: Record<string, string> };
     type Sp = [string, string, string[], string | null, number, string, string[], string | null];
     type Idx = { species: Sp[]; moves: Record<string, [string, string, string]>; learn: Record<string, number[]> };
-    type Tb = { stats: number[][]; items: [string, string, string][] };
+    type Tb = { stats: number[][]; items: [string, string, string][]; moves: Record<string, [number | null, number | null, number, string]> };
     type Set6 = [number, number, number, number, number, number];
     type Mon = { sp: string; ab: string; item: string; moves: string[]; nature: string; evs: Set6; ivs: Set6; level: number; tera: string };
     type Team = { id: string; name: string; fmt: string; mons: Mon[] };
@@ -244,7 +244,7 @@ import { GAMES, meta } from '../lib/data';
       ed.querySelectorAll<HTMLInputElement>('.mvin').forEach((inp) => {
         const j = +inp.dataset.j!;
         const setMove = (name: string) => { const v = name.trim().toLowerCase(); m.moves[j] = v ? (Object.keys(idx.moves).find((x) => idx.moves[x][0].toLowerCase() === v) ?? m.moves[j]) : ''; save(); };
-        autocomplete(inp, () => learnOf(i).map((x) => idx.moves[x]).filter(Boolean).map(([label, type, cat]) => ({ label, type, cat })).sort((a, b) => a.label.localeCompare(b.label)),
+        autocomplete(inp, () => learnOf(i).filter((x) => idx.moves[x]).map((x) => { const [label, type, cat] = idx.moves[x]; const md = tb.moves[x]; return { label, type, cat, move: md ? { pow: md[0], acc: md[1], pp: md[2], desc: md[3] } : undefined }; }).sort((a, b) => a.label.localeCompare(b.label)),
           (it) => { setMove(it.label); drawEd(); (ed.querySelectorAll<HTMLInputElement>('.mvin')[j + 1])?.focus(); }, 12, true);
         inp.addEventListener('change', () => { setMove(inp.value); drawEd(); });
       });

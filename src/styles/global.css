@@ -123,6 +123,14 @@ table { border-collapse: collapse; width: 100%; }
 .ac-s { color: var(--ink-soft); font-size: .8rem; }
 .ac-t { font-weight: 700; font-size: .7rem; padding: 0 .4rem; border: 1px solid rgb(0 0 0 / .3); }
 .ac-c { font-weight: 700; font-size: .65rem; color: #fff; padding: .05rem .35rem; }
+.ac.ac-rich .ac-row { display: grid; grid-template-columns: 9.5rem 4.2rem 2.6rem 2.6rem 2.6rem 2.2rem 1fr; gap: .45rem; font-size: .85rem; padding: .3rem .6rem; }
+.ac.ac-rich .ac-l { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ac.ac-rich .ac-t { text-align: center; }
+.ac.ac-rich .ac-c { text-align: center; align-self: center; }
+.ac-n { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.ac-n small { display: block; font-size: .58rem; font-weight: 600; color: var(--ink-soft); }
+.ac-d { font-size: .75rem; color: var(--ink-soft); line-height: 1.25; }
+@media (max-width: 640px) { .ac.ac-rich .ac-row { grid-template-columns: 1fr 4rem 2.4rem 2.4rem; } .ac.ac-rich .ac-row > :nth-child(n+5) { display: none; } }
 select.field { appearance: none; -webkit-appearance: none; padding-right: 2.2rem; cursor: pointer; font-weight: 600;
   background-image: linear-gradient(45deg, transparent 50%, var(--ink) 50%), linear-gradient(135deg, var(--ink) 50%, transparent 50%);
   background-position: calc(100% - 16px) 55%, calc(100% - 11px) 55%; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }

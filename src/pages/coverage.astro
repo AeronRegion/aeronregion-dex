@@ -80,6 +80,8 @@ import { GAMES, meta } from '../lib/data';
       if (!learnable) { learnable = new Map(); for (const [m, arr] of Object.entries(d.learn)) for (let k = 0; k < arr.length; k += 2) { const e: [string, number] = [m, arr[k + 1]]; const l = learnable.get(arr[k]); l ? l.push(e) : learnable.set(arr[k], [e]); } }
       const w = want(); return (learnable.get(i) ?? []).filter(([, mask]) => mask & w).map(([m]) => m);
     };
+    let details: Promise<Record<string, [number | null, number | null, number, string]>> | null = null;
+    const moveDetails = () => (details ??= fetch('/tb.json').then((r) => r.json()).then((x) => x.moves));
     const team: Member[] = [];
     const $ = (id: string) => document.getElementById(id)!;
     const add = $('add') as HTMLInputElement;
@@ -166,7 +168,7 @@ import { GAMES, meta } from '../lib/data';
         el.querySelectorAll<HTMLInputElement>('.mvin').forEach((inp) => {
           const j = +inp.dataset.j!;
           const setMove = (name: string) => { const id = Object.keys(d.moves).find((m) => d.moves[m][0].toLowerCase() === name.trim().toLowerCase()) ?? ''; t.moves[j] = id; inp.parentElement!.querySelector('.mvt')?.remove(); inp.insertAdjacentHTML('afterend', mvTag(id ? mv(id) : null)); draw(); };
-          autocomplete(inp, async () => (await learnOf(t.i)).map((m) => d.moves[m]).filter(Boolean).map(([label, type, cat]) => ({ label, type, cat })).sort((a, b) => a.label.localeCompare(b.label)), (it) => { setMove(it.label); (el.querySelectorAll<HTMLInputElement>('.mvin')[j + 1])?.focus(); }, 12, true);
+          autocomplete(inp, async () => { const md = await moveDetails(); return (await learnOf(t.i)).filter((m) => d.moves[m]).map((m) => { const [label, type, cat] = d.moves[m]; const x = md[m]; return { label, type, cat, move: x ? { pow: x[0], acc: x[1], pp: x[2], desc: x[3] } : undefined }; }).sort((a, b) => a.label.localeCompare(b.label)); }, (it) => { setMove(it.label); (el.querySelectorAll<HTMLInputElement>('.mvin')[j + 1])?.focus(); }, 12, true);
           inp.addEventListener('change', () => setMove(inp.value));
         });
       });
