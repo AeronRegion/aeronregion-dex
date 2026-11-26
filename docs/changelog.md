@@ -16,3 +16,4 @@
 - 2026-11-26: Move category icons redrawn as round PokemonDB-style badges (one shared drawing in src/lib/ac.ts)
 - 2026-11-26: Added `npm run check:mobile` (scripts/check-mobile.mjs) and a CLAUDE.md rule to run it before every visual push
 - 2026-11-26: Teambuilder rebuilt on Showdown's compact layout: set card on top, EV editor and always-open pick list side by side, "Remaining" for the selected format, HOME renders for normal and shiny art, Pokémon filters (type/ability/move chips)
+- 2026-11-26: Teambuilder tabs keep the same box icon when a Pokémon is shiny (small gold star instead of switching to a different sprite)

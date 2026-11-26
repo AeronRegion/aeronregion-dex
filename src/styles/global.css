@@ -446,3 +446,6 @@ html[data-theme='dark'] #ed.sd .detbox, html[data-theme='dark'] #ed.sd .c-sum, h
   #ed.sd .mlist[data-kind='sp'] .mhead > :nth-child(n+3):not(:last-child), #ed.sd .mlist[data-kind='sp'] .mr > :nth-child(n+3):not(:last-child) { display: none; }
 }
 @media (max-width: 640px) { #ed.sd .c-sum { display: none; } }
+/* team tabs: same box icon for shiny (box icons have no shiny version), with a small star */
+.slotb { position: relative; }
+.slotb .tabstar { position: absolute; top: 2px; right: 4px; font-style: normal; font-size: 11px; color: #d4a017; line-height: 1; }
