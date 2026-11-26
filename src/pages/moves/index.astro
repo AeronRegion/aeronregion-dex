@@ -6,6 +6,8 @@ import { moves, moveUrl } from '../../lib/data';
 import { TYPES } from '../../lib/types';
 const catOrder: Record<string, number> = { Physical: 0, Special: 1, Status: 2 };
 const TAGS = ['Multi-hit', 'Priority', 'Negative priority', 'Spread', 'Contact', 'Sound', 'Punch', 'Bite', 'Slicing', 'Pulse', 'Ball / bomb', 'Wind', 'Healing', 'Draining', 'Recoil', 'High crit', 'Pivot (switches out)', 'Two-turn', 'Secondary effect'];
+// any other tag in the data (Let's Go exclusive, Z-Move, Max Move…) also gets an option, so every tag link filters
+TAGS.push(...[...new Set(moves.flatMap((m) => m.tags))].filter((t) => !TAGS.includes(t)).sort());
 const list = [...moves].sort((a, b) => catOrder[a.cat] - catOrder[b.cat] || a.name.localeCompare(b.name));
 ---
 <Base title="Pokémon moves list" description="Every move with type, category, power, accuracy, PP, priority and target.">
