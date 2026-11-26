@@ -38,23 +38,13 @@ import { GAMES, meta } from '../lib/data';
   <div id="res" hidden>
     <div class="sums">
       <div>
-        <h3 class="sec">Team defense</h3>
-        <div class="sum" id="sumdef"></div>
-        <p class="note">Members that resist or are immune, minus members that are weak. <b class="pos">Green</b> is good, <b class="neg">red</b> is a hole.</p>
-      </div>
-      <div>
-        <h3 class="sec">Moveset coverage</h3>
-        <div class="sum" id="sumoff"></div>
-        <p class="note" id="offnote"></p>
-      </div>
-    </div>
-    <div class="sums">
-      <div>
-        <h3 class="sec">Defense by member</h3>
+        <h3 class="sec">Defense</h3>
+        <p class="note">Damage each type does to each member. <b>Net</b> is members that resist or are immune minus members that are weak: <span class="pos">+</span> is covered, <span class="neg">−</span> is a hole.</p>
         <div class="mx-wrap"><table class="mx" id="def"></table></div>
       </div>
       <div>
-        <h3 class="sec">Moveset coverage by member</h3>
+        <h3 class="sec">Moveset coverage</h3>
+        <p class="note" id="offnote"></p>
         <div class="mx-wrap"><table class="mx" id="off"></table></div>
       </div>
     </div>
@@ -131,9 +121,9 @@ import { GAMES, meta } from '../lib/data';
       // defense
       const rows = TYPES.map((t) => { const ms = team.map((m) => defMult(t, d.species[m.i][2], m.ab)); return { t, ms, w: ms.filter((m) => m > 1).length, r: ms.filter((m) => m < 1).length }; });
       const score = (n: number) => `<b class="${n > 0 ? 'pos' : n < 0 ? 'neg' : 'z'}">${n > 0 ? '+' : ''}${n}</b>`;
-      $('sumdef').innerHTML = rows.map((r) => `<div class="sc" title="${r.t}: ${r.r} resist or immune, ${r.w} weak">${chip(r.t)}${score(r.r - r.w)}</div>`).join('');
-      $('def').innerHTML = head(d, '<th class="tot">Weak</th><th class="tot">Resist</th><th class="gap"></th>') + `</tr></thead><tbody>` +
-        rows.map((r) => `<tr><th>${chip(r.t)}</th><td class="tot weak${r.w ? '' : ' zero'}">${r.w}</td><td class="tot res${r.r ? '' : ' zero'}">${r.r}</td><td class="gap"></td>${r.ms.map((m) => cell(m)).join('')}</tr>`).join('') + '</tbody>';
+      const net = (r: { w: number; r: number }) => r.r - r.w;
+      $('def').innerHTML = head(d, '<th class="tot">Weak</th><th class="tot">Resist</th><th class="tot">Net</th><th class="gap"></th>') + `</tr></thead><tbody>` +
+        rows.map((r) => { const n = net(r); return `<tr><th>${chip(r.t)}</th><td class="tot weak${r.w ? '' : ' zero'}">${r.w}</td><td class="tot res${r.r ? '' : ' zero'}">${r.r}</td><td class="tot ${n > 0 ? 'res' : n < 0 ? 'neg' : 'zero'}">${n > 0 ? '+' : ''}${n}</td><td class="gap"></td>${r.ms.map((m) => cell(m)).join('')}</tr>`; }).join('') + '</tbody>';
 
       // coverage: best multiplier each member's damaging moves get against each type
       const dmg = team.map((m) => m.moves.filter((id) => { const x = id && mv(id); return x && x[2] !== 'Status'; }));
@@ -146,13 +136,12 @@ import { GAMES, meta } from '../lib/data';
         });
         return { def, best, se: best.filter((x) => x.b > 1).length };
       });
-      $('sumoff').innerHTML = offRows.map((r) => `<div class="sc" title="${r.def}: ${r.se} member${r.se === 1 ? '' : 's'} hit it super effectively">${chip(r.def)}<b class="${!anyMoves ? 'z' : r.se ? 'pos' : 'neg'}">${anyMoves ? (r.se ? '+' + r.se : '0') : '–'}</b></div>`).join('');
       const none = offRows.filter((r) => r.se === 0).map((r) => r.def);
       $('offnote').innerHTML = !anyMoves ? 'Add attacking moves to see what the team hits super effectively.'
         : none.length ? `Members with a super-effective move against each type. <b class="neg">No answer to ${none.join(', ')}.</b>`
         : `Members with a super-effective move against each type. <b class="pos">Every type is covered.</b>`;
       $('off').innerHTML = head(d, '<th class="tot">Hit 2×</th><th class="gap"></th>') + `</tr></thead><tbody>` +
-        offRows.map((r) => `<tr class="${anyMoves && r.se === 0 ? 'hole' : ''}"><th>${chip(r.def)}</th><td class="tot cov${r.se ? '' : ' zero'}">${r.se}</td><td class="gap"></td>${r.best.map((x) => x.b < 0 ? '<td class="none"></td>' : cell(x.b, `${x.by}: ${txt(x.b) || '1'}×`)).join('')}</tr>`).join('') + '</tbody>';
+        offRows.map((r) => `<tr><th>${chip(r.def)}</th><td class="tot ${r.se ? 'res' : 'neg'}">${r.se}</td><td class="gap"></td>${r.best.map((x) => x.b < 0 ? '<td class="none"></td>' : cell(x.b, `${x.by}: ${txt(x.b) || '1'}×`)).join('')}</tr>`).join('') + '</tbody>';
     };
 
     const cards = () => {
@@ -307,6 +296,7 @@ import { GAMES, meta } from '../lib/data';
   .mx :global(td.tot) { width: 58px; font-size: .95rem; border-width: 2px; }
   .mx :global(td.weak) { color: #a40000; border-color: #a40000; background: var(--weak-bg); }
   .mx :global(td.res) { color: #2f6b06; border-color: #4e9a06; background: var(--res-bg); }
+  .mx :global(td.neg) { color: #fff; border-color: #a40000; background: #a40000; }
   .mx :global(td.cov) { color: #1f5f8a; border-color: #59c4fb; background: var(--cov-bg); }
   .mx :global(td.tot.zero) { color: var(--ink-soft); background: var(--card); border-color: var(--line); font-weight: 500; }
   .mx :global(tr.worst td.weak) { background: #a40000; color: #fff; }
