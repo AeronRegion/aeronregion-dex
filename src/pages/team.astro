@@ -243,7 +243,7 @@ import { GAMES, meta } from '../lib/data';
       const i = spIndex.get(m.sp) ?? 0;
       // Showdown-style picker: a list under the editor for whichever box has focus (Pokémon, ability, item or a move).
       // Each row carries the information you need to choose, and typing filters it.
-      ed.insertAdjacentHTML('beforeend', '<div class="mlist" hidden><div class="mhead"></div><div class="mbody"></div></div>');
+      ed.querySelector('.col.c')!.insertAdjacentHTML('beforebegin', '<div class="mlist" hidden><div class="mhead"></div><div class="mbody"></div></div>');
       const hideList = () => { const main = document.querySelector<HTMLElement>('main'); if (main) main.style.minHeight = main.offsetHeight + 'px'; list.hidden = true; };
       const list = ed.querySelector<HTMLElement>('.mlist')!, headEl = list.querySelector<HTMLElement>('.mhead')!, body = list.querySelector<HTMLElement>('.mbody')!;
       type Kind = 'sp' | 'ab' | 'item' | 'mv';
