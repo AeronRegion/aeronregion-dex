@@ -418,7 +418,7 @@ import { GAMES, meta } from '../lib/data';
   .strip :global(.slotadd .field) { width: 100%; }
   .ed { display: grid; grid-template-columns: 240px 1fr 1.3fr; gap: 1.6rem; border: 2px solid var(--ink); background: var(--card); padding: 1rem; }
   @media (max-width: 1000px) { .ed { grid-template-columns: 1fr 1fr; } .ed :global(.col.c) { grid-column: 1 / -1; } }
-  @media (max-width: 640px) { .ed { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) { .ed { grid-template-columns: 1fr; } .ed :global(.barc), .ed :global(.stt thead th:nth-child(3)) { display: none; } }
   .ed :global(.col) { display: flex; flex-direction: column; gap: .5rem; min-width: 0; }
   .ed :global(.who) { display: flex; justify-content: center; }
   .ed :global(.fl) { display: flex; flex-direction: column; gap: .15rem; font-size: .78rem; font-weight: 700; color: var(--ink-soft); }
