@@ -18,3 +18,4 @@
 - 2026-11-26: Teambuilder rebuilt on Showdown's compact layout: set card on top, EV editor and always-open pick list side by side, "Remaining" for the selected format, HOME renders for normal and shiny art, Pokémon filters (type/ability/move chips)
 - 2026-11-26: Teambuilder tabs keep the same box icon when a Pokémon is shiny (small gold star instead of switching to a different sprite)
 - 2026-11-26: Coverage checker cells are squares (32px, 25px on phones) instead of wide flat rectangles
+- 2026-11-26: Coverage checker Defense: defensive colours (red = weak, green = resists, black = immune), Good/OK/Bad per type, Weak/Resist counts in aligned columns; explanation text removed

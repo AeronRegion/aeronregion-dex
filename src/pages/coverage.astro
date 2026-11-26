@@ -39,7 +39,6 @@ import { GAMES, meta } from '../lib/data';
     <div class="sums">
       <div>
         <h3 class="sec">Defense</h3>
-        <p class="note">Damage each type does to each member. <b>Net</b> is members that resist or are immune minus members that are weak: <span class="pos">+</span> is covered, <span class="neg">−</span> is a hole.</p>
         <div class="mx-wrap"><table class="mx" id="def"></table></div>
       </div>
       <div>
@@ -104,6 +103,9 @@ import { GAMES, meta } from '../lib/data';
     const txt = (m: number) => m === 1 ? '' : m === 0 ? '0' : m === 0.5 ? '½' : m === 0.25 ? '¼' : m === 0.75 ? '¾' : String(+m.toFixed(2));
     const bg = (m: number) => m === 1 ? '' : m === 0 ? '#2e3436' : m >= 4 ? '#73d216' : m > 1 ? '#4e9a06' : m <= 0.25 ? '#7c0000' : '#a40000';
     const cell = (m: number, title = '') => `<td title="${title}" style="${bg(m) ? `background:${bg(m)};color:${m === 0 ? '#fff' : '#ffdd57'}` : ''}">${txt(m)}</td>`;
+    // defense cells use defensive colours: red = takes extra damage, green = takes less, black = immune
+    const dcell = (m: number) => { const c = m === 0 ? 'im' : m >= 4 ? 'w4' : m > 1 ? 'w2' : m <= 0.25 ? 'r4' : m < 1 ? 'r2' : ''; return `<td class="dc ${c}">${m === 1 ? '' : m === 0 ? '0' : m === 0.5 ? '½' : m === 0.25 ? '¼' : m + '×'}</td>`; };
+    const verdict = (w: number, r: number) => (w >= 3 || w - r >= 2 ? ['bad', 'Bad'] : w > r || (w > 0 && w === r) ? ['ok', 'OK'] : ['good', 'Good']);
     const head = (d: Idx, lead = '') => `<thead><tr><th></th>${lead}${team.map((t) => { const s = d.species[t.i]; return `<th class="mh" title="${esc(s[1])}"><img src="${s[3] ? SPR + s[3] + '.png' : ''}" alt="" width="40" height="40" /></th>`; }).join('')}`;
     // small type tag shown inside a move box
     const mvTag = (x: [string, string, string] | null) => x ? `<span class="mvt" style="background:${COLORS[x[1]]}" title="${x[1]} · ${x[2]}">${x[1].slice(0, 3).toUpperCase()}</span>` : '';
@@ -122,8 +124,8 @@ import { GAMES, meta } from '../lib/data';
       const rows = TYPES.map((t) => { const ms = team.map((m) => defMult(t, d.species[m.i][2], m.ab)); return { t, ms, w: ms.filter((m) => m > 1).length, r: ms.filter((m) => m < 1).length }; });
       const score = (n: number) => `<b class="${n > 0 ? 'pos' : n < 0 ? 'neg' : 'z'}">${n > 0 ? '+' : ''}${n}</b>`;
       const net = (r: { w: number; r: number }) => r.r - r.w;
-      $('def').innerHTML = head(d, '<th class="tot">Weak</th><th class="tot">Resist</th><th class="tot">Net</th><th class="gap"></th>') + `</tr></thead><tbody>` +
-        rows.map((r) => { const n = net(r); return `<tr><th>${chip(r.t)}</th><td class="tot weak${r.w ? '' : ' zero'}">${r.w}</td><td class="tot res${r.r ? '' : ' zero'}">${r.r}</td><td class="tot ${n > 0 ? 'res' : n < 0 ? 'neg' : 'zero'}">${n > 0 ? '+' : ''}${n}</td><td class="gap"></td>${r.ms.map((m) => cell(m)).join('')}</tr>`; }).join('') + '</tbody>';
+      $('def').innerHTML = head(d) + '<th class="gap"></th><th class="vh">Team</th><th class="tot">Weak</th><th class="tot">Resist</th></tr></thead><tbody>' +
+        rows.map((r) => { const [vc, vt] = verdict(r.w, r.r); return `<tr><th>${chip(r.t)}</th>${r.ms.map(dcell).join('')}<td class="gap"></td><td class="vd"><span class="pill ${vc}">${vt}</span></td><td class="tot cnt${r.w ? ' wk' : ''}">${r.w}</td><td class="tot cnt${r.r ? ' rs' : ''}">${r.r}</td></tr>`; }).join('') + '</tbody>';
 
       // coverage: best multiplier each member's damaging moves get against each type
       const dmg = team.map((m) => m.moves.filter((id) => { const x = id && mv(id); return x && x[2] !== 'Status'; }));
