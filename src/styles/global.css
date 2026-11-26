@@ -199,3 +199,10 @@ main p a:not([class]):hover, main .note a:hover { text-decoration: underline; }
 /* readability: names and key values a little heavier, secondary text darker */
 table.data td a, .mr b, .evo b, .card b, .kv td, .st b, .slotb span, .tabs button, .ed .fl .ll, .tchip, .chip { font-weight: 600 !important; }
 .mr .r, .tc b, h1 .kind { font-weight: 600 !important; }
+/* type matchup grids keep light neutral cells in dark mode, so the colored ones stand out */
+html[data-theme='dark'] .tchart td:not([style*='background']), html[data-theme='dark'] .tc b:not([style*='background']), html[data-theme='dark'] .mx td:not([style*='background']):not(.tot):not(.gap):not(.none) { background: #eef1f4 !important; border-color: #c5ccd4 !important; color: #1c2733 !important; }
+html[data-theme='dark'] .mx td.none { background: repeating-linear-gradient(45deg, #d5dbe2 0 4px, #eef1f4 4px 8px) !important; }
+/* any text that links somewhere is link blue (buttons, type labels and tiles keep their own colors) */
+main a:not(.chip):not(.block):not(.tile):not(.sm):not(.evb):not(.card):not(.evo):not(.tc a):not(.tchart a):not(.pick a):not(.hero a):not(.dexl):not([class*='chip']) { color: var(--link) !important; }
+main .card b, main .evo b { color: var(--link) !important; }
+main a:not(.chip):not(.block):not(.tile):not(.sm):not(.tc a):not(.tchart a):not(.pick a):not(.hero a):hover { text-decoration: underline; }
