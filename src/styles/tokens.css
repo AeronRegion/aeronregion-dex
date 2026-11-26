@@ -8,31 +8,31 @@
    ───────────────────────────────────────────────────────────── */
 :root {
   /* Color */
-  --petal:        #f4dcd8;  /* page background */
-  --petal-deep:   #eac3c0;  /* hover rows, subtle fills */
+  --petal:        #f2f3f5;  /* page background */
+  --petal-deep:   #e1e4e8;  /* hover rows, subtle fills */
   --blossom:      #e895b0;  /* primary buttons */
-  --ink:          #2e1a20;  /* text, outlines */
-  --ink-soft:     #6b4a50;  /* secondary text on petal */
-  --brick:        #5a2731;  /* dark bands, nav, footer */
-  --brick-deep:   #351820;
-  --on-brick:     #f6e7e2;
-  --on-brick-soft:#cfa9a6;
+  --ink:          #1f2329;  /* text, outlines */
+  --ink-soft:     #5d6570;  /* secondary text on petal */
+  --brick:        #3b4049;  /* dark bands, nav, footer */
+  --brick-deep:   #23262b;
+  --on-brick:     #f2f3f5;
+  --on-brick-soft:#aab1bb;
   --teal:         #56c6bb;  /* online / live */
   --teal-ink:     #1f6f67;  /* teal text on petal */
   --leaf:         #b4c07c;
-  --card:         #fff7f5;  /* inputs, cards, table cells */
-  --line:         #e2c3bf;  /* hairlines, empty cells */
-  --line-2:       #d9b9b4;
-  --stripe:       #f3e4e1;
-  --zebra:        rgb(255 255 255 / .35);
+  --card:         #ffffff;  /* inputs, cards, table cells */
+  --line:         #d8dce1;  /* hairlines, empty cells */
+  --line-2:       #c6cbd2;
+  --stripe:       #eceef1;
+  --zebra:        rgb(0 0 0 / .025);
   --shadow:       var(--ink);
   --hover:        #1f7fb8;
   --link:         #2369a8;
-  --worst:        #f6d2cd;
+  --worst:        #f8d7d4;
   --weak-bg:      #fbe3e0;
   --res-bg:       #e4f2d9;
   --cov-bg:       #e3f4fd;
-  --track:        #ead1cd;
+  --track:        #e3e6ea;
 
   /* Nametag plate (the floating label above players) */
   --tag-bg:       rgb(0 0 0 / .32);
@@ -51,14 +51,14 @@
 /* Dark mode: set on <html data-theme="dark"> (chosen with the header toggle, or the system setting) */
 html[data-theme='dark'] {
   color-scheme: dark;
-  --petal:        #1c1417;
-  --petal-deep:   #3a2a31;
-  --ink:          #f1e3e1;
-  --ink-soft:     #b7a0a4;
-  --card:         #281d22;
-  --line:         #44333a;
-  --line-2:       #574450;
-  --stripe:       #33262c;
+  --petal:        #16181b;
+  --petal-deep:   #2e3238;
+  --ink:          #eceef1;
+  --ink-soft:     #a3aab4;
+  --card:         #202328;
+  --line:         #363a41;
+  --line-2:       #474c55;
+  --stripe:       #2a2d33;
   --zebra:        rgb(255 255 255 / .035);
   --shadow:       #000;
   --hover:        #7fd0ff;
@@ -67,6 +67,6 @@ html[data-theme='dark'] {
   --weak-bg:      #3d1f22;
   --res-bg:       #1f3319;
   --cov-bg:       #16303d;
-  --track:        #3a2d33;
+  --track:        #30343a;
   --teal-ink:     #7fd8ce;
 }

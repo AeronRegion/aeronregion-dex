@@ -167,6 +167,7 @@ import { GAMES, meta } from '../lib/data';
       const addIn = document.getElementById('addmon') as HTMLInputElement | null;
       if (addIn) autocomplete(addIn, () => idx.species.map((s) => ({ label: s[1], sub: s[2].join(' / ') })), (it) => { const i = findSpecies(it.label); if (i < 0) return; t.mons.push(newMon(i)); sel = t.mons.length - 1; save(); drawTeams(); drawStrip(); drawEd(); });
     };
+    const sortState: Record<string, { by: string; dir: number } | null> = {};
     const drawEd = () => {
       const t = team(); const ed = $('ed');
       if (!t.mons.length) { ed.hidden = true; return; }
@@ -239,10 +240,20 @@ import { GAMES, meta } from '../lib/data';
       type Kind = 'sp' | 'ab' | 'item' | 'mv';
       const movePool = learnOf(i).filter((x) => idx.moves[x]).sort((a, b) => idx.moves[a][0].localeCompare(idx.moves[b][0]));
       const HEAD: Record<Kind, string> = {
-        mv: '<span>Move</span><span>Type</span><span>Cat</span><span class="r">Pow</span><span class="r">Acc</span><span class="r">PP</span><span>Description</span>',
-        sp: '<span></span><span>Pokémon</span><span>Types</span><span>Abilities</span>' + ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe', 'BST'].map((x) => `<span class="r">${x}</span>`).join(''),
+        mv: '<button data-s="name">Move</button><button data-s="type">Type</button><button data-s="cat">Cat</button><button class="r" data-s="pow">Pow</button><button class="r" data-s="acc">Acc</button><button class="r" data-s="pp">PP</button><span>Description</span>',
+        sp: '<span></span><button data-s="name">Pokémon</button><button data-s="type">Types</button><span>Abilities</span>' + ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe', 'BST'].map((x, k) => `<button class="r" data-s="st${k}">${x}</button>`).join(''),
         ab: '<span>Ability</span><span>Description</span>',
         item: '<span></span><span>Item</span><span>Description</span>',
+      };
+      // click a column heading to sort by it (again to flip); numbers sort high to low first
+      const sortVal = (k: Kind, key: string, by: string): string | number => {
+        if (k === 'mv') { const [name, type, cat] = idx.moves[key]; const md = tb.moves[key] ?? [null, null, 0, '']; return by === 'type' ? type : by === 'cat' ? ['Physical', 'Special', 'Status'].indexOf(cat) : by === 'pow' ? md[0] ?? -1 : by === 'acc' ? md[1] ?? 101 : by === 'pp' ? md[2] : name; }
+        const x = idx.species[+key]; if (by === 'type') return x[2].join('/'); if (by === 'name') return x[1];
+        const st = tb.stats[+key]; return by === 'st6' ? st.reduce((a, b) => a + b, 0) : st[+by.slice(2)];
+      };
+      const sorted = (k: Kind, keys: string[]) => {
+        const st = sortState[k]; if (!st) return keys;
+        return [...keys].sort((a, b) => { const va = sortVal(k, a, st.by), vb = sortVal(k, b, st.by); const c = typeof va === 'number' ? (vb as number) - va : String(va).localeCompare(String(vb)); return st.dir * c || nameOf(k, a).localeCompare(nameOf(k, b)); });
       };
       const poolOf = (k: Kind): string[] => k === 'mv' ? movePool : k === 'sp' ? idx.species.map((_, x) => String(x)) : k === 'ab' ? abilitiesOf(s) : tb.items.map((_, x) => String(x));
       const nameOf = (k: Kind, key: string) => k === 'mv' ? idx.moves[key][0] : k === 'sp' ? idx.species[+key][1] : k === 'ab' ? key : tb.items[+key][0];
@@ -265,12 +276,12 @@ import { GAMES, meta } from '../lib/data';
       const LIMIT = 150;
       const fill = (q: string) => {
         const v = q.trim().toLowerCase(), pool = poolOf(kind);
-        shown = !v ? pool : [...pool.filter((x) => nameOf(kind, x).toLowerCase().startsWith(v)), ...pool.filter((x) => { const n = nameOf(kind, x).toLowerCase(); return !n.startsWith(v) && (n.includes(v) || extraMatch(kind, x, v)); })];
+        shown = !v ? sorted(kind, pool) : [...pool.filter((x) => nameOf(kind, x).toLowerCase().startsWith(v)), ...pool.filter((x) => { const n = nameOf(kind, x).toLowerCase(); return !n.startsWith(v) && (n.includes(v) || extraMatch(kind, x, v)); })];
         act = v && shown.length ? 0 : -1;
         body.innerHTML = shown.length ? shown.slice(0, LIMIT).map((x, k) => rowOf(kind, x, k === act)).join('') + (shown.length > LIMIT ? `<p class="note" style="padding:.5rem .7rem">Showing ${LIMIT} of ${shown.length}. Type to narrow it down.</p>` : '') : '<p class="note" style="padding:.5rem .7rem">Nothing matches.</p>';
       };
       const open = (k: Kind, inp: HTMLInputElement, j = -1) => {
-        kind = k; slot = j; field = inp; list.dataset.kind = k; headEl.innerHTML = HEAD[k]; list.hidden = false; inp.select(); fill(''); body.scrollTop = 0;
+        kind = k; slot = j; field = inp; list.dataset.kind = k; headEl.innerHTML = HEAD[k]; markSort(); list.hidden = false; inp.select(); fill(''); body.scrollTop = 0;
         if (list.getBoundingClientRect().top > innerHeight - 120) list.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       };
       const focusNext = (sel2: string) => (ed.querySelector<HTMLInputElement>(sel2))?.focus();
@@ -298,6 +309,12 @@ import { GAMES, meta } from '../lib/data';
       ed.querySelectorAll<HTMLInputElement>('.mvin').forEach((inp) => {
         const j = +inp.dataset.j!; wire(inp, 'mv', j);
         inp.addEventListener('change', () => { const v = inp.value.trim().toLowerCase(); if (!v) { m.moves[j] = ''; save(); } else { const hit = movePool.find((x) => idx.moves[x][0].toLowerCase() === v); if (hit) { m.moves[j] = hit; save(); } } });
+      });
+      const markSort = () => headEl.querySelectorAll<HTMLElement>('[data-s]').forEach((b) => { const st = sortState[kind]; b.classList.toggle('sorted', st?.by === b.dataset.s); b.dataset.dir = st?.by === b.dataset.s ? String(st!.dir) : ''; });
+      headEl.addEventListener('mousedown', (e) => {
+        const b = (e.target as HTMLElement).closest<HTMLElement>('[data-s]'); if (!b) return; e.preventDefault();
+        const by = b.dataset.s!, cur2 = sortState[kind]; sortState[kind] = cur2?.by === by ? (cur2.dir === 1 ? { by, dir: -1 } : null) : { by, dir: 1 };
+        markSort(); fill(field?.value && field.value !== field.defaultValue ? field.value : ''); body.scrollTop = 0;
       });
       body.addEventListener('mousedown', (e) => { const r = (e.target as HTMLElement).closest<HTMLElement>('.mr'); if (r) { e.preventDefault(); choose(r.dataset.x!); } });
       document.addEventListener('mousedown', (e) => { if (!list.hidden && !(e.target as HTMLElement).closest('.mlist') && e.target !== field) list.hidden = true; });
@@ -438,6 +455,12 @@ import { GAMES, meta } from '../lib/data';
   .ed :global(.mlist[data-kind='item'] .mhead), .ed :global(.mlist[data-kind='item'] .mr) { grid-template-columns: 30px 12rem 1fr; }
   .ed :global(.mr img) { width: 32px; height: 32px; object-fit: contain; image-rendering: pixelated; }
   .ed :global(.mhead) { font-size: .75rem; font-weight: 700; color: var(--ink-soft); border-bottom: 2px solid var(--ink); background: var(--petal-deep); }
+  .ed :global(.mhead button) { all: unset; cursor: pointer; font: inherit; white-space: nowrap; }
+  .ed :global(.mhead button:hover) { color: var(--ink); }
+  .ed :global(.mhead button.r) { text-align: right; }
+  .ed :global(.mhead button.sorted) { color: var(--ink); }
+  .ed :global(.mhead button.sorted[data-dir='1'])::after { content: ' ▾'; }
+  .ed :global(.mhead button.sorted[data-dir='-1'])::after { content: ' ▴'; }
   .ed :global(.mbody) { max-height: 360px; overflow-y: auto; }
   .ed :global(.mr) { font-size: .9rem; border-bottom: 1px solid var(--line); cursor: pointer; }
   .ed :global(.mr:hover), .ed :global(.mr.on) { background: var(--petal-deep); }
