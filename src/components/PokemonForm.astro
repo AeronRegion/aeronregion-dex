@@ -9,6 +9,20 @@ import learnData from '../data/learn.json';
 const { s, first } = Astro.props as { s: any; first: boolean };
 const learn = (learnData as Record<string, [string, string[]][]>)[s.id] ?? [];
 
+// one game per generation for the sprite table at the bottom of the overview
+const SPRITE_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
+const SPRITE_GENS = [
+  { key: 'g1', gen: 1, label: 'Gen 1', game: 'Yellow', path: 'versions/generation-i/yellow', shiny: null },
+  { key: 'g2', gen: 2, label: 'Gen 2', game: 'Crystal', path: 'versions/generation-ii/crystal', shiny: 'versions/generation-ii/crystal/shiny' },
+  { key: 'g3', gen: 3, label: 'Gen 3', game: 'Emerald', path: 'versions/generation-iii/emerald', shiny: 'versions/generation-iii/emerald/shiny' },
+  { key: 'g4', gen: 4, label: 'Gen 4', game: 'Platinum', path: 'versions/generation-iv/platinum', shiny: 'versions/generation-iv/platinum/shiny' },
+  { key: 'g5', gen: 5, label: 'Gen 5', game: 'Black & White', path: 'versions/generation-v/black-white', shiny: 'versions/generation-v/black-white/shiny' },
+  { key: 'g6', gen: 6, label: 'Gen 6', game: 'X & Y', path: 'versions/generation-vi/x-y', shiny: 'versions/generation-vi/x-y/shiny' },
+  { key: 'g7', gen: 7, label: 'Gen 7', game: 'Ultra Sun & Moon', path: 'versions/generation-vii/ultra-sun-ultra-moon', shiny: 'versions/generation-vii/ultra-sun-ultra-moon/shiny' },
+  { key: 'home', gen: 1, label: 'Gen 8–9', game: 'HOME', path: 'other/home', shiny: 'other/home/shiny' },
+];
+// a sprite that doesn't exist: blank the cell, and drop the whole game column when nothing in it exists
+const GONE = "var td=this.closest('td'),t=td.closest('table'),k=td.dataset.col;td.classList.add('gone');if(Array.prototype.every.call(t.querySelectorAll('td[data-col='+k+']'),function(c){return c.classList.contains('gone')}))t.querySelectorAll('[data-col='+k+']').forEach(function(c){c.hidden=true})";
 const imp = (m: number) => { const inch = Math.round(m * 39.3701); return `${Math.floor(inch / 12)}′${String(inch % 12).padStart(2, '0')}″`; };
 const abil = [s.abilities['0'], s.abilities['1']].filter(Boolean);
 const statColor = (b: number) => b < 50 ? '#e06a5a' : b < 80 ? '#f2a65a' : b < 100 ? '#e8c64a' : b < 130 ? '#8cc35b' : '#3fa66a';
@@ -147,6 +161,24 @@ const spawns = s.cobbleverse?.spawns ?? [];
     {s.dex.length > 0 && <>
       <h3 class="sec">Pokédex entries</h3>
       <table class="dex">{s.dex.map((d: any) => <tr><th>{d.game}</th><td>{d.text}</td></tr>)}</table>
+    </>}
+
+    {s.art && <>
+      <h3 class="sec">Sprites</h3>
+      <div class="sprites-wrap">
+        <table class="sprites">
+          <thead><tr><th></th>{SPRITE_GENS.filter((g) => g.gen >= (s.gen ?? 1)).map((g) => <th data-col={g.key}>{g.label}<small>{g.game}</small></th>)}</tr></thead>
+          <tbody>
+            {['Normal', 'Shiny'].map((kind) => (
+              <tr><th>{kind}</th>{SPRITE_GENS.filter((g) => g.gen >= (s.gen ?? 1)).map((g) => {
+                const path = kind === 'Shiny' ? g.shiny : g.path;
+                return path ? <td data-col={g.key}><img src={`${SPRITE_BASE}/${path}/${s.art}.png`} alt={`${kind} ${formLabel(s)}, ${g.game}`} loading="lazy" width="96" height="96" class:list={{ home: g.key === 'home' }} onerror={GONE} /></td> : <td data-col={g.key} class="gone"></td>;
+              })}</tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Sprites from PokéAPI. Gen 1 had no shiny Pokémon; Gen 8 and 9 are shown with HOME renders.</p>
     </>}
   </section>
 
@@ -336,6 +368,16 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .spawn dl { display: grid; grid-template-columns: 80px 1fr; gap: .1rem .8rem; margin: 0; align-content: start; }
   .spawn dt { color: var(--ink-soft); text-align: right; } .spawn dd { margin: 0; }
   .spawn + .spawn { border-top: 1px dashed var(--line); padding-top: .4rem; }
+  .sprites-wrap { overflow-x: auto; }
+  .sprites { border-collapse: separate; border-spacing: 4px; width: auto; }
+  .sprites thead th { font-size: .8rem; font-weight: 700; text-align: center; padding: 0 .3rem; white-space: nowrap; }
+  .sprites thead small { display: block; font-weight: 500; color: var(--ink-soft); font-size: .7rem; }
+  .sprites tbody th { text-align: right; font-size: .85rem; font-weight: 600; color: var(--ink-soft); padding-right: .4rem; }
+  .sprites td { width: 104px; height: 104px; text-align: center; vertical-align: middle; background: var(--card); border: 1px solid var(--line); }
+  .sprites td img { width: 96px; height: 96px; margin: 0 auto; image-rendering: pixelated; }
+  .sprites td img.home { image-rendering: auto; }
+  .sprites td.gone img { display: none; }
+  .sprites td.gone::after { content: '—'; color: var(--ink-soft); }
   .dex th { text-align: left; font-weight: 700; padding: .35rem 1rem .35rem 0; width: 200px; vertical-align: top; font-size: .92rem; }
   .dex td { padding: .35rem 0; }
   :global(.data tr.group td) { background: var(--petal-deep) !important; font-weight: 700; padding-top: .6rem; }
