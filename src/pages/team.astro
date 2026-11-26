@@ -148,7 +148,7 @@ import { GAMES, meta } from '../lib/data';
         if (x.evs) m.evs = x.evs as Set6; if (x.ivs) m.ivs = x.ivs as Set6;
         m.moves = x.moves.map((n) => moveId(n, TYPES)).filter((id) => idx.moves[id] || /^hiddenpower-\w+$/.test(id)).slice(0, 4);
         while (m.moves.length < 4) m.moves.push('');
-        out.push(m); if (out.length >= 12) break;
+        out.push(m); if (out.length >= 14) break;
       }
       return { out, miss, looksSp };
     };
@@ -163,7 +163,7 @@ import { GAMES, meta } from '../lib/data';
     const drawStrip = () => {
       const t = team();
       $('strip').innerHTML = t.mons.map((m, k) => { const s = spOf(m); return `<button type="button" class="slotb${k === sel ? ' on' : ''}" data-k="${k}" draggable="true" title="Drag to reorder"><img src="${s[3] ? SPR + 'pokemon/' + s[3] + '.png' : ''}" alt="" width="56" height="56" /><span>${esc(s[1])}</span></button>`; }).join('') +
-        (t.mons.length < 12 ? `<div class="slotadd"><input class="field" id="addmon" placeholder="+ Add Pokémon" autocomplete="off" /></div>` : '');
+        (t.mons.length < 14 ? `<div class="slotadd"><input class="field" id="addmon" placeholder="+ Add Pokémon" autocomplete="off" /></div>` : '');
       const addIn = document.getElementById('addmon') as HTMLInputElement | null;
       if (addIn) autocomplete(addIn, () => idx.species.map((s) => ({ label: s[1], sub: s[2].join(' / ') })), (it) => { const i = findSpecies(it.label); if (i < 0) return; t.mons.push(newMon(i)); sel = t.mons.length - 1; save(); drawTeams(); drawStrip(); drawEd(); });
     };
@@ -316,11 +316,11 @@ import { GAMES, meta } from '../lib/data';
       if (champ() && !looksSp) for (const m of out) m.evs = m.evs.map(evToSp) as Set6;
       if (champ()) for (const m of out) { m.level = 50; m.ivs = [31, 31, 31, 31, 31, 31]; }
       let added = out.length, dropped = 0;
-      if (append) { const room = 12 - team().mons.length; added = Math.min(room, out.length); dropped = out.length - added; team().mons.push(...out.slice(0, added)); sel = team().mons.length - 1; }
+      if (append) { const room = 14 - team().mons.length; added = Math.min(room, out.length); dropped = out.length - added; team().mons.push(...out.slice(0, added)); sel = team().mons.length - 1; }
       else { team().mons = out; sel = 0; }
       $('impbox').hidden = true; ($('imptext') as HTMLTextAreaElement).value = ''; drawAll();
       const sp = miss[0] === '__sp'; if (sp) miss.shift();
-      say(`${append ? 'Added' : 'Loaded'} ${added} Pokémon.${dropped ? ` ${dropped} didn't fit (12 max).` : ''}${sp ? ' The spreads look like Champions Stat Points, so the format was set to Pokémon Champions.' : ''}${miss.length ? ` Not found: ${miss.join(', ')}.` : ''}`);
+      say(`${append ? 'Added' : 'Loaded'} ${added} Pokémon.${dropped ? ` ${dropped} didn't fit (14 max).` : ''}${sp ? ' The spreads look like Champions Stat Points, so the format was set to Pokémon Champions.' : ''}${miss.length ? ` Not found: ${miss.join(', ')}.` : ''}`);
     };
     $('impgo').addEventListener('click', () => doImport(false));
     $('impadd').addEventListener('click', () => doImport(true));

@@ -3,9 +3,9 @@ import Base from '../layouts/Base.astro';
 import { TYPES, CHART, dbTypeColors, ABILITY_DEF } from '../lib/types';
 import { GAMES, meta } from '../lib/data';
 ---
-<Base title="Coverage checker" description="Check a team of up to 12 Pokémon: what it is weak to and which types its movesets hit super effectively.">
+<Base title="Coverage checker" description="Check a team of up to 14 Pokémon: what it is weak to and which types its movesets hit super effectively.">
   <h1>Coverage checker</h1>
-  <p class="note">Add up to 12 Pokémon and give each one up to 4 moves. The tables below show what the team is weak to and which types its moves hit super effectively.</p>
+  <p class="note">Add up to 14 Pokémon and give each one up to 4 moves. The tables below show what the team is weak to and which types its moves hit super effectively.</p>
   <div class="controls">
     <label class="lab2">Format
       <select class="field" id="fmt">
@@ -14,12 +14,12 @@ import { GAMES, meta } from '../lib/data';
         {[9, 8, 7].map((g) => <option value={g}>{GAMES[g]}</option>)}
       </select>
     </label>
-    <label class="lab2">Randomize <input class="field num" id="rn" type="number" min="1" max="12" value="6" aria-label="How many to randomize" /></label>
+    <label class="lab2">Randomize <input class="field num" id="rn" type="number" min="1" max="14" value="6" aria-label="How many to randomize" /></label>
     <button class="sm" id="rand" type="button">Randomize team</button>
   </div>
   <div class="controls">
     <div class="slot addslot"><input class="field" id="add" placeholder="Add a Pokémon…" autocomplete="off" /></div>
-    <span class="soft" id="n">0 / 12</span>
+    <span class="soft" id="n">0 / 14</span>
     <div class="acts">
       <a class="sm" href="https://play.pokemonshowdown.com/teambuilder" target="_blank" rel="noopener">Open Showdown ↗</a>
       <button class="sm" id="imp" type="button">Import</button>
@@ -119,8 +119,8 @@ import { GAMES, meta } from '../lib/data';
 
     const draw = () => {
       const d = idx!;
-      $('n').textContent = `${team.length} / 12`;
-      add.disabled = team.length >= 12; add.placeholder = team.length >= 12 ? 'Team is full' : 'Add a Pokémon…';
+      $('n').textContent = `${team.length} / 14`;
+      add.disabled = team.length >= 14; add.placeholder = team.length >= 14 ? 'Team is full' : 'Add a Pokémon…';
       ['share', 'clear', 'paste'].forEach((k) => (($(k) as HTMLButtonElement).disabled = !team.length));
       const q = team.map((t) => [d.species[t.i][0], t.moves.filter(Boolean).join('.'), toID(t.ab)].join(':').replace(/:+$/, '')).join(',');
       history.replaceState(null, '', team.length ? `?t=${q}` : location.pathname);
@@ -180,7 +180,7 @@ import { GAMES, meta } from '../lib/data';
     };
     const addMon = async (name: string) => {
       const d = await load(); const i = findSpecies(d, name);
-      if (i < 0 || team.length >= 12) return;
+      if (i < 0 || team.length >= 14) return;
       team.push({ i, moves: [], ab: abilitiesOf(d.species[i])[0] ?? '' }); add.value = ''; cards();
       ($('team').lastElementChild?.querySelector('.mvin') as HTMLInputElement | null)?.focus();
     };
@@ -206,13 +206,13 @@ import { GAMES, meta } from '../lib/data';
       for (const x of sets) {
         const i = findSpecies(d, x.species); if (i < 0) { miss.push(x.species); continue; }
         const moves = x.moves.map((n) => moveId(n, TYPES)).filter((id) => d.moves[id] || /^hiddenpower-\w+$/.test(id)).slice(0, 4);
-        out.push({ i, moves, ab: x.ability || abilitiesOf(d.species[i])[0] || '' }); if (out.length >= 12) break;
+        out.push({ i, moves, ab: x.ability || abilitiesOf(d.species[i])[0] || '' }); if (out.length >= 14) break;
       }
       if (!out.length) { say("Couldn't read any Pokémon from that. Paste the team in Showdown's export format."); return; }
       let added = out.length;
-      if (append) { added = Math.min(12 - team.length, out.length); team.push(...out.slice(0, added)); } else { team.length = 0; team.push(...out); }
+      if (append) { added = Math.min(14 - team.length, out.length); team.push(...out.slice(0, added)); } else { team.length = 0; team.push(...out); }
       cards();
-      say(`${append ? 'Added' : 'Loaded'} ${added} Pokémon.${out.length > added ? ` ${out.length - added} didn't fit (12 max).` : ''}${miss.length ? ` Not found: ${miss.join(', ')}.` : ''}`);
+      say(`${append ? 'Added' : 'Loaded'} ${added} Pokémon.${out.length > added ? ` ${out.length - added} didn't fit (14 max).` : ''}${miss.length ? ` Not found: ${miss.join(', ')}.` : ''}`);
     };
     const fromLink = (s: string) => { try { const u = new URL(s); const t = u.searchParams.get('team'); return t ? decodeURIComponent(escape(atob(t))) : null; } catch { return null; } };
     $('imp').addEventListener('click', () => { $('impbox').hidden = false; ($('imptext') as HTMLTextAreaElement).focus(); });
@@ -227,7 +227,7 @@ import { GAMES, meta } from '../lib/data';
     const pickN = <T,>(arr: T[], n: number) => { const a = arr.slice(); for (let k = a.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [a[k], a[j]] = [a[j], a[k]]; } return a.slice(0, n); };
     rBtn.addEventListener('click', async () => {
       const d = await load(); await learnOf(0);
-      const n = Math.max(1, Math.min(12, Math.round(+rnIn.value || 6))); rnIn.value = String(n);
+      const n = Math.max(1, Math.min(14, Math.round(+rnIn.value || 6))); rnIn.value = String(n);
       const pool: number[] = []; for (let i = 0; i < d.species.length; i++) if ((await learnOf(i)).length >= 4) pool.push(i);
       team.length = 0;
       for (const i of pickN(pool, n)) {
@@ -244,7 +244,7 @@ import { GAMES, meta } from '../lib/data';
       const sp = new URLSearchParams(location.search);
       const p = sp.get('t'), ext = sp.get('team');
       if (ext) { try { await importText(decodeURIComponent(escape(atob(ext)))); return; } catch { /* fall through */ } }
-      if (p) for (const part of p.split(',').slice(0, 12)) {
+      if (p) for (const part of p.split(',').slice(0, 14)) {
         const [id, mvs, abId] = part.split(':'); const i = d.species.findIndex((x) => x[0] === id); if (i < 0) continue;
         const abs = abilitiesOf(d.species[i]);
         team.push({ i, moves: (mvs ?? '').split('.').filter((m) => d.moves[m] || /^hiddenpower-\w+$/.test(m)).slice(0, 4), ab: abs.find((a) => toID(a) === abId) ?? abs[0] ?? '' });
