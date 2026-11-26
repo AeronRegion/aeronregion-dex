@@ -265,8 +265,10 @@ import { GAMES, meta } from '../lib/data';
       const poolOf = (k: Kind): string[] => k === 'mv' ? movePool : k === 'sp' ? idx.species.map((_, x) => String(x)) : k === 'ab' ? abilitiesOf(s) : tb.items.map((_, x) => String(x));
       const nameOf = (k: Kind, key: string) => k === 'mv' ? idx.moves[key][0] : k === 'sp' ? idx.species[+key][1] : k === 'ab' ? key : tb.items[+key][0];
       const extraMatch = (k: Kind, key: string, v: string) => k === 'mv' ? idx.moves[key][1].toLowerCase() === v : k === 'sp' ? idx.species[+key][2].some((t) => t.toLowerCase() === v) : false;
+      // the entry already in the box being changed: highlighted and scrolled to when the list opens
+      const isCur = (k: Kind, key: string) => k === 'mv' ? m.moves[slot] === key : k === 'sp' ? idx.species[+key][0] === m.sp : k === 'ab' ? key === m.ab : tb.items[+key][0] === m.item;
       const rowOf = (k: Kind, key: string, on: boolean) => {
-        const cls = `mr${on ? ' on' : ''}`;
+        const cls = `mr${on ? ' on' : ''}${isCur(k, key) ? ' cur' : ''}`;
         if (k === 'mv') {
           const [name, type, cat] = idx.moves[key]; const md = tb.moves[key] ?? [null, null, 0, ''];
           return `<div class="${cls}${m.moves.includes(key) ? ' has' : ''}" data-x="${key}"><b>${esc(name)}</b>${chip(type)}<svg viewBox="0 0 28 14" width="30" height="15" role="img" aria-label="${cat}"><title>${cat}</title>${CAT_SVG[cat] ?? ''}</svg><span class="r">${md[0] ?? '—'}</span><span class="r">${md[1] ?? '—'}</span><span class="r">${md[2]}</span><span class="d">${esc(md[3])}</span></div>`;
@@ -289,6 +291,8 @@ import { GAMES, meta } from '../lib/data';
       };
       const open = (k: Kind, inp: HTMLInputElement, j = -1) => {
         kind = k; slot = j; field = inp; list.dataset.kind = k; headEl.innerHTML = HEAD[k]; markSort(); list.hidden = false; inp.select(); fill(''); body.scrollTop = 0;
+        const cur3 = body.querySelector<HTMLElement>('.mr.cur'); if (cur3) body.scrollTop = cur3.getBoundingClientRect().top - body.getBoundingClientRect().top - body.clientHeight / 2 + cur3.offsetHeight / 2;
+        ed.querySelectorAll('.editing').forEach((x) => x.classList.remove('editing')); inp.classList.add('editing');
         if (list.getBoundingClientRect().top > innerHeight - 120) list.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       };
       const focusNext = (sel2: string) => (ed.querySelector<HTMLInputElement>(sel2))?.focus();
@@ -474,6 +478,9 @@ import { GAMES, meta } from '../lib/data';
   .ed :global(.mbody) { max-height: 360px; overflow-y: auto; }
   .ed :global(.mr) { font-size: .9rem; border-bottom: 1px solid var(--line); cursor: pointer; }
   .ed :global(.mr:hover), .ed :global(.mr.on) { background: var(--petal-deep); }
+  .ed :global(.mr.cur) { background: #dbeeff; box-shadow: inset 4px 0 0 #2f8fd8; }
+  :global(html[data-theme='dark']) .ed :global(.mr.cur) { background: #1d3447; }
+  .ed :global(.field.editing) { outline: 3px solid #2f8fd8; outline-offset: 0; }
   .ed :global(.mr.has b::after) { content: ' ✓'; color: var(--ink-soft); font-weight: 600; }
   .ed :global(.mr .tchip) { text-align: center; }
   .ed :global(.mr .r), .ed :global(.mhead .r) { text-align: right; font-variant-numeric: tabular-nums; }
