@@ -210,7 +210,7 @@ import { GAMES, meta } from '../lib/data';
             <tbody>${base.map((b, k) => `<tr>
               <th class="${mark(k)}">${STATNAME[k]}${k ? `<span class="nb"><button type="button" class="np${mark(k) === 'up' ? ' on' : ''}" data-k="${k}" data-d="1" title="Nature raises ${STATNAME[k]}" aria-label="Nature raises ${STATNAME[k]}">+</button><button type="button" class="np${mark(k) === 'down' ? ' on' : ''}" data-k="${k}" data-d="-1" title="Nature lowers ${STATNAME[k]}" aria-label="Nature lowers ${STATNAME[k]}">−</button></span>` : ''}</th>
               <td class="n"><b>${b}</b></td>
-              <td class="sbar"><i style="${sdBar(st[k], k)}"></i></td>
+              <td class="sbar"><i style="${sdBar(st[k] * 100 / (c ? 50 : m.level || 100), k)}"></i></td>
               <td><input class="field num ev" data-k="${k}" type="number" min="0" max="${cap.per}" step="${cap.step}" value="${m.evs[k]}" aria-label="${STATNAME[k]} ${cap.label}" /></td>
               <td class="barc"><input type="range" class="evr" data-k="${k}" min="0" max="${cap.per}" step="${cap.step}" value="${m.evs[k]}" aria-label="${STATNAME[k]} ${cap.label}" /></td>
               ${c ? '' : `<td><input class="field num iv" data-k="${k}" type="number" min="0" max="31" value="${m.ivs[k]}" aria-label="${STATNAME[k]} IVs" /></td>`}
@@ -219,7 +219,7 @@ import { GAMES, meta } from '../lib/data';
           <p class="note">Base stat total ${base.reduce((a, b) => a + b, 0)}. ${c ? 'Champions: up to 32 Stat Points per stat and 66 in total; each point adds 1 to the stat. Always Lv. 50 with perfect IVs. Copy for Showdown converts the points to EVs.' : 'EVs go up to 252 per stat and 510 in total.'}</p>
         </div>`;
       const reStats = () => { // update numbers without rebuilding the inputs, so sliders keep focus while dragging
-        const st2 = statsOf(m); ed.querySelectorAll<HTMLElement>('.stt tbody tr').forEach((tr, k) => { tr.querySelector('td:last-child b')!.textContent = String(st2[k]); tr.querySelector<HTMLElement>('.sbar i')!.setAttribute('style', sdBar(st2[k], k)); });
+        const st2 = statsOf(m); ed.querySelectorAll<HTMLElement>('.stt tbody tr').forEach((tr, k) => { tr.querySelector('td:last-child b')!.textContent = String(st2[k]); tr.querySelector<HTMLElement>('.sbar i')!.setAttribute('style', sdBar(st2[k] * 100 / (champ() ? 50 : m.level || 100), k)); });
         const tot = m.evs.reduce((a, b) => a + b, 0); const el = ed.querySelector('.evleft')!; el.textContent = `${cap.label} left: ${cap.total - tot}`; el.classList.toggle('over', tot > cap.total);
         save();
       };
