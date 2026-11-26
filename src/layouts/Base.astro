@@ -120,6 +120,20 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
         });
       });
     </script>
+    <script>
+      // Tag each data-table column by its header text (col-power, col-effect, ...) so CSS can fit tables on phones
+      const slug = (t: string) => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const tag = (t: HTMLTableElement) => {
+        const hs = [...t.querySelectorAll<HTMLTableCellElement>('thead tr:last-child th')]; if (!hs.length || t.dataset.cols === String(t.rows.length)) return;
+        const seen: Record<string, number> = {};
+        const names = hs.map((h) => { const n = (h.textContent || '').trim() === '#' ? 'num' : slug(h.textContent || '') || 'blank'; seen[n] = (seen[n] || 0) + 1; return seen[n] > 1 ? n + '-' + seen[n] : n; });
+        for (const row of t.rows) [...row.cells].forEach((c, i) => names[i] && c.classList.add('col-' + names[i]));
+        t.dataset.cols = String(t.rows.length);
+      };
+      const tagAll = () => document.querySelectorAll<HTMLTableElement>('table.data').forEach(tag);
+      tagAll();
+      let pend = 0; new MutationObserver(() => { cancelAnimationFrame(pend); pend = requestAnimationFrame(tagAll); }).observe(document.querySelector('main') ?? document.body, { childList: true, subtree: true });
+    </script>
   </body>
 </html>
 <style>

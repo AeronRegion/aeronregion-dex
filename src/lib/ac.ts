@@ -4,9 +4,9 @@ const TC: Record<string, string> = { Normal: '#999870', Fire: '#e0701f', Water: 
 const LIGHT = new Set(['Normal', 'Electric', 'Grass', 'Ice', 'Ground', 'Flying', 'Bug', 'Rock', 'Steel', 'Fairy']);
 // same category icons as the rest of the site (components/Cat.astro)
 export const CAT_SVG: Record<string, string> = {
-  Physical: '<rect width="28" height="14" rx="3" fill="#c9482c"/><path d="M14 2.2l1.5 3 3.2-1.1-1.2 3.1 3 1.6-3.3.6.2 3.3-2.6-2-2.6 2 .2-3.3-3.3-.6 3-1.6L9.3 4.1l3.2 1.1z" fill="#ffd34d"/>',
-  Special: '<rect width="28" height="14" rx="3" fill="#4f6fc7"/><circle cx="14" cy="7" r="4.6" fill="none" stroke="#dfe7ff" stroke-width="1.4"/><circle cx="14" cy="7" r="2.2" fill="#dfe7ff"/>',
-  Status: '<rect width="28" height="14" rx="3" fill="#8a8a8a"/><circle cx="14" cy="7" r="4.4" fill="none" stroke="#f2f2f2" stroke-width="1.4"/><path d="M14 2.6a4.4 4.4 0 0 1 0 8.8z" fill="#f2f2f2"/>',
+  Physical: '<path d="M14 .6l1.6 3.4 3.6-1.5-1.1 3.7 3.7 1.3-3.5 1.6 1.6 3.5-3.7-1.1L14 14.6l-1.2-3.1-3.7 1.1 1.6-3.5-3.5-1.6 3.7-1.3-1.1-3.7 3.6 1.5z" fill="#e8562a"/><circle cx="14" cy="7.6" r="2.6" fill="#ffd24a"/>',
+  Special: '<circle cx="14" cy="7" r="6.3" fill="#5b79c9"/><circle cx="14" cy="7" r="4.1" fill="none" stroke="#e4ebff" stroke-width="1.3"/><circle cx="14" cy="7" r="1.7" fill="#e4ebff"/>',
+  Status: '<circle cx="14" cy="7" r="6.3" fill="#9a9a9a"/><circle cx="14" cy="7" r="4.2" fill="#f4f4f4"/><path d="M14 2.8a4.2 4.2 0 0 1 0 8.4z" fill="#9a9a9a"/>',
 };
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
 

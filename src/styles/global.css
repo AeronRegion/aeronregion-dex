@@ -350,3 +350,54 @@ table.data td { padding-top: .3rem; padding-bottom: .3rem; }
 html[data-theme='dark'] #ed input.evr::-webkit-slider-runnable-track { background: linear-gradient(to right, #4ea3f0 var(--fill, 0%), #4a525c var(--fill, 0%)); }
 html[data-theme='dark'] #ed input.evr::-moz-range-track { background: #4a525c; }
 html[data-theme='dark'] #ed input.evr::-moz-range-progress { background: #4ea3f0; }
+/* phones: data tables fit the screen instead of scrolling sideways */
+@media (max-width: 640px) {
+  table.data { font-size: .78rem !important; }
+  table.data th, table.data td { padding: .3rem .22rem !important; }
+  table.data .chip.small:not(.card .chip) { width: 3.5rem !important; font-size: .56rem !important; height: 1.05rem !important; line-height: calc(1.05rem - 2px) !important; letter-spacing: -.01em; }
+  table.data td svg { width: 22px !important; height: 11px !important; }
+  table.data .sprite { width: 32px !important; height: 24px !important; }
+}
+/* phones: columns are tagged by header (col-<name>, see Base.astro); drop the least useful ones so the rest fit, and let long text wrap */
+@media (max-width: 640px) {
+  table.data { display: table !important; width: 100% !important; }
+  table.data th, table.data td { white-space: nowrap !important; }
+  table.data .col-effect, table.data .col-move, table.data .col-name, table.data .col-ability, table.data .col-item, table.data .col-pokemon-2 { white-space: normal !important; }
+  table.data .col-effect { min-width: 9rem; font-size: .74rem; }
+  table.data .col-target, table.data .col-ev-yield, table.data .col-gen, table.data .col-fling { display: none !important; }
+  table.data:has(.col-effect) .col-priority { display: none !important; }
+  table.data .col-total, table.data .col-hp, table.data .col-atk, table.data .col-def, table.data .col-spa, table.data .col-spd, table.data .col-spe { padding-left: .12rem !important; padding-right: .12rem !important; font-size: .72rem; }
+}
+/* phones, round two: everything fits without sideways scrolling */
+@media (max-width: 640px) {
+  /* type chart: 18 columns squeezed to the screen */
+  .tchart { width: 100% !important; table-layout: fixed; padding: 2px !important; border-spacing: 1px !important; }
+  .tchart th, .tchart td { padding: 0 !important; font-size: .55rem !important; height: 18px !important; min-width: 0 !important; width: auto !important; letter-spacing: -.03em; }
+  .tchart th a { font-size: .5rem !important; padding: 0 !important; min-width: 0 !important; width: 100% !important; height: 100%; display: flex !important; align-items: center; justify-content: center; overflow: hidden; }
+  .tchart tr > th:first-child { width: 26px !important; }
+  .tchart th.corner { font-size: .38rem !important; line-height: 1.1; }
+  /* natures grid */
+  .nat { width: 100% !important; table-layout: fixed; border-spacing: 2px !important; }
+  .nat th, .nat td { font-size: .62rem !important; padding: .35rem .1rem !important; min-width: 0 !important; width: auto !important; overflow-wrap: anywhere; }
+  .nat thead th:first-child { font-size: .5rem !important; }
+  /* data tables: a little tighter */
+  table.data .col-effect { min-width: 6.5rem !important; }
+  table.data .col-num { display: none !important; }
+  table.data th { font-size: .66rem !important; }
+  table.moves-list .col-effect, table.data:has(.col-priority):has(.col-effect) .col-effect { display: none !important; }
+  /* region jump bar: not sticky under the tall phone header */
+  .jump { position: static !important; border-width: 1px !important; }
+}
+/* phones, round three */
+@media (max-width: 640px) {
+  table.dextable .col-hp, table.dextable .col-atk, table.dextable .col-def, table.dextable .col-spa, table.dextable .col-spd, table.dextable .col-spe, table.dextable .col-total { padding: .3rem 1px !important; font-size: .68rem !important; }
+  table.dextable .chip.small { width: 3.1rem !important; }
+  table.dextable .sprite { width: 28px !important; height: 21px !important; }
+  table.data .col-pokemon { font-size: .7rem; }
+  /* Teambuilder: narrower boxes so the moving stat bars get room */
+  #ed td.sbar { width: 84px !important; max-width: 84px; min-width: 84px !important; }
+  #ed td.sbar i { transform: scaleX(.45) !important; }
+  #ed .col.c .stt input.num { width: 2.6rem !important; padding-left: .3rem; padding-right: .2rem; }
+}
+@media (max-width: 640px) { .formtabs { flex-wrap: wrap !important; overflow: visible !important; row-gap: 2px; } .formtabs button { font-size: .8rem !important; padding: .35rem .6rem !important; } }
+@media (max-width: 640px) { table.dextable .col-hp, table.dextable .col-atk, table.dextable .col-def, table.dextable .col-spa, table.dextable .col-spd, table.dextable .col-spe, table.dextable .col-total { padding-left: 3px !important; padding-right: 0 !important; font-size: .64rem !important; } table.dextable .col-name { font-size: .74rem; } }

@@ -12,3 +12,6 @@
 - 2026-11-26: Added CLAUDE.md with working rules and locked decisions; started docs/
 - 2026-11-26: README brought up to date (current pages, Teambuilder and Coverage checker, data files, known gaps)
 - 2026-11-26: CLAUDE.md locked decisions updated to match the live site (look, top bar, types page, hosting, data source) and Teambuilder rules added
+- 2026-11-26: Phones: tables, type chart and natures grid fit the screen (low-priority columns hidden on phones), form tabs wrap, region jump bar no longer hides under the header; Teambuilder stat bars get more room on phones
+- 2026-11-26: Move category icons redrawn as round PokemonDB-style badges (one shared drawing in src/lib/ac.ts)
+- 2026-11-26: Added `npm run check:mobile` (scripts/check-mobile.mjs) and a CLAUDE.md rule to run it before every visual push

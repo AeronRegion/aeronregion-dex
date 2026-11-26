@@ -15,6 +15,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - EDIT existing files. Never rewrite a whole file from scratch; that is how past changes got reverted.
 - Before changing anything visual, check "Locked decisions" below. If a request conflicts with one, ask first.
 - After every change: add a line to docs/changelog.md, and if it was a design decision, add it below.
+- Before pushing any visual change: `npm run build && npm run check:mobile`. It opens the main pages at iPhone size (390px) and fails if anything runs off the screen or needs sideways scrolling; look at the screenshots it saves in .cache/mobile/ too. Don't push until it passes. New pages go in its PAGES list.
 - Verify on the live site after deploy (hard refresh: Ctrl+Shift+R).
 
 ## Locked decisions
