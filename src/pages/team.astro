@@ -239,10 +239,6 @@ import { GAMES, meta } from '../lib/data';
             <span class="cap">Moves</span>
             ${[0, 1, 2, 3].map((j) => `<div class="slot mrow"><input class="field mvin" data-j="${j}" value="${esc(m.moves[j] ? moveName(m.moves[j]) : '')}" placeholder="Move ${j + 1}" autocomplete="off" />${moveInfo(m.moves[j])}</div>`).join('')}
           </div>
-          <div class="c-sum">
-            <span class="cap">Stats <small>${c ? 'SP' : 'EV'}</small></span>
-            ${SHORT.map((x, k) => `<div class="sr" data-k="${k}"><span class="${mark(k)}">${x}</span><i style="${sdBar(st[k] * 100 / (c ? 50 : m.level || 100), k)}"></i><b>${m.evs[k] ? m.evs[k] : ''}${sfx(k)}</b></div>`).join('')}
-          </div>
         </div>
         <div class="col c evp">
           <h3 class="sec">${c ? 'Stat Points' : 'EVs'}</h3>
@@ -268,7 +264,6 @@ import { GAMES, meta } from '../lib/data';
       const reStats = () => { // update numbers without rebuilding the inputs, so sliders keep focus while dragging
         const st2 = statsOf(m); ed.querySelectorAll<HTMLElement>('.stt tbody tr').forEach((tr, k) => { tr.querySelector('td:last-child b')!.textContent = String(st2[k]); tr.querySelector<HTMLElement>('.sbar i')!.setAttribute('style', sdBar(st2[k] * 100 / (champ() ? 50 : m.level || 100), k)); });
         const tot = m.evs.reduce((a, b) => a + b, 0); const el = ed.querySelector('.evleft')!; el.textContent = String(cap.total - tot); el.classList.toggle('over', tot > cap.total);
-        ed.querySelectorAll<HTMLElement>('.c-sum .sr').forEach((r, k) => { r.querySelector('i')!.setAttribute('style', sdBar(st2[k] * 100 / (champ() ? 50 : m.level || 100), k)); r.querySelector('b')!.textContent = (m.evs[k] ? String(m.evs[k]) : '') + sfx(k); });
         save();
       };
       ed.querySelector<HTMLInputElement>('#f-lv')!.addEventListener('change', (e) => { const el = e.target as HTMLInputElement; m.level = Math.max(1, Math.min(100, Math.round(+el.value) || 50)); el.value = String(m.level); reStats(); });

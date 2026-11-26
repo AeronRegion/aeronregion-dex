@@ -22,3 +22,4 @@
 - 2026-11-26: Teambuilder on phones: the pick list opens right under the box being edited and the box scrolls up, so the list stays above the on-screen keyboard
 - 2026-11-26: Multi-hit moves show their hit count under the power (25 ×2–5) in every move table; on phones PP is hidden so Priority fits
 - 2026-11-26: Teambuilder: typed text in Pokémon/Ability/Item/Move boxes is saved as the matching entry on Enter or when leaving the box (otherwise it goes back to the saved value); items saved as partial text are repaired on load; set card shows category + Pow/Acc beside each move (no type label)
+- 2026-11-26: Teambuilder: removed the stat summary box (top right of the set card); the EV table below already shows the stats

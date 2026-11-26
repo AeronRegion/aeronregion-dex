@@ -61,7 +61,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - docs/decisions.md: longer reasoning behind decisions
 
 ### Teambuilder
-- Layout mirrors Showdown's compact teambuilder: a set card on top (art | details + Pokémon/Item/Ability | moves | stat summary), then the EV editor and the pick list side by side. The pick list stays open (move list for the next empty slot by default).
+- Layout mirrors Showdown's compact teambuilder: a set card on top (art | details + Pokémon/Item/Ability | moves; no stat summary box), then the EV editor and the pick list side by side. The pick list stays open (move list for the next empty slot by default).
 - Below the EV editor only "Remaining" for the selected format (EVs or Stat Points) and the nature; no extra totals or notes.
 - Artwork: PokéAPI HOME renders for both normal and shiny (they match); official artwork only as a fallback.
 - Pokémon search has Showdown-style filters (type, ability, move chips).
