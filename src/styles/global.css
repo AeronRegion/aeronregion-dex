@@ -283,7 +283,19 @@ table.data td { padding-top: .3rem; padding-bottom: .3rem; }
 .pstats .ps b { font-weight: 700 !important; text-align: right; }
 .mlist .mr .chip, .mlist .mr .tchip, .mlist .mr .ac-t { margin-right: 2px; }
 .mlist .mr > span:has(.chip), .mlist .mr > span:has(.tchip) { white-space: nowrap; }
-.ed td.sbar { min-width: 90px; width: 90px; padding: 0 .5rem 0 .2rem; }
+.ed td.sbar { min-width: 184px; width: 184px; padding: 0 .5rem 0 .2rem; }
 .ed td.sbar i { display: block; height: 11px; }
 .ed .stt td.n b { font-weight: 700 !important; }
-@media (max-width: 640px) { .ed td.sbar { min-width: 30px; width: 30px; padding: 0 .3rem 0 0; } }
+@media (max-width: 640px) { .ed td.sbar { min-width: 0; width: 34%; } .ed td.sbar i { max-width: 100%; } }
+.ed td.sbar { overflow: hidden; }
+@media (max-width: 640px) { .ed td.sbar { min-width: 0 !important; width: 70px !important; } }
+.ed .col.c .stt { width: auto !important; }
+.ed .col.c .stt .barc { width: 210px !important; } .ed .col.c .stt .barc input { width: 200px; }
+.ed .col.c .stt input.num { width: 4.2rem; }
+@media (max-width: 640px) { .ed td.sbar { width: 36px !important; padding-right: .2rem !important; } .ed .col.c .stt input.num { width: 3.2rem; } .ed .col.c .stt th, .ed .col.c .stt td { padding-left: .15rem !important; padding-right: .15rem !important; } }
+#ed .col.c table.stt { width: auto !important; }
+@media (max-width: 640px) { #ed td.sbar { width: 40px !important; max-width: 40px; } #ed td.sbar i { transform: scaleX(.22); transform-origin: left center; } }
+#ed .col.c .stt input.num { width: 4.2rem !important; }
+#ed .col.c .stt .barc input { width: 200px !important; }
+@media (max-width: 640px) { #ed .col.c .stt input.num { width: 3.2rem !important; } }
+#ed .col.c table.stt { align-self: flex-start; justify-self: start; }

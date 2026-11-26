@@ -75,6 +75,8 @@ import { GAMES, meta } from '../lib/data';
     };
     const spOf = (m: Mon) => idx.species[spIndex.get(m.sp) ?? 0];
     const isEmpty = (m: Mon) => !spIndex.has(m.sp);
+    // Showdown teambuilder bars: length and color come from the calculated stat, so they move with EVs, IVs, nature and level
+    const sdBar = (v: number, k: number) => `width:${Math.min(179, Math.floor(v * 180 / (k ? 504 : 704)))}px;background:hsl(${Math.min(360, Math.floor(v * 180 / 714))}, 85%, 45%)`;
     const abilitiesOf = (s: Sp) => [...s[6], ...(s[7] ? [s[7]] : [])];
     const cap = (s: string) => s[0].toUpperCase() + s.slice(1);
     const moveName = (id: string) => { const hp = id.match(/^hiddenpower-(\w+)$/); if (hp) return `Hidden Power [${cap(hp[1])}]`; return idx.moves[id]?.[0] ?? ''; };
@@ -204,20 +206,20 @@ import { GAMES, meta } from '../lib/data';
         <div class="col c">
           <h3 class="sec">Stats <span class="soft evleft${evTotal > cap.total ? ' over' : ''}">${cap.label} left: ${cap.total - evTotal}</span></h3>
           <table class="stt">
-            <thead><tr><th></th><th class="n">Base</th><th class="sbh"></th><th></th><th>${c ? 'SP' : 'EVs'}</th>${c ? '' : '<th>IVs</th>'}<th class="n">Stat</th></tr></thead>
+            <thead><tr><th></th><th class="n">Base</th><th class="sbh"></th><th>${c ? 'SP' : 'EVs'}</th><th></th>${c ? '' : '<th>IVs</th>'}<th class="n">Stat</th></tr></thead>
             <tbody>${base.map((b, k) => `<tr>
               <th class="${mark(k)}">${STATNAME[k]}${k ? `<span class="nb"><button type="button" class="np${mark(k) === 'up' ? ' on' : ''}" data-k="${k}" data-d="1" title="Nature raises ${STATNAME[k]}" aria-label="Nature raises ${STATNAME[k]}">+</button><button type="button" class="np${mark(k) === 'down' ? ' on' : ''}" data-k="${k}" data-d="-1" title="Nature lowers ${STATNAME[k]}" aria-label="Nature lowers ${STATNAME[k]}">−</button></span>` : ''}</th>
               <td class="n"><b>${b}</b></td>
-              <td class="sbar"><i style="width:${Math.min(100, b / 1.8)}%;background:hsl(${Math.min(360, Math.floor(b * 180 / 255))}, 85%, 45%)"></i></td>
-              <td class="barc"><input type="range" class="evr" data-k="${k}" min="0" max="${cap.per}" step="${cap.step}" value="${m.evs[k]}" aria-label="${STATNAME[k]} ${cap.label}" /></td>
+              <td class="sbar"><i style="${sdBar(st[k], k)}"></i></td>
               <td><input class="field num ev" data-k="${k}" type="number" min="0" max="${cap.per}" step="${cap.step}" value="${m.evs[k]}" aria-label="${STATNAME[k]} ${cap.label}" /></td>
+              <td class="barc"><input type="range" class="evr" data-k="${k}" min="0" max="${cap.per}" step="${cap.step}" value="${m.evs[k]}" aria-label="${STATNAME[k]} ${cap.label}" /></td>
               ${c ? '' : `<td><input class="field num iv" data-k="${k}" type="number" min="0" max="31" value="${m.ivs[k]}" aria-label="${STATNAME[k]} IVs" /></td>`}
               <td class="n"><b>${st[k]}</b></td></tr>`).join('')}</tbody>
           </table>
           <p class="note">Base stat total ${base.reduce((a, b) => a + b, 0)}. ${c ? 'Champions: up to 32 Stat Points per stat and 66 in total; each point adds 1 to the stat. Always Lv. 50 with perfect IVs. Copy for Showdown converts the points to EVs.' : 'EVs go up to 252 per stat and 510 in total.'}</p>
         </div>`;
       const reStats = () => { // update numbers without rebuilding the inputs, so sliders keep focus while dragging
-        const st2 = statsOf(m); ed.querySelectorAll<HTMLElement>('.stt tbody tr').forEach((tr, k) => (tr.querySelector('td:last-child b')!.textContent = String(st2[k])));
+        const st2 = statsOf(m); ed.querySelectorAll<HTMLElement>('.stt tbody tr').forEach((tr, k) => { tr.querySelector('td:last-child b')!.textContent = String(st2[k]); tr.querySelector<HTMLElement>('.sbar i')!.setAttribute('style', sdBar(st2[k], k)); });
         const tot = m.evs.reduce((a, b) => a + b, 0); const el = ed.querySelector('.evleft')!; el.textContent = `${cap.label} left: ${cap.total - tot}`; el.classList.toggle('over', tot > cap.total);
         save();
       };
@@ -445,9 +447,10 @@ import { GAMES, meta } from '../lib/data';
   .strip :global(.slotplus:hover) { color: var(--ink); background: var(--card); }
   .strip :global(.slotadd) { position: relative; display: flex; align-items: center; width: 220px; height: 54px; }
   .strip :global(.slotadd .field) { width: 100%; }
-  .ed { position: relative; border-top-left-radius: 0 !important; display: grid; grid-template-columns: 240px 1fr 1.3fr; gap: 1.6rem; border: 2px solid var(--ink); background: var(--card); padding: 1rem; }
-  @media (max-width: 1000px) { .ed { grid-template-columns: 1fr 1fr; } .ed :global(.col.c) { grid-column: 1 / -1; } }
-  @media (max-width: 640px) { .ed { grid-template-columns: 1fr; } .ed :global(.barc), .ed :global(.stt thead th:nth-child(3)) { display: none; } }
+  .ed { position: relative; border-top-left-radius: 0 !important; display: grid; grid-template-columns: 240px 1fr; gap: 1.6rem; border: 2px solid var(--ink); background: var(--card); padding: 1rem; }
+  .ed > :global(.col.c) { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: .8rem; }
+  @media (max-width: 1000px) { .ed { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 640px) { .ed { grid-template-columns: 1fr; } .ed :global(.barc), .ed :global(.stt thead th:nth-child(5)) { display: none; } }
   .ed :global(.col) { display: flex; flex-direction: column; gap: .5rem; min-width: 0; }
   .ed :global(.who) { display: flex; justify-content: center; position: relative; }
   .ed :global(.col.a) { gap: .3rem; }
@@ -521,7 +524,7 @@ import { GAMES, meta } from '../lib/data';
   .ed :global(.np.on[data-d='-1']) { background: #b3261e; border-color: #b3261e; color: #fff; }
   .ed :global(.stt .n) { text-align: right; }
   .ed :global(.sbar) { width: 90px; padding: 0 .4rem 0 .2rem; } .ed :global(.sbar i) { display: block; height: 11px; }
-  .ed :global(.barc) { width: 34%; } .ed :global(.barc input) { width: 100%; accent-color: #59c4fb; }
+  .ed :global(.barc) { width: 26%; } .ed :global(.barc input) { width: 100%; accent-color: #59c4fb; }
   .ed :global(.num) { width: 4.2rem; padding: .2rem .35rem; }
   .ed :global(.evleft) { font-size: .8rem; font-weight: 600; margin-left: .4rem; }
   .ed :global(.evleft.over) { color: #b3261e; }
