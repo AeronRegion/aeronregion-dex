@@ -200,7 +200,7 @@ import { GAMES, meta } from '../lib/data';
     const moveInfo = (key: string) => {
       if (!key || !idx.moves[key]) return '<span class="minfo"></span>';
       const [, type, cat] = idx.moves[key]; const md = tb.moves[key] ?? [null, null, 0, ''];
-      return `<span class="minfo">${chip(type)}<svg viewBox="0 0 28 14" width="30" height="15" role="img" aria-label="${cat}"><title>${cat}</title>${CAT_SVG[cat] ?? ''}</svg><span class="pa" title="Power / Accuracy">${md[0] ?? '—'}<small>/</small>${md[1] ?? '—'}</span></span>`;
+      return `<span class="minfo"><svg viewBox="0 0 28 14" width="30" height="15" role="img" aria-label="${cat}"><title>${cat}</title>${CAT_SVG[cat] ?? ''}</svg><span class="pw"><small>Pow</small> ${md[0] ?? '—'}</span><span class="pw"><small>Acc</small> ${md[1] ?? '—'}</span></span>`;
     };
     const drawEd = () => {
       const t = team(); const ed = $('ed');
@@ -375,13 +375,41 @@ import { GAMES, meta } from '../lib/data';
         if (kind === 'ab') { m.ab = key; save(); drawEd(); focusNext('#f-item'); return; }
         m.item = tb.items[+key][0]; save(); drawEd(); focusNext('.mvin');
       };
+      // Leaving a box: typed text becomes a real entry (exact name, else the best match, like Showdown); otherwise the box goes back to what's saved.
+      // No redraw here, so the click that caused the blur still lands where it was aimed.
+      const best = (v: string, names: [string, string][]) => { const lv = v.toLowerCase(); return (names.find(([, n]) => n.toLowerCase() === lv) ?? names.find(([, n]) => n.toLowerCase().startsWith(lv)) ?? names.find(([, n]) => n.toLowerCase().includes(lv)))?.[0]; };
+      const commit = (inp: HTMLInputElement, k: Kind, j: number) => {
+        const v = inp.value.trim();
+        if (k === 'mv') {
+          const key = v ? best(v, movePool.map((x) => [x, idx.moves[x][0]])) : '';
+          if (key !== undefined) { m.moves[j] = key; save(); }
+          inp.value = m.moves[j] ? moveName(m.moves[j]) : '';
+          const info = inp.nextElementSibling; if (info?.classList.contains('minfo')) info.outerHTML = moveInfo(m.moves[j]);
+          return;
+        }
+        if (k === 'item') {
+          const key = v ? best(v, tb.items.map(([n]) => [n, n])) : '';
+          if (key !== undefined) { m.item = key; save(); }
+          inp.value = m.item;
+          const src = itemIcon(m.item); ed.querySelectorAll<HTMLImageElement>('.itemic, .whoitem').forEach((im) => { if (src) im.src = src; im.hidden = !src; });
+          return;
+        }
+        if (k === 'ab') {
+          const key = v ? best(v, abilitiesOf(spOf(m)).map((a) => [a, a])) : undefined;
+          if (key) { m.ab = key; save(); }
+          inp.value = m.ab;
+          return;
+        }
+        if (k === 'sp') inp.value = isEmpty(m) ? '' : spOf(m)[1];
+      };
       const wire = (inp: HTMLInputElement, k: Kind, j = -1) => {
         inp.addEventListener('focus', () => open(k, inp, j));
         inp.addEventListener('input', () => fill(inp.value));
+        inp.addEventListener('change', () => commit(inp, k, j));
         inp.addEventListener('keydown', (e) => {
           const rows = body.querySelectorAll('.mr');
           if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); act = Math.max(0, Math.min(rows.length - 1, act + (e.key === 'ArrowDown' ? 1 : -1))); rows.forEach((r, x) => r.classList.toggle('on', x === act)); rows[act]?.scrollIntoView({ block: 'nearest' }); }
-          else if (e.key === 'Enter' && act >= 0) { e.preventDefault(); choose(shown[act]); }
+          else if (e.key === 'Enter' && shown.length) { e.preventDefault(); choose(shown[act >= 0 ? act : 0]); }
           else if (e.key === 'Escape') { hideList(); inp.blur(); }
           else if (e.key === 'Backspace' && k === 'sp' && !inp.value && filters.length) { e.preventDefault(); filters.pop(); fill(''); }
         });
@@ -390,10 +418,8 @@ import { GAMES, meta } from '../lib/data';
       wire(ed.querySelector<HTMLInputElement>('#f-ab')!, 'ab');
       const itemIn = ed.querySelector<HTMLInputElement>('#f-item')!;
       wire(itemIn, 'item');
-      itemIn.addEventListener('change', () => { const v = itemIn.value.trim(); const hit = tb.items.find(([n]) => n.toLowerCase() === v.toLowerCase()); m.item = hit ? hit[0] : v; save(); });
       ed.querySelectorAll<HTMLInputElement>('.mvin').forEach((inp) => {
         const j = +inp.dataset.j!; wire(inp, 'mv', j);
-        inp.addEventListener('change', () => { const v = inp.value.trim().toLowerCase(); if (!v) { m.moves[j] = ''; save(); } else { const hit = movePool.find((x) => idx.moves[x][0].toLowerCase() === v); if (hit) { m.moves[j] = hit; save(); } } });
       });
       if (!empty) { const mv = ed.querySelectorAll<HTMLInputElement>('.mvin'); const j0 = Math.max(0, m.moves.findIndex((x, q) => q < 4 && !x)); queueMicrotask(() => { if (!ed.contains(document.activeElement)) open('mv', mv[j0 < 4 ? j0 : 0], j0 < 4 ? j0 : 0, true); }); }
       const markSort = () => headEl.querySelectorAll<HTMLElement>('[data-s]').forEach((b) => { const st = sortState[kind]; b.classList.toggle('sorted', st?.by === b.dataset.s); b.dataset.dir = st?.by === b.dataset.s ? String(st!.dir) : ''; });
@@ -495,7 +521,7 @@ import { GAMES, meta } from '../lib/data';
 
     Promise.all([fetch('/search-index.json').then((r) => r.json()), fetch('/tb.json').then((r) => r.json())]).then(([a, b]) => {
       idx = a; tb = b; idx.species.forEach((s, i) => spIndex.set(s[0], i));
-      teams = (store.get() as Team[]).filter((t) => t && Array.isArray(t.mons)).map((t) => ({ ...t, mons: t.mons.filter((m) => spIndex.has(m.sp) || m.sp === '') }));
+      teams = (store.get() as Team[]).filter((t) => t && Array.isArray(t.mons)).map((t) => ({ ...t, mons: t.mons.filter((m) => spIndex.has(m.sp) || m.sp === '').map((m) => { if (m.item && !tb.items.some(([n]) => n === m.item)) { const lv = m.item.toLowerCase(); m.item = (tb.items.find(([n]) => n.toLowerCase().startsWith(lv)) ?? tb.items.find(([n]) => n.toLowerCase().includes(lv)))?.[0] ?? ''; } return m; }) }));
       const p = new URLSearchParams(location.search);
       const shared = p.get('team');
       if (shared) {

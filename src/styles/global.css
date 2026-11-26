@@ -490,3 +490,5 @@ table.data small.hx { display: block; font-size: .68rem; font-weight: 600; color
   table.data .col-priority { display: table-cell !important; font-size: .68rem; }
   table.data th.col-priority { font-size: 0 !important; } table.data th.col-priority::after { content: 'Pri'; font-size: .66rem; }
 }
+#ed.sd .c-mv .minfo .pw { display: inline-block; min-width: 4.2rem; font-variant-numeric: tabular-nums; }
+#ed.sd .c-mv .minfo .pw small { color: var(--ink-soft); font-size: .7rem; margin-right: .15rem; }
