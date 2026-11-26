@@ -359,7 +359,14 @@ import { GAMES, meta } from '../lib/data';
         kind = k; slot = j; field = inp; list.dataset.kind = k; headEl.innerHTML = HEAD[k]; markSort(); list.hidden = false; if (!quiet) inp.select(); fill(''); body.scrollTop = 0;
         const cur3 = body.querySelector<HTMLElement>('.mr.cur'); if (cur3) body.scrollTop = cur3.getBoundingClientRect().top - body.getBoundingClientRect().top - body.clientHeight / 2 + cur3.offsetHeight / 2;
         ed.querySelectorAll('.editing').forEach((x) => x.classList.remove('editing')); inp.classList.add('editing');
-        if (!quiet && list.getBoundingClientRect().top > innerHeight - 120) list.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        // phones: the on-screen keyboard covers the bottom half, so the list goes right under the box being edited and the box scrolls up under the header
+        if (matchMedia('(max-width: 640px)').matches) {
+          const anchor = inp.closest<HTMLElement>('.mrow, .fl') ?? inp; if (anchor.nextElementSibling !== list) anchor.after(list); list.classList.add('inline');
+          if (!quiet) { const hh = document.querySelector<HTMLElement>('.site-header')?.offsetHeight ?? 0; setTimeout(() => window.scrollTo({ top: scrollY + anchor.getBoundingClientRect().top - hh - 6, behavior: 'smooth' }), 60); }
+        } else {
+          if (list.parentElement !== ed) { ed.append(list); list.classList.remove('inline'); }
+          if (!quiet && list.getBoundingClientRect().top > innerHeight - 120) list.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
       };
       const focusNext = (sel2: string) => (ed.querySelector<HTMLInputElement>(sel2))?.focus();
       const choose = (key: string) => {

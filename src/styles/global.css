@@ -479,3 +479,6 @@ html[data-theme='dark'] #ed.sd .detbox, html[data-theme='dark'] #ed.sd .c-sum, h
 .mx td.cnt.wk { color: #b3261e !important; } .mx td.cnt.rs { color: #2f7a3f !important; }
 @media (max-width: 640px) { .mx th.vh, .mx td.vd { width: 36px !important; min-width: 36px; max-width: 36px; } .mx .pill { width: 34px; font-size: .6rem; } }
 @media (max-width: 640px) { #def td.cnt, #def th.tot { display: none !important; } #def .gap { width: 3px !important; } }
+/* phones: pick list sits directly under the box being edited, short enough to stay above the keyboard */
+@media (max-width: 640px) { #ed .mlist.inline { width: 100%; margin: .2rem 0 .4rem !important; } #ed .mlist.inline .mbody { max-height: 38vh !important; } }
+@media (max-width: 640px) { #ed .mlist.inline .mr { padding-top: .15rem !important; padding-bottom: .15rem !important; } #ed .mlist.inline .mr .d { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } }

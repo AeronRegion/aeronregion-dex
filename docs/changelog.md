@@ -19,3 +19,4 @@
 - 2026-11-26: Teambuilder tabs keep the same box icon when a Pokémon is shiny (small gold star instead of switching to a different sprite)
 - 2026-11-26: Coverage checker cells are squares (32px, 25px on phones) instead of wide flat rectangles
 - 2026-11-26: Coverage checker Defense: defensive colours (red = weak, green = resists, black = immune), Good/OK/Bad per type, Weak/Resist counts in aligned columns; explanation text removed
+- 2026-11-26: Teambuilder on phones: the pick list opens right under the box being edited and the box scrolls up, so the list stays above the on-screen keyboard
