@@ -73,7 +73,8 @@ import { GAMES, meta } from '../lib/data';
       const w = fmtSel.value === 'all' || fmtSel.value === 'champ' ? -1 : 1 << +fmtSel.value;
       return (learnable.get(i) ?? []).filter(([, mask]) => mask & w).map(([m]) => m);
     };
-    const spOf = (m: Mon) => idx.species[spIndex.get(m.sp) ?? -1];
+    const spOf = (m: Mon) => idx.species[spIndex.get(m.sp) ?? 0];
+    const isEmpty = (m: Mon) => !spIndex.has(m.sp);
     const abilitiesOf = (s: Sp) => [...s[6], ...(s[7] ? [s[7]] : [])];
     const cap = (s: string) => s[0].toUpperCase() + s.slice(1);
     const moveName = (id: string) => { const hp = id.match(/^hiddenpower-(\w+)$/); if (hp) return `Hidden Power [${cap(hp[1])}]`; return idx.moves[id]?.[0] ?? ''; };
@@ -86,7 +87,7 @@ import { GAMES, meta } from '../lib/data';
     const evToSp = (ev: number) => (ev >= 4 ? Math.min(32, 1 + Math.floor((ev - 4) / 8)) : 0);
     const CAP = () => (champ() ? { per: 32, total: 66, step: 1, label: 'Stat Points' } : { per: 252, total: 510, step: 4, label: 'EVs' });
     const statsOf = (m: Mon) => {
-      const base = tb.stats[spIndex.get(m.sp)!]; const [u, d] = NAT[m.nature] ?? [1, 1];
+      const base = tb.stats[spIndex.get(m.sp) ?? 0]; const [u, d] = NAT[m.nature] ?? [1, 1];
       const c = champ(), lv = c ? 50 : m.level;
       return base.map((b, k) => {
         const ev = c ? spToEv(m.evs[k]) : m.evs[k], iv = c ? 31 : m.ivs[k];
@@ -110,7 +111,7 @@ import { GAMES, meta } from '../lib/data';
       const ok = store.set(teams);
       $('saved').textContent = ok ? 'Saved in this browser' : "Couldn't save in this browser. Use Copy link to keep this team.";
       clearTimeout(savedTimer); savedTimer = window.setTimeout(() => ($('saved').textContent = ''), 2500);
-      ($('cov') as HTMLAnchorElement).href = team().mons.length ? '/coverage/?team=' + encodeURIComponent(b64(exportText())) : '/coverage/';
+      ($('cov') as HTMLAnchorElement).href = team().mons.some((m) => !isEmpty(m)) ? '/coverage/?team=' + encodeURIComponent(b64(exportText())) : '/coverage/';
     };
     const say = (t: string) => { $('msg').textContent = t; setTimeout(() => ($('msg').textContent = ''), 6000); };
 
@@ -129,7 +130,7 @@ import { GAMES, meta } from '../lib/data';
       for (const id of m.moves) if (id) lines.push(`- ${moveName(id)}`);
       return lines.join('\n');
     };
-    const exportText = () => team().mons.map(monText).join('\n\n') + '\n';
+    const exportText = () => team().mons.filter((m) => !isEmpty(m)).map(monText).join('\n\n') + '\n';
     const b64 = (t: string) => btoa(unescape(encodeURIComponent(t)));
     const unb64 = (t: string) => decodeURIComponent(escape(atob(t)));
     const findSpecies = (name: string) => {
@@ -163,19 +164,17 @@ import { GAMES, meta } from '../lib/data';
     };
     const drawStrip = () => {
       const t = team();
-      $('strip').innerHTML = t.mons.map((m, k) => { const s = spOf(m); return `<button type="button" class="slotb${k === sel ? ' on' : ''}" data-k="${k}" draggable="true" title="Drag to reorder"><img src="${s[3] ? (m.shiny ? SPR + 'pokemon/shiny/' + s[3] + '.png' : SPR + 'pokemon/versions/generation-vii/icons/' + s[3] + '.png') : ''}" onerror="this.onerror=null;this.src=this.dataset.fb" data-fb="${s[3] ? SPR + 'pokemon/' + (m.shiny ? 'shiny/' : '') + s[3] + '.png' : ''}" alt="" width="56" height="56" /><span>${esc(s[1])}</span></button>`; }).join('') +
-        (t.mons.length < 14 ? `<button type="button" class="slotplus" id="plus" title="Add a Pokémon" aria-label="Add a Pokémon">+</button><div class="slotadd" hidden><input class="field" id="addmon" placeholder="Add a Pokémon…" autocomplete="off" /></div>` : '');
-      const addIn = document.getElementById('addmon') as HTMLInputElement | null;
-      document.getElementById('plus')?.addEventListener('click', () => { const w = addIn!.parentElement!; w.hidden = false; document.getElementById('plus')!.hidden = true; addIn!.focus(); });
-      addIn?.addEventListener('blur', () => setTimeout(() => { if (!addIn.value) { addIn.parentElement!.hidden = true; const p = document.getElementById('plus'); if (p) p.hidden = false; } }, 200));
-      if (addIn) autocomplete(addIn, () => idx.species.map((s) => ({ label: s[1], sub: s[2].join(' / ') })), (it) => { const i = findSpecies(it.label); if (i < 0) return; t.mons.push(newMon(i)); sel = t.mons.length - 1; save(); drawTeams(); drawStrip(); drawEd(); });
+      $('strip').innerHTML = t.mons.map((m, k) => { const s = spOf(m); if (isEmpty(m)) return `<button type="button" class="slotb blank${k === sel ? ' on' : ''}" data-k="${k}" title="Empty slot"><span></span></button>`; return `<button type="button" class="slotb${k === sel ? ' on' : ''}" data-k="${k}" draggable="true" title="Drag to reorder"><img src="${s[3] ? (m.shiny ? SPR + 'pokemon/shiny/' + s[3] + '.png' : SPR + 'pokemon/versions/generation-vii/icons/' + s[3] + '.png') : ''}" onerror="this.onerror=null;this.src=this.dataset.fb" data-fb="${s[3] ? SPR + 'pokemon/' + (m.shiny ? 'shiny/' : '') + s[3] + '.png' : ''}" alt="" width="56" height="56" /><span>${esc(s[1])}</span></button>`; }).join('') +
+        (t.mons.length < 14 ? `<button type="button" class="slotplus" id="plus" title="Add a Pokémon" aria-label="Add a Pokémon">+</button>` : '');
+      document.getElementById('plus')?.addEventListener('click', () => { const m = newMon(0); m.sp = ''; m.ab = ''; t.mons.push(m); sel = t.mons.length - 1; drawTeams(); drawStrip(); drawEd(); setTimeout(() => { const f = $('f-sp') as HTMLInputElement | null; f?.focus(); f?.dispatchEvent(new Event('focus')); }, 0); });
     };
     const sortState: Record<string, { by: string; dir: number } | null> = {};
     const drawEd = () => {
       const t = team(); const ed = $('ed');
       if (!t.mons.length) { ed.hidden = true; return; }
       sel = Math.min(sel, t.mons.length - 1); ed.hidden = false;
-      const m = t.mons[sel], s = spOf(m), st = statsOf(m), base = tb.stats[spIndex.get(m.sp)!];
+      const m = t.mons[sel], s = spOf(m), st = statsOf(m), base = tb.stats[spIndex.get(m.sp) ?? 0], empty = isEmpty(m);
+      ed.classList.toggle('empty', empty);
       const evTotal = m.evs.reduce((a, b) => a + b, 0);
       const [u, d] = NAT[m.nature]; const cap = CAP(), c = champ();
       const mark = (k: number) => (k && u !== d ? (k === u ? 'up' : k === d ? 'down' : '') : '');
@@ -183,7 +182,7 @@ import { GAMES, meta } from '../lib/data';
         <button type="button" class="edel" id="f-rm" title="Delete this Pokémon from the team">🗑 Delete</button>
         <div class="col a">
           <div class="who"><img src="${s[3] ? SPR + 'pokemon/other/official-artwork/' + (m.shiny ? 'shiny/' : '') + s[3] + '.png' : ''}" alt="${m.shiny ? 'Shiny ' : ''}${esc(s[1])}" width="150" height="150" />${m.shiny ? '<span class="shinytag" title="Shiny">★</span>' : ''}</div>
-          <div class="slot"><label class="fl"><span class="ll">Pokémon</span><input class="field" id="f-sp" value="${esc(s[1])}" autocomplete="off" /></label></div>
+          <div class="slot"><label class="fl"><span class="ll">Pokémon</span><input class="field" id="f-sp" value="${empty ? '' : esc(s[1])}" placeholder="Choose a Pokémon" autocomplete="off" /></label></div>
           <div class="types">${s[2].map(chip).join(' ')} <a href="${s[5]}" class="dexl">Dex page</a></div>
           <div class="slot"><label class="fl"><span class="ll">Ability</span><input class="field" id="f-ab" value="${esc(m.ab)}" autocomplete="off" /></label></div>
           <div class="slot"><label class="fl"><span class="ll">Item</span><input class="field" id="f-item" value="${esc(m.item)}" placeholder="No item" autocomplete="off" /></label></div>
@@ -238,7 +237,7 @@ import { GAMES, meta } from '../lib/data';
       }));
       const shift = (dir: number) => { const to = sel + dir; if (to < 0 || to >= t.mons.length) return; [t.mons[sel], t.mons[to]] = [t.mons[to], t.mons[sel]]; sel = to; save(); drawStrip(); drawEd(); };
       ed.querySelector('#f-rm')!.addEventListener('click', () => { t.mons.splice(sel, 1); sel = Math.max(0, sel - 1); save(); drawTeams(); drawStrip(); drawEd(); });
-      const i = spIndex.get(m.sp)!;
+      const i = spIndex.get(m.sp) ?? 0;
       // Showdown-style picker: a list under the editor for whichever box has focus (Pokémon, ability, item or a move).
       // Each row carries the information you need to choose, and typing filters it.
       ed.insertAdjacentHTML('beforeend', '<div class="mlist" hidden><div class="mhead"></div><div class="mbody"></div></div>');
@@ -298,7 +297,7 @@ import { GAMES, meta } from '../lib/data';
       const focusNext = (sel2: string) => (ed.querySelector<HTMLInputElement>(sel2))?.focus();
       const choose = (key: string) => {
         if (kind === 'mv') { m.moves[slot] = key; save(); const next = slot + 1; drawEd(); if (next < 4) ed.querySelectorAll<HTMLInputElement>('.mvin')[next]?.focus(); return; }
-        if (kind === 'sp') { const n = +key; t.mons[sel] = { ...newMon(n), item: m.item, nature: m.nature, evs: m.evs, ivs: m.ivs, level: m.level }; save(); drawTeams(); drawStrip(); drawEd(); focusNext('#f-ab'); return; }
+        if (kind === 'sp') { const n = +key; t.mons[sel] = { ...newMon(n), level: m.level }; save(); drawTeams(); drawStrip(); drawEd(); focusNext('#f-ab'); return; }
         if (kind === 'ab') { m.ab = key; save(); drawEd(); focusNext('#f-item'); return; }
         m.item = tb.items[+key][0]; save(); drawEd(); focusNext('.mvin');
       };
@@ -408,7 +407,7 @@ import { GAMES, meta } from '../lib/data';
 
     Promise.all([fetch('/search-index.json').then((r) => r.json()), fetch('/tb.json').then((r) => r.json())]).then(([a, b]) => {
       idx = a; tb = b; idx.species.forEach((s, i) => spIndex.set(s[0], i));
-      teams = (store.get() as Team[]).filter((t) => t && Array.isArray(t.mons)).map((t) => ({ ...t, mons: t.mons.filter((m) => spIndex.has(m.sp)) }));
+      teams = (store.get() as Team[]).filter((t) => t && Array.isArray(t.mons)).map((t) => ({ ...t, mons: t.mons.filter((m) => spIndex.has(m.sp) || m.sp === '') }));
       const p = new URLSearchParams(location.search);
       const shared = p.get('team');
       if (shared) {
@@ -439,6 +438,8 @@ import { GAMES, meta } from '../lib/data';
   .strip :global(.slotb img[src*='/pokemon/'][src$='.png']:not([src*='icons'])) { width: 44px; height: 44px; margin: -8px 0 -2px; image-rendering: auto; }
   .strip :global(.slotb span) { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.2; }
   .strip :global(.slotb.on) { background: var(--card); height: 66px; }
+  .strip :global(.slotb.blank) { background: var(--card); }
+  .ed.empty > :global(.col.b), .ed.empty > :global(.col.c) { display: none; } .ed.empty :global(.who), .ed.empty :global(.types), .ed.empty :global(.col.a > :not(:has(#f-sp))) { display: none; } .ed.empty { grid-template-columns: 1fr !important; } .ed.empty :global(.col.a) { max-width: 340px; }
   .strip :global(.slotplus) { width: 54px; height: 62px; font: inherit; font-size: 1.6rem; line-height: 1; border: 1px solid var(--line-2); border-bottom: 0; border-radius: 4px 4px 0 0; background: var(--petal-deep); color: var(--ink-soft); cursor: pointer; }
   .strip :global(.slotplus:hover) { color: var(--ink); background: var(--card); }
   .strip :global(.slotadd) { position: relative; display: flex; align-items: center; width: 220px; height: 54px; }
