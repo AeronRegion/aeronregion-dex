@@ -180,6 +180,7 @@ import { GAMES, meta } from '../lib/data';
       const evTotal = m.evs.reduce((a, b) => a + b, 0);
       const [u, d] = NAT[m.nature]; const cap = CAP(), c = champ();
       const mark = (k: number) => (k && u !== d ? (k === u ? 'up' : k === d ? 'down' : '') : '');
+      const sfx = (k: number) => (mark(k) === 'up' ? '+' : mark(k) === 'down' ? '-' : '');
       ed.innerHTML = `
         <button type="button" class="edel" id="f-rm" title="Delete this Pokémon from the team">🗑 Delete</button>
         <div class="col a">
@@ -208,10 +209,10 @@ import { GAMES, meta } from '../lib/data';
           <table class="stt">
             <thead><tr><th></th><th class="n">Base</th><th class="sbh"></th><th>${c ? 'SP' : 'EVs'}</th><th></th>${c ? '' : '<th>IVs</th>'}<th class="n">Stat</th></tr></thead>
             <tbody>${base.map((b, k) => `<tr>
-              <th class="${mark(k)}">${STATNAME[k]}${k ? `<span class="nb"><button type="button" class="np${mark(k) === 'up' ? ' on' : ''}" data-k="${k}" data-d="1" title="Nature raises ${STATNAME[k]}" aria-label="Nature raises ${STATNAME[k]}">+</button><button type="button" class="np${mark(k) === 'down' ? ' on' : ''}" data-k="${k}" data-d="-1" title="Nature lowers ${STATNAME[k]}" aria-label="Nature lowers ${STATNAME[k]}">−</button></span>` : ''}</th>
+              <th class="${mark(k)}" title="${k ? 'Type + or - after the EVs to raise or lower this stat with your nature' : ''}">${STATNAME[k]}</th>
               <td class="n"><b>${b}</b></td>
               <td class="sbar"><i style="${sdBar(st[k] * 100 / (c ? 50 : m.level || 100), k)}"></i></td>
-              <td><input class="field num ev" data-k="${k}" type="number" min="0" max="${cap.per}" step="${cap.step}" value="${m.evs[k]}" aria-label="${STATNAME[k]} ${cap.label}" /></td>
+              <td><input class="field num ev" data-k="${k}" type="text" inputmode="numeric" autocomplete="off" value="${m.evs[k]}${sfx(k)}" aria-label="${STATNAME[k]} ${cap.label}" /></td>
               <td class="barc"><input type="range" class="evr" data-k="${k}" min="0" max="${cap.per}" step="${cap.step}" value="${m.evs[k]}" aria-label="${STATNAME[k]} ${cap.label}" /></td>
               ${c ? '' : `<td><input class="field num iv" data-k="${k}" type="number" min="0" max="31" value="${m.ivs[k]}" aria-label="${STATNAME[k]} IVs" /></td>`}
               <td class="n"><b>${st[k]}</b></td></tr>`).join('')}</tbody>
@@ -229,15 +230,15 @@ import { GAMES, meta } from '../lib/data';
       ed.querySelector<HTMLSelectElement>('#f-tera')!.addEventListener('change', (e) => { m.tera = (e.target as HTMLSelectElement).value; save(); });
       ed.querySelector<HTMLSelectElement>('#f-nat')!.addEventListener('change', (e) => { m.nature = (e.target as HTMLSelectElement).value; save(); drawEd(); });
       // +/− beside a stat picks the nature that raises or lowers it, keeping the other half when it can
-      ed.querySelectorAll<HTMLButtonElement>('.np').forEach((b) => b.addEventListener('click', () => {
-        const k = +b.dataset.k!, up = b.dataset.d === '1'; let [nu, nd] = NAT[m.nature];
+      // Showdown-style: a + or - typed after a stat's EVs raises or lowers that stat with the nature (typing it again, or removing it, undoes it)
+      const toggleNat = (k: number, up: boolean) => {
+        let [nu, nd] = NAT[m.nature];
         const neutral = nu === nd;
         if (up) { if (!neutral && nu === k) { nd = nu; } else { if (nd === k) nd = nu; nu = k; if (neutral) nd = k === 1 ? 3 : 1; } }
         else { if (!neutral && nd === k) { nu = nd; } else { if (nu === k) nu = nd; nd = k; if (neutral) nu = k === 1 ? 3 : 1; } }
         if (nu === nd) { m.nature = ({ 1: 'Hardy', 2: 'Docile', 3: 'Bashful', 4: 'Quirky', 5: 'Serious' } as Record<number, string>)[nu]; }
         else m.nature = Object.keys(NAT).find((n) => NAT[n][0] === nu && NAT[n][1] === nd)!;
-        save(); drawEd();
-      }));
+      };
       const shift = (dir: number) => { const to = sel + dir; if (to < 0 || to >= t.mons.length) return; [t.mons[sel], t.mons[to]] = [t.mons[to], t.mons[sel]]; sel = to; save(); drawStrip(); drawEd(); };
       ed.querySelector('#f-rm')!.addEventListener('click', () => { t.mons.splice(sel, 1); sel = Math.max(0, sel - 1); save(); drawTeams(); drawStrip(); drawEd(); });
       const i = spIndex.get(m.sp) ?? 0;
@@ -333,10 +334,17 @@ import { GAMES, meta } from '../lib/data';
       document.addEventListener('mousedown', (e) => { if (!list.hidden && !(e.target as HTMLElement).closest('.mlist') && e.target !== field) hideList(); });
       const clampEv = (k: number, v: number) => { const others = m.evs.reduce((a, b, x) => a + (x === k ? 0 : b), 0); return Math.max(0, Math.min(cap.per, v, cap.total - others)); };
       ed.querySelectorAll<HTMLInputElement>('.evr').forEach((r) => r.addEventListener('input', () => {
-        const k = +r.dataset.k!; m.evs[k] = clampEv(k, +r.value); r.value = String(m.evs[k]); (ed.querySelector(`.ev[data-k="${k}"]`) as HTMLInputElement).value = String(m.evs[k]); reStats();
+        const k = +r.dataset.k!; m.evs[k] = clampEv(k, +r.value); r.value = String(m.evs[k]); (ed.querySelector(`.ev[data-k="${k}"]`) as HTMLInputElement).value = String(m.evs[k]) + sfx(k); reStats();
       }));
       ed.querySelectorAll<HTMLInputElement>('.ev').forEach((n) => n.addEventListener('change', () => {
-        const k = +n.dataset.k!; m.evs[k] = clampEv(k, Math.round(+n.value || 0)); n.value = String(m.evs[k]); (ed.querySelector(`.evr[data-k="${k}"]`) as HTMLInputElement).value = String(m.evs[k]); reStats();
+        const k = +n.dataset.k!; const mt = n.value.trim().match(/^(\d*)\s*([+-]?)$/);
+        const num = mt ? +(mt[1] || 0) : Math.round(parseFloat(n.value) || 0), sign = mt ? mt[2] : '';
+        m.evs[k] = clampEv(k, num);
+        const had = mark(k);
+        if (k && sign === '+' && had !== 'up') toggleNat(k, true);
+        else if (k && sign === '-' && had !== 'down') toggleNat(k, false);
+        else if (k && !sign && had) toggleNat(k, had === 'up');
+        save(); drawEd();
       }));
       ed.querySelectorAll<HTMLInputElement>('.iv').forEach((n) => n.addEventListener('change', () => {
         const k = +n.dataset.k!; m.ivs[k] = Math.max(0, Math.min(31, Math.round(+n.value || 0))); n.value = String(m.ivs[k]); reStats();
