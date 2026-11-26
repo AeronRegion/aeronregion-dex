@@ -300,7 +300,6 @@ table.data td { padding-top: .3rem; padding-bottom: .3rem; }
 @media (max-width: 640px) { #ed .col.c .stt input.num { width: 3.2rem !important; } }
 #ed .col.c table.stt { align-self: flex-start; justify-self: start; }
 /* Teambuilder: like Showdown, the pick list takes the stats panel's place while it's open, right under the moves */
-#ed:has(> .mlist:not([hidden])) > .col.c { display: none; }
 /* Teambuilder: held item icon beside the Item box and on the artwork, like Showdown */
 #ed .itemic { width: 30px; height: 30px; margin: -4px -2px -4px -4px; image-rendering: pixelated; flex: none; }
 #ed .who { position: relative; }
@@ -310,3 +309,11 @@ table.data td { padding-top: .3rem; padding-bottom: .3rem; }
 #ed { grid-template-columns: 240px minmax(0, 440px) !important; }
 #ed > .col.c, #ed > .mlist { grid-column: 1 / -1; }
 @media (max-width: 640px) { #ed { grid-template-columns: 1fr !important; } }
+/* Teambuilder layout: details | stats | moves, with the pick list as a full-width row underneath */
+#ed { grid-template-columns: 240px auto minmax(260px, 1fr) !important; }
+#ed > .col.a { order: 1; } #ed > .col.c { order: 2; grid-column: auto !important; border-top: 0 !important; padding-top: 0 !important; } #ed > .col.b { order: 3; } #ed > .mlist { order: 4; grid-column: 1 / -1; }
+#ed td.sbar { min-width: 112px !important; width: 112px !important; }
+#ed .col.c .stt .barc { width: 130px !important; } #ed .col.c .stt .barc input { width: 120px !important; }
+#ed .col.c .stt input.num { width: 3.6rem !important; }
+@media (max-width: 1100px) { #ed { grid-template-columns: 240px 1fr !important; } #ed > .col.c { grid-column: 1 / -1 !important; order: 3; } #ed > .col.b { order: 2; } }
+@media (max-width: 640px) { #ed { grid-template-columns: 1fr !important; } #ed > .col.c { order: 3; } }
