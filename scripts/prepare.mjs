@@ -257,7 +257,7 @@ fs.writeFileSync('public/search-index.json', JSON.stringify({
 // Teambuilder extras, aligned with search-index species order: base stats, plus holdable items
 fs.writeFileSync('public/tb.json', JSON.stringify({
   stats: out.map((s) => ['hp', 'atk', 'def', 'spa', 'spd', 'spe'].map((k) => s.stats[k])),
-  items: items.filter((i) => !i.past).map((i) => [i.name, i.icon, (i.desc ?? '').slice(0, 90)]).sort((a, b) => a[0].localeCompare(b[0])),
+  items: items.map((i) => [i.name, i.icon, (i.desc ?? '').slice(0, 90)]).sort((a, b) => a[0].localeCompare(b[0])),
 }));
 write('meta', { cobbleverse: cobble ? cobble.version : null, built: new Date().toISOString().slice(0, 10) });
 console.log(`species ${out.length}, moves ${moves.length}, items ${items.length}, cobbleverse ${cobble ? 'yes' : 'no'}`);

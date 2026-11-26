@@ -32,7 +32,8 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
     <meta name="theme-color" content="#2e1a20" />
     <script is:inline>
       // pick the theme before the page paints: saved choice, otherwise the system setting
-      (function () { var t = null; try { t = localStorage.getItem('theme'); } catch (e) {}
+      (function () { var m = document.cookie.match(/(?:^|; )theme=(dark|light)/), t = m && m[1];
+        if (!t) { try { t = localStorage.getItem('theme'); } catch (e) {} }
         if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         document.documentElement.dataset.theme = t; })();
     </script>
@@ -71,7 +72,10 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
       setLabel();
       modeBtn.addEventListener('click', () => {
         const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-        document.documentElement.dataset.theme = next; try { localStorage.setItem('theme', next); } catch {} setLabel();
+        document.documentElement.dataset.theme = next; try { localStorage.setItem('theme', next); } catch {}
+        // shared with aeronregion.net so both sites match
+        const host = location.hostname.endsWith('aeronregion.net') ? '; domain=.aeronregion.net' : '';
+        document.cookie = `theme=${next}; path=/; max-age=31536000; samesite=lax${host}`; setLabel();
       });
       // Header search (and any input with data-find): themed suggestions, jump to the page on pick/enter.
       import { autocomplete } from '../lib/ac';

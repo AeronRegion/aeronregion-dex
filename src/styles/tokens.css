@@ -27,6 +27,7 @@
   --zebra:        rgb(255 255 255 / .35);
   --shadow:       var(--ink);
   --hover:        #1f7fb8;
+  --link:         #2369a8;
   --worst:        #f6d2cd;
   --weak-bg:      #fbe3e0;
   --res-bg:       #e4f2d9;
@@ -61,6 +62,7 @@ html[data-theme='dark'] {
   --zebra:        rgb(255 255 255 / .035);
   --shadow:       #000;
   --hover:        #7fd0ff;
+  --link:         #7fc4ff;
   --worst:        #5a2326;
   --weak-bg:      #3d1f22;
   --res-bg:       #1f3319;
