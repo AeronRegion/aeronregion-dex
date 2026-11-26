@@ -50,11 +50,12 @@ const SHIELD = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentCol
 
   <section data-panel="moves" hidden>
     <table class="data sortable" style="margin-top:1rem">
-      <thead><tr><th data-sort="text">Move</th><th data-sort="num" class="sorted asc">Cat.</th><th data-sort="num">Power</th><th data-sort="num">Acc</th><th data-sort="num">PP</th><th data-sort="num" class="pri">Priority</th><th data-sort="text">Target</th><th>Effect</th></tr></thead>
+      <thead><tr><th data-sort="text">Move</th><th>Type</th><th data-sort="num" class="sorted asc">Cat.</th><th data-sort="num">Power</th><th data-sort="num">Acc</th><th data-sort="num">PP</th><th data-sort="num" class="pri">Priority</th><th data-sort="text">Target</th><th>Effect</th></tr></thead>
       <tbody>
         {typeMoves.map((m) => (
           <tr>
             <td><a href={moveUrl(m)}>{m.name}</a></td>
+            <td><Type type={m.type} small /></td>
             <td data-v={catOrder[m.cat]}><Cat cat={m.cat} /></td>
             <td class="n">{m.power ?? '—'}</td><td class="n">{m.acc ?? '—'}</td><td class="n">{m.pp}</td>
             <td class={`n pri ${m.pri > 0 ? 'pos' : m.pri < 0 ? 'neg' : 'zero'}`} data-v={m.pri}>{m.pri > 0 ? `+${m.pri}` : m.pri}</td>

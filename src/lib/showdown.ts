@@ -1,6 +1,6 @@
 // Reads a team in Showdown's text format. Forgiving about what chat apps do to a paste:
 // moves may start with "- ", "* ", "• " or nothing, and blank lines may appear inside a set.
-export type ParsedSet = { species: string; item: string; ability: string; level: number | null; tera: string; evs: number[] | null; ivs: number[] | null; nature: string; moves: string[] };
+export type ParsedSet = { species: string; gender: string; shiny: boolean; item: string; ability: string; level: number | null; tera: string; evs: number[] | null; ivs: number[] | null; nature: string; moves: string[] };
 const STAT = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
 const stats = (line: string, base: number) => {
   const out = Array(6).fill(base);
@@ -16,9 +16,10 @@ export function parseShowdown(text: string, isMove: (name: string) => boolean, i
   let cur: ParsedSet | null = null;
   const headOf = (line: string) => {
     const [h, item = ''] = line.split(' @ ');
+    const g = h.match(/\((M|F)\)\s*$/);
     let head = h.replace(/\s*\((M|F)\)\s*$/, '').trim();
     const paren = head.match(/\(([^)]+)\)\s*$/); if (paren && paren[1].length > 1) head = paren[1];
-    return { head, item: item.trim() };
+    return { head, item: item.trim(), gender: g ? g[1] : '' };
   };
   for (const raw of text.replace(/\r/g, '').split('\n')) {
     const line = raw.trim().replace(/^[`>]+\s*/, '');
@@ -32,13 +33,14 @@ export function parseShowdown(text: string, isMove: (name: string) => boolean, i
       else if (key === 'tera type') cur.tera = v;
       else if (key === 'evs') cur.evs = stats(v, 0);
       else if (key === 'ivs') cur.ivs = stats(v, 31);
+      else if (key === 'shiny') cur.shiny = /^y/i.test(v);
       continue;
     }
     if (cur && /^\w+\s+Nature$/i.test(line)) { cur.nature = line.replace(/\s*Nature$/i, ''); continue; }
     // a bare line: a move if the current set has room and it names a move, otherwise maybe a new Pokémon
     if (cur && !line.includes(' @ ') && cur.moves.length < 4 && isMove(line)) { cur.moves.push(line); continue; }
-    const { head, item } = headOf(line);
-    if (isSpecies(head)) { cur = { species: head, item, ability: '', level: null, tera: '', evs: null, ivs: null, nature: '', moves: [] }; sets.push(cur); }
+    const { head, item, gender } = headOf(line);
+    if (isSpecies(head)) { cur = { species: head, gender, shiny: false, item, ability: '', level: null, tera: '', evs: null, ivs: null, nature: '', moves: [] }; sets.push(cur); }
   }
   return sets;
 }

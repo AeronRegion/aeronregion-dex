@@ -48,7 +48,7 @@ import { GAMES, meta } from '../lib/data';
     type Idx = { species: Sp[]; moves: Record<string, [string, string, string]>; learn: Record<string, number[]> };
     type Tb = { stats: number[][]; items: [string, string, string][]; abilities: Record<string, string>; moves: Record<string, [number | null, number | null, number, string]> };
     type Set6 = [number, number, number, number, number, number];
-    type Mon = { sp: string; ab: string; item: string; moves: string[]; nature: string; evs: Set6; ivs: Set6; level: number; tera: string };
+    type Mon = { sp: string; ab: string; item: string; moves: string[]; nature: string; evs: Set6; ivs: Set6; level: number; tera: string; shiny?: boolean; gender?: string };
     type Team = { id: string; name: string; fmt: string; mons: Mon[] };
 
     const $ = (id: string) => document.getElementById(id)!;
@@ -117,10 +117,11 @@ import { GAMES, meta } from '../lib/data';
     // ---------- Showdown text ----------
     const statLine = (v: Set6, skip: number) => v.map((x, k) => (x !== skip ? `${x} ${STAT[k]}` : '')).filter(Boolean).join(' / ');
     const monText = (m: Mon) => {
-      const s = spOf(m); const lines = [`${s[1]}${m.item ? ` @ ${m.item}` : ''}`];
+      const s = spOf(m); const lines = [`${s[1]}${m.gender ? ` (${m.gender})` : ''}${m.item ? ` @ ${m.item}` : ''}`];
       if (m.ab) lines.push(`Ability: ${m.ab}`);
       const c = champ();
       const lv = c ? 50 : m.level; if (lv !== 100) lines.push(`Level: ${lv}`);
+      if (m.shiny) lines.push('Shiny: Yes');
       if (m.tera) lines.push(`Tera Type: ${m.tera}`);
       const ev = statLine((c ? m.evs.map(spToEv) : m.evs) as Set6, 0); if (ev) lines.push(`EVs: ${ev}`);
       lines.push(`${m.nature} Nature`);
@@ -143,7 +144,7 @@ import { GAMES, meta } from '../lib/data';
       const looksSp = sets.some((x) => x.evs) && sets.every((x) => !x.evs || (x.evs.every((v) => v <= 32) && x.evs.reduce((a, b) => a + b, 0) <= 66));
       for (const x of sets) {
         const i = findSpecies(x.species); if (i < 0) { miss.push(x.species); continue; }
-        const m = newMon(i); m.item = x.item; m.level = x.level ?? 100;
+        const m = newMon(i); m.item = x.item; m.level = x.level ?? 100; m.shiny = x.shiny; m.gender = x.gender;
         if (x.ability) m.ab = x.ability; if (x.tera) m.tera = x.tera; if (x.nature && NAT[x.nature]) m.nature = x.nature;
         if (x.evs) m.evs = x.evs as Set6; if (x.ivs) m.ivs = x.ivs as Set6;
         m.moves = x.moves.map((n) => moveId(n, TYPES)).filter((id) => idx.moves[id] || /^hiddenpower-\w+$/.test(id)).slice(0, 4);
@@ -162,7 +163,7 @@ import { GAMES, meta } from '../lib/data';
     };
     const drawStrip = () => {
       const t = team();
-      $('strip').innerHTML = t.mons.map((m, k) => { const s = spOf(m); return `<button type="button" class="slotb${k === sel ? ' on' : ''}" data-k="${k}" draggable="true" title="Drag to reorder"><img src="${s[3] ? SPR + 'pokemon/' + s[3] + '.png' : ''}" alt="" width="56" height="56" /><span>${esc(s[1])}</span></button>`; }).join('') +
+      $('strip').innerHTML = t.mons.map((m, k) => { const s = spOf(m); return `<button type="button" class="slotb${k === sel ? ' on' : ''}" data-k="${k}" draggable="true" title="Drag to reorder"><img src="${s[3] ? SPR + 'pokemon/' + (m.shiny ? 'shiny/' : '') + s[3] + '.png' : ''}" alt="" width="56" height="56" /><span>${esc(s[1])}</span></button>`; }).join('') +
         (t.mons.length < 14 ? `<div class="slotadd"><input class="field" id="addmon" placeholder="+ Add Pokémon" autocomplete="off" /></div>` : '');
       const addIn = document.getElementById('addmon') as HTMLInputElement | null;
       if (addIn) autocomplete(addIn, () => idx.species.map((s) => ({ label: s[1], sub: s[2].join(' / ') })), (it) => { const i = findSpecies(it.label); if (i < 0) return; t.mons.push(newMon(i)); sel = t.mons.length - 1; save(); drawTeams(); drawStrip(); drawEd(); });
@@ -178,11 +179,15 @@ import { GAMES, meta } from '../lib/data';
       const mark = (k: number) => (k && u !== d ? (k === u ? 'up' : k === d ? 'down' : '') : '');
       ed.innerHTML = `
         <div class="col a">
-          <div class="who"><img src="${s[3] ? SPR + 'pokemon/other/official-artwork/' + s[3] + '.png' : ''}" alt="" width="150" height="150" /></div>
+          <div class="who"><img src="${s[3] ? SPR + 'pokemon/other/official-artwork/' + (m.shiny ? 'shiny/' : '') + s[3] + '.png' : ''}" alt="${m.shiny ? 'Shiny ' : ''}${esc(s[1])}" width="150" height="150" />${m.shiny ? '<span class="shinytag" title="Shiny">★</span>' : ''}</div>
           <div class="slot"><label class="fl">Pokémon<input class="field" id="f-sp" value="${esc(s[1])}" autocomplete="off" /></label></div>
           <div class="types">${s[2].map(chip).join(' ')} <a href="${s[5]}" class="dexl">Dex page</a></div>
           <div class="slot"><label class="fl">Ability<input class="field" id="f-ab" value="${esc(m.ab)}" autocomplete="off" /></label></div>
           <div class="slot"><label class="fl">Item<input class="field" id="f-item" value="${esc(m.item)}" placeholder="No item" autocomplete="off" /></label></div>
+          <div class="pair">
+            <label class="fl">Gender<select class="field" id="f-gen"><option value=""${!m.gender ? ' selected' : ''}>Random</option><option value="M"${m.gender === 'M' ? ' selected' : ''}>Male</option><option value="F"${m.gender === 'F' ? ' selected' : ''}>Female</option></select></label>
+            <label class="fl">Shiny<span class="shinybox"><input type="checkbox" id="f-shiny"${m.shiny ? ' checked' : ''} /> ${m.shiny ? 'Yes' : 'No'}</span></label>
+          </div>
           <div class="pair">
             <label class="fl">Level<input class="field" id="f-lv" type="number" min="1" max="100" value="${c ? 50 : m.level}"${c ? ' disabled title="Champions battles are always Lv. 50"' : ''} /></label>
             <label class="fl">Tera type<select class="field" id="f-tera">${[...TYPES, 'Stellar'].map((x) => `<option${x === m.tera ? ' selected' : ''}>${x}</option>`).join('')}</select></label>
@@ -216,6 +221,8 @@ import { GAMES, meta } from '../lib/data';
         save();
       };
       ed.querySelector<HTMLInputElement>('#f-lv')!.addEventListener('change', (e) => { const el = e.target as HTMLInputElement; m.level = Math.max(1, Math.min(100, Math.round(+el.value) || 50)); el.value = String(m.level); reStats(); });
+      ed.querySelector<HTMLSelectElement>('#f-gen')!.addEventListener('change', (e) => { m.gender = (e.target as HTMLSelectElement).value; save(); });
+      ed.querySelector<HTMLInputElement>('#f-shiny')!.addEventListener('change', (e) => { m.shiny = (e.target as HTMLInputElement).checked; save(); drawStrip(); drawEd(); });
       ed.querySelector<HTMLSelectElement>('#f-tera')!.addEventListener('change', (e) => { m.tera = (e.target as HTMLSelectElement).value; save(); });
       ed.querySelector<HTMLSelectElement>('#f-nat')!.addEventListener('change', (e) => { m.nature = (e.target as HTMLSelectElement).value; save(); drawEd(); });
       // +/− beside a stat picks the nature that raises or lowers it, keeping the other half when it can
@@ -437,7 +444,10 @@ import { GAMES, meta } from '../lib/data';
   @media (max-width: 1000px) { .ed { grid-template-columns: 1fr 1fr; } .ed :global(.col.c) { grid-column: 1 / -1; } }
   @media (max-width: 640px) { .ed { grid-template-columns: 1fr; } .ed :global(.barc), .ed :global(.stt thead th:nth-child(3)) { display: none; } }
   .ed :global(.col) { display: flex; flex-direction: column; gap: .5rem; min-width: 0; }
-  .ed :global(.who) { display: flex; justify-content: center; }
+  .ed :global(.who) { display: flex; justify-content: center; position: relative; }
+  .ed :global(.shinytag) { position: absolute; top: 0; right: 1rem; color: #e0a800; font-size: 1.3rem; }
+  .ed :global(.shinybox) { display: flex; align-items: center; gap: .4rem; height: 2.6rem; font-size: .95rem; color: var(--ink); font-weight: 600; }
+  .ed :global(.shinybox input) { width: 1.15rem; height: 1.15rem; accent-color: #e0a800; }
   .ed :global(.fl) { display: flex; flex-direction: column; gap: .15rem; font-size: .78rem; font-weight: 700; color: var(--ink-soft); }
   .ed :global(.fl .field) { width: 100%; color: var(--ink); }
   .ed :global(.slot) { position: relative; }
