@@ -122,7 +122,7 @@ table { border-collapse: collapse; width: 100%; }
 .ac-l { font-weight: 600; flex: 1; }
 .ac-s { color: var(--ink-soft); font-size: .8rem; }
 .ac-t { font-weight: 700; font-size: .7rem; padding: 0 .4rem; border: 1px solid rgb(0 0 0 / .3); }
-.ac-c { font-weight: 700; font-size: .65rem; color: #fff; padding: .05rem .35rem; }
+.ac-c { line-height: 0; display: inline-flex; justify-content: center; }
 .ac.ac-rich .ac-row { display: grid; grid-template-columns: 9.5rem 4.2rem 2.6rem 2.6rem 2.6rem 2.2rem 1fr; gap: .45rem; font-size: .85rem; padding: .3rem .6rem; }
 .ac.ac-rich .ac-l { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ac.ac-rich .ac-t { text-align: center; }

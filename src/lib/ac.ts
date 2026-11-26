@@ -2,7 +2,12 @@
 export type AcItem = { label: string; sub?: string; type?: string; cat?: string; value?: string; move?: { pow: number | null; acc: number | true | null; pp: number; desc: string } };
 const TC: Record<string, string> = { Normal: '#a8a77a', Fire: '#ee8130', Water: '#6390f0', Electric: '#f7d02c', Grass: '#7ac74c', Ice: '#96d9d6', Fighting: '#c22e28', Poison: '#a33ea1', Ground: '#e2bf65', Flying: '#a98ff3', Psychic: '#f95587', Bug: '#a6b91a', Rock: '#b6a136', Ghost: '#735797', Dragon: '#6f35fc', Dark: '#705746', Steel: '#b7b7ce', Fairy: '#d685ad' };
 const LIGHT = new Set(['Normal', 'Electric', 'Grass', 'Ice', 'Ground', 'Flying', 'Bug', 'Rock', 'Steel', 'Fairy']);
-const CAT: Record<string, string> = { Physical: '#c9482c', Special: '#4f6fc7', Status: '#8a8a8a' };
+// same category icons as the rest of the site (components/Cat.astro)
+export const CAT_SVG: Record<string, string> = {
+  Physical: '<rect width="28" height="14" rx="3" fill="#c9482c"/><path d="M14 2.2l1.5 3 3.2-1.1-1.2 3.1 3 1.6-3.3.6.2 3.3-2.6-2-2.6 2 .2-3.3-3.3-.6 3-1.6L9.3 4.1l3.2 1.1z" fill="#ffd34d"/>',
+  Special: '<rect width="28" height="14" rx="3" fill="#4f6fc7"/><circle cx="14" cy="7" r="4.6" fill="none" stroke="#dfe7ff" stroke-width="1.4"/><circle cx="14" cy="7" r="2.2" fill="#dfe7ff"/>',
+  Status: '<rect width="28" height="14" rx="3" fill="#8a8a8a"/><circle cx="14" cy="7" r="4.4" fill="none" stroke="#f2f2f2" stroke-width="1.4"/><path d="M14 2.6a4.4 4.4 0 0 1 0 8.8z" fill="#f2f2f2"/>',
+};
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
 
 // openEmpty: clicking or focusing the box lists every item (scrollable), and typing narrows it down
@@ -27,7 +32,7 @@ export function autocomplete(input: HTMLInputElement, getItems: () => Promise<Ac
       `<span class="ac-l">${esc(it.label)}</span>` +
       (it.sub ? `<span class="ac-s">${esc(it.sub)}</span>` : '') +
       (it.type ? `<span class="ac-t" style="background:${TC[it.type]};color:${LIGHT.has(it.type) ? '#2e1a20' : '#fff'}">${it.type}</span>` : '') +
-      (it.cat ? `<span class="ac-c" style="background:${CAT[it.cat]}" title="${it.cat}">${it.cat.slice(0, 3).toUpperCase()}</span>` : '') +
+      (it.cat ? `<span class="ac-c" title="${it.cat}"><svg viewBox="0 0 28 14" width="30" height="15" aria-label="${it.cat}" role="img">${CAT_SVG[it.cat] ?? ''}</svg></span>` : '') +
       (it.move ? `<span class="ac-n"><small>Pow</small>${it.move.pow ?? '—'}</span><span class="ac-n"><small>Acc</small>${it.move.acc === true ? '—' : it.move.acc ?? '—'}</span><span class="ac-n"><small>PP</small>${it.move.pp}</span><span class="ac-d">${esc(it.move.desc)}</span>` : '') +
       `</div>`).join('');
     box.hidden = shown.length === 0; place();

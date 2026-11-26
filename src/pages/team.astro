@@ -41,7 +41,7 @@ import { GAMES, meta } from '../lib/data';
     window.__TB = { TYPES, COLORS };
   </script>
   <script>
-    import { autocomplete } from '../lib/ac';
+    import { autocomplete, CAT_SVG } from '../lib/ac';
     import { parseShowdown, moveId } from '../lib/showdown';
     const { TYPES, COLORS } = (window as any).__TB as { TYPES: string[]; COLORS: Record<string, string> };
     type Sp = [string, string, string[], string | null, number, string, string[], string | null];
@@ -241,13 +241,35 @@ import { GAMES, meta } from '../lib/data';
       ed.querySelector('#f-right')!.addEventListener('click', () => shift(1));
       ed.querySelector('#f-rm')!.addEventListener('click', () => { t.mons.splice(sel, 1); sel = Math.max(0, sel - 1); save(); drawTeams(); drawStrip(); drawEd(); });
       const i = spIndex.get(m.sp)!;
+      // Showdown-style move list: opens under the editor while a move box has focus, filters as you type
+      ed.insertAdjacentHTML('beforeend', '<div class="mlist" hidden><div class="mhead"><span>Name</span><span>Type</span><span>Cat</span><span class="r">Pow</span><span class="r">Acc</span><span class="r">PP</span><span>Description</span></div><div class="mbody"></div></div>');
+      const list = ed.querySelector<HTMLElement>('.mlist')!, body = list.querySelector<HTMLElement>('.mbody')!;
+      const pool = learnOf(i).filter((x) => idx.moves[x]).sort((a, b) => idx.moves[a][0].localeCompare(idx.moves[b][0]));
+      let slot = -1, shown: string[] = [], act = -1;
+      const row = (x: string, k: number) => {
+        const [name, type, cat] = idx.moves[x]; const md = tb.moves[x] ?? [null, null, 0, ''];
+        return `<div class="mr${k === act ? ' on' : ''}${m.moves.includes(x) ? ' has' : ''}" data-x="${x}"><b>${esc(name)}</b>${chip(type)}<svg viewBox="0 0 28 14" width="30" height="15" role="img" aria-label="${cat}"><title>${cat}</title>${CAT_SVG[cat] ?? ''}</svg><span class="r">${md[0] ?? '—'}</span><span class="r">${md[1] ?? '—'}</span><span class="r">${md[2]}</span><span class="d">${esc(md[3])}</span></div>`;
+      };
+      const fill = (q: string) => {
+        const v = q.trim().toLowerCase();
+        shown = !v ? pool : [...pool.filter((x) => idx.moves[x][0].toLowerCase().startsWith(v)), ...pool.filter((x) => !idx.moves[x][0].toLowerCase().startsWith(v) && (idx.moves[x][0].toLowerCase().includes(v) || idx.moves[x][1].toLowerCase() === v))];
+        act = v && shown.length ? 0 : -1;
+        body.innerHTML = shown.length ? shown.map(row).join('') : '<p class="note" style="padding:.5rem">No moves match.</p>';
+      };
+      const choose = (x: string) => { m.moves[slot] = x; save(); const next = slot + 1; drawEd(); if (next < 4) (ed.querySelectorAll<HTMLInputElement>('.mvin')[next])?.focus(); };
       ed.querySelectorAll<HTMLInputElement>('.mvin').forEach((inp) => {
         const j = +inp.dataset.j!;
-        const setMove = (name: string) => { const v = name.trim().toLowerCase(); m.moves[j] = v ? (Object.keys(idx.moves).find((x) => idx.moves[x][0].toLowerCase() === v) ?? m.moves[j]) : ''; save(); };
-        autocomplete(inp, () => learnOf(i).filter((x) => idx.moves[x]).map((x) => { const [label, type, cat] = idx.moves[x]; const md = tb.moves[x]; return { label, type, cat, move: md ? { pow: md[0], acc: md[1], pp: md[2], desc: md[3] } : undefined }; }).sort((a, b) => a.label.localeCompare(b.label)),
-          (it) => { setMove(it.label); drawEd(); (ed.querySelectorAll<HTMLInputElement>('.mvin')[j + 1])?.focus(); }, 12, true);
-        inp.addEventListener('change', () => { setMove(inp.value); drawEd(); });
+        inp.addEventListener('focus', () => { slot = j; list.hidden = false; inp.select(); fill(''); body.scrollTop = 0; if (list.getBoundingClientRect().top > innerHeight - 120) list.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
+        inp.addEventListener('input', () => fill(inp.value));
+        inp.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); act = Math.max(0, Math.min(shown.length - 1, act + (e.key === 'ArrowDown' ? 1 : -1))); body.querySelectorAll('.mr').forEach((r, k) => r.classList.toggle('on', k === act)); body.querySelectorAll('.mr')[act]?.scrollIntoView({ block: 'nearest' }); }
+          else if (e.key === 'Enter' && act >= 0) { e.preventDefault(); choose(shown[act]); }
+          else if (e.key === 'Escape') { list.hidden = true; inp.blur(); }
+        });
+        inp.addEventListener('change', () => { const v = inp.value.trim().toLowerCase(); if (!v) { m.moves[j] = ''; save(); } else { const hit = pool.find((x) => idx.moves[x][0].toLowerCase() === v); if (hit) { m.moves[j] = hit; save(); } } });
       });
+      body.addEventListener('mousedown', (e) => { const r = (e.target as HTMLElement).closest<HTMLElement>('.mr'); if (r) { e.preventDefault(); choose(r.dataset.x!); } });
+      document.addEventListener('mousedown', (e) => { if (!list.hidden && !(e.target as HTMLElement).closest('.mlist, .mvin')) list.hidden = true; });
       const clampEv = (k: number, v: number) => { const others = m.evs.reduce((a, b, x) => a + (x === k ? 0 : b), 0); return Math.max(0, Math.min(cap.per, v, cap.total - others)); };
       ed.querySelectorAll<HTMLInputElement>('.evr').forEach((r) => r.addEventListener('input', () => {
         const k = +r.dataset.k!; m.evs[k] = clampEv(k, +r.value); r.value = String(m.evs[k]); (ed.querySelector(`.ev[data-k="${k}"]`) as HTMLInputElement).value = String(m.evs[k]); reStats();
@@ -378,6 +400,18 @@ import { GAMES, meta } from '../lib/data';
   .ed :global(.mrow) { display: flex; align-items: center; gap: .4rem; }
   .ed :global(.mrow .field) { flex: 1; min-width: 0; }
   .ed :global(.mrow .tchip) { width: 64px; text-align: center; }
+  .ed :global(.mlist) { grid-column: 1 / -1; border: 2px solid var(--ink); background: var(--card); }
+  .ed :global(.mhead), .ed :global(.mr) { display: grid; grid-template-columns: 11rem 4.6rem 2.4rem 2.8rem 2.8rem 2.4rem 1fr; gap: .6rem; align-items: center; padding: .3rem .7rem; }
+  .ed :global(.mhead) { font-size: .75rem; font-weight: 700; color: var(--ink-soft); border-bottom: 2px solid var(--ink); background: var(--petal-deep); }
+  .ed :global(.mbody) { max-height: 360px; overflow-y: auto; }
+  .ed :global(.mr) { font-size: .9rem; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .ed :global(.mr:hover), .ed :global(.mr.on) { background: var(--petal-deep); }
+  .ed :global(.mr.has b::after) { content: ' ✓'; color: var(--ink-soft); font-weight: 600; }
+  .ed :global(.mr .tchip) { text-align: center; }
+  .ed :global(.mr .r), .ed :global(.mhead .r) { text-align: right; font-variant-numeric: tabular-nums; }
+  .ed :global(.mr .r) { font-weight: 700; }
+  .ed :global(.mr .d) { font-size: .8rem; color: var(--ink-soft); line-height: 1.3; }
+  @media (max-width: 700px) { .ed :global(.mhead), .ed :global(.mr) { grid-template-columns: 1fr 4.4rem 2.2rem 2.6rem; } .ed :global(.mhead > :nth-child(n+5)), .ed :global(.mr > :nth-child(n+5)) { display: none; } }
   .ed :global(.danger) { border-color: #a40000; color: #a40000; align-self: flex-start; }
   .ed :global(.stt) { width: 100%; border-collapse: collapse; }
   .ed :global(.stt th), .ed :global(.stt td) { padding: .15rem .3rem; font-size: .88rem; }
