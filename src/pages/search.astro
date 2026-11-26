@@ -36,7 +36,7 @@ import { TYPES } from '../lib/types';
   const slug = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/♀/g, '-f').replace(/♂/g, '-m').replace(/['’.:%]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const TC: Record<string, string> = { Normal: '#a8a77a', Fire: '#ee8130', Water: '#6390f0', Electric: '#f7d02c', Grass: '#7ac74c', Ice: '#96d9d6', Fighting: '#c22e28', Poison: '#a33ea1', Ground: '#e2bf65', Flying: '#a98ff3', Psychic: '#f95587', Bug: '#a6b91a', Rock: '#b6a136', Ghost: '#735797', Dragon: '#6f35fc', Dark: '#705746', Steel: '#b7b7ce', Fairy: '#d685ad' };
   const light = new Set(['Normal', 'Electric', 'Grass', 'Ice', 'Ground', 'Flying', 'Bug', 'Rock', 'Steel', 'Fairy']);
-  const chip = (t: string) => `<span style="display:inline-block;font-weight:700;font-size:.7rem;padding:0 .4rem;border:1px solid rgb(0 0 0/.3);background:${TC[t]};color:${light.has(t) ? '#2e1a20' : '#fff'}">${t}</span>`;
+  const chip = (t: string) => `<span class="chip small" style="--c:${TC[t]};display:inline-block;font-weight:700;font-size:.7rem;padding:0 .4rem;border:1px solid rgb(0 0 0/.3);background:${TC[t]};color:${light.has(t) ? '#2e1a20' : '#fff'}">${t}</span>`;
   import { autocomplete } from '../lib/ac';
   const inputs = [...document.querySelectorAll<HTMLInputElement>('#f input.mv')];
   const abIn = document.getElementById('ab') as HTMLInputElement, tySel = document.getElementById('ty') as HTMLSelectElement;

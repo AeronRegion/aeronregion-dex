@@ -231,3 +231,12 @@ header .brand, .brand { font-family: 'Rubik Variable', 'Rubik', system-ui, sans-
 main a, main .card b, main .evo b, .ab { text-decoration: none !important; }
 main p a:not([class]), main .note a, main p.note a { text-decoration: underline !important; text-decoration-thickness: 1px !important; text-underline-offset: 2px; }
 main a:not(.chip):not(.block):not(.tile):not(.sm):not(.tc a):not(.tchart a):not(.pick a):not(.hero a):hover, main .card:hover b, main .evo a:hover b, .ab:hover { text-decoration: underline !important; text-decoration-thickness: 1px !important; text-underline-offset: 2px; }
+/* Pokémon cards, PokemonDB style: name, then "#0009 / Water · Ice" in plain colored text */
+.card > div { display: block; line-height: 1.3; }
+.card b { display: block; font-size: .95rem; }
+.card small { display: inline !important; font-size: .8rem; color: var(--ink-soft); margin: 0 !important; }
+.card small::after { content: ' / '; }
+.card .chips { display: inline !important; margin: 0 !important; }
+main .card .chip.chip, .card span.chip.chip { display: inline !important; background: none !important; border: 0 !important; padding: 0 !important; font-size: .8rem !important; font-weight: 600 !important; text-shadow: none !important; color: color-mix(in srgb, var(--c) 58%, #000) !important; }
+html[data-theme='dark'] .card .chip { color: color-mix(in srgb, var(--c) 75%, #fff) !important; }
+.card .chip + .chip::before { content: '\00a0·\00a0'; color: var(--ink-soft); font-weight: 400; }
