@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import Type from '../../components/Type.astro';
-import { abilities, speciesById, slug, pokeUrl, iconUrl, formLabel } from '../../lib/data';
+import { abilities, speciesById, slug, pokeUrl, iconUrl, boxIconUrl, formLabel } from '../../lib/data';
 export function getStaticPaths() {
   return abilities.map((a) => ({ params: { slug: slug(a.name) }, props: { a } }));
 }
@@ -19,7 +19,7 @@ const normal = list.filter((x: any) => !x.hidden), hidden = list.filter((x: any)
     <div class="cards">
       {group.map(({ s }: any) => (
         <a class="card" href={pokeUrl(s)}>
-          <img src={iconUrl(s.art)} alt="" loading="lazy" width="52" height="52" />
+          <img src={boxIconUrl(s.art)} data-fb={iconUrl(s.art)} onerror="if(this.dataset.fb&&this.src!==this.dataset.fb){this.src=this.dataset.fb;this.classList.add('fb')}" alt="" loading="lazy" width="40" height="30" />
           <div><b>{formLabel(s)}</b><small>#{String(s.num).padStart(4, '0')}</small><div class="chips">{s.types.map((t: string) => <Type type={t} small link={false} />)}</div></div>
         </a>
       ))}

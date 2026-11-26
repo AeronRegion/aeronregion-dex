@@ -81,10 +81,13 @@ const spawns = s.cobbleverse?.spawns ?? [];
     <div class="two">
       <div>
         <h3 class="sec">Base stats</h3>
-        {STATS.map(([k, label]) => { const b = s.stats[k]; const [lo, hi] = statRange(k, b); return (
-          <div class="st"><span>{label}</span><b>{b}</b><div class="bar"><i style={`width:${Math.min(100, b / 1.8)}%;background:${statColor(b)}`}></i></div><span class="mm">{lo}–{hi}</span></div>
-        ); })}
-        <div class="st tot"><span>Total</span><b>{s.bst}</b><span class="mm">Min–max at Lv. 100</span></div>
+        <table class="stt">
+          {STATS.map(([k, label]) => { const b = s.stats[k]; const [lo, hi] = statRange(k, b); return (
+            <tr><th>{label}</th><td class="n">{b}</td><td class="bc"><div class="bar" style={`width:${Math.min(100, b / 1.8)}%;background:${statColor(b)}`}></div></td><td class="mm">{lo}</td><td class="mm">{hi}</td></tr>
+          ); })}
+          <tr class="tot"><th>Total</th><td class="n">{s.bst}</td><td></td><th class="mh">Min</th><th class="mh">Max</th></tr>
+        </table>
+        <p class="stnote">Min and max stats at Lv. 100.</p>
       </div>
       <div>
         <h3 class="sec">Type defenses</h3>
@@ -328,14 +331,17 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .tabs button { font: inherit; font-weight: 700; font-size: 1.05rem; padding: .5rem 1.6rem; background: none; border: 3px solid transparent; border-bottom: 0; margin-bottom: -3px; cursor: pointer; color: var(--ink); }
   .tabs button[aria-selected='true'] { border-color: var(--ink); background: var(--card); }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 2.2rem; }
-  .st { display: grid; grid-template-columns: 76px 36px 1fr 76px; gap: .55rem; align-items: center; padding: .12rem 0; }
-  .st > span:first-child { text-align: right; color: var(--ink-soft); font-weight: 500; }
-  .st span:first-child { font-weight: 500; }
-  .st b { text-align: right; }
-  .bar { height: 10px; background: var(--track); } .bar i { display: block; height: 100%; }
-  .tot .mm { grid-column: 3 / 5; white-space: nowrap; }
-  .mm { color: var(--ink-soft); font-size: .88rem; text-align: right; }
-  .tot { border-top: 2px solid var(--ink); margin-top: .3rem; }
+  .stt { width: 100%; border-collapse: collapse; }
+  .stt th, .stt td { padding: .28rem .5rem; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  .stt th { text-align: right; font-weight: 400; color: var(--ink-soft); width: 72px; white-space: nowrap; }
+  .stt td.n { width: 34px; text-align: right; font-weight: 600 !important; }
+  .stt td.bc { padding-right: .8rem; }
+  .stt .bar { height: 12px; border-radius: 4px; border: 1px solid rgb(0 0 0 / .18); }
+  .stt td.mm { width: 40px; text-align: right; color: var(--ink-soft); }
+  .stt tr.tot th, .stt tr.tot td { border-bottom: 0; }
+  .stt tr.tot th:first-child, .stt tr.tot td.n { color: var(--ink); font-weight: 700 !important; }
+  .stt th.mh { width: 40px; font-size: .85rem; font-weight: 600; color: var(--ink-soft); }
+  .stnote { font-size: .8rem; color: var(--ink-soft); margin: .4rem 0 0; }
   .dt { display: grid; grid-template-columns: repeat(9, 36px); gap: 5px 2px; }
   .tc { display: flex; flex-direction: column; text-align: center; font-weight: 700; font-size: .7rem; }
   .tc a { min-width: 0; height: 19px; line-height: 18px; font-size: .64rem; margin-bottom: 2px; font-weight: 700 !important; text-decoration: none; color: #fff; text-shadow: 1px 1px 1px rgb(0 0 0 / .6); border: 1px solid rgb(0 0 0 / .2); border-radius: 0; }
@@ -347,7 +353,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .stage { display: flex; flex-direction: column; align-items: center; gap: .6rem; }
   .stage.many { display: grid; grid-template-columns: repeat(4, minmax(110px, 1fr)); gap: .4rem .6rem; }
   .evo { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--ink); padding: .3rem .6rem; border: 2px solid transparent; }
-  .evo.cur b { text-decoration: underline; text-decoration-thickness: 3px; text-decoration-color: #59c4fb; text-underline-offset: 4px; }
+  .evo.cur { background: var(--card); border: 1px solid var(--line-2); border-radius: 4px; cursor: default; pointer-events: none; box-shadow: inset 0 -3px 0 var(--brick); }
   .evo img { width: 84px; height: 84px; object-fit: contain; }
   .evo em { font-style: normal; font-size: .82rem; background: var(--petal-deep); padding: 0 .4rem; }
   .evo b { font-weight: 700; }
@@ -385,7 +391,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
     .two { grid-template-columns: 1fr; }
     .stage.many { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .dt { grid-template-columns: repeat(9, minmax(0, 1fr)); }
-    .st { grid-template-columns: 62px 34px 1fr 64px; gap: .45rem; }
+    .stt th, .stt td { padding: .25rem .3rem; } .stt th { width: 58px; }
     .spawn { grid-template-columns: 1fr; gap: .2rem; }
   .mtable .tgt, .mtable th:nth-child(8) { display: none; }
   }

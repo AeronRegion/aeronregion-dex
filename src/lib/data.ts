@@ -44,6 +44,7 @@ const SPR = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites';
 export const artUrl = (art: string | null) => art ? `${SPR}/pokemon/other/official-artwork/${art}.png` : '';
 export const iconUrl = (art: string | null) => art ? `${SPR}/pokemon/${art}.png` : '';
 export const itemIconUrl = (icon: string | null) => icon ? `${SPR}/items/${icon}.png` : '';
+export const boxIconUrl = (art: string | null) => art ? `${SPR}/pokemon/versions/generation-vii/icons/${art}.png` : '';
 
 export const GAMES: Record<number, string> = {
   9: 'Scarlet / Violet', 8: 'Sword / Shield', 7: 'Sun / Moon / USUM', 6: 'X / Y / ORAS', 5: 'Black / White', 4: 'DPPt / HGSS', 3: 'RSE / FRLG', 2: 'Gold / Silver / Crystal', 1: 'Red / Blue / Yellow',

@@ -107,9 +107,9 @@ table { border-collapse: collapse; width: 100%; }
 .note { font-size: .88rem; color: var(--ink-soft); }
 .sprite { width: 40px; height: 40px; object-fit: contain; image-rendering: auto; }
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .6rem; }
-.card { display: grid; grid-template-columns: 52px 1fr; gap: .6rem; align-items: center; padding: .35rem .5rem; text-decoration: none; color: var(--ink); }
+.card { display: grid; grid-template-columns: 40px 1fr; gap: .6rem; align-items: center; padding: .35rem .5rem; text-decoration: none; color: var(--ink); }
 .card:hover { background: #fbe8e4; color: var(--ink); }
-.card img { width: 52px; height: 52px; object-fit: contain; }
+.card img { width: 40px; height: 30px; object-fit: contain; image-rendering: pixelated; } .card img.fb { width: 40px; height: 40px; margin: -5px 0; image-rendering: auto; }
 .card b { display: block; font-weight: 700; line-height: 1.2; }
 .card small { display: block; color: var(--ink-soft); font-size: .78rem; margin-bottom: .15rem; }
 .chips { display: flex; gap: .25rem; flex-wrap: wrap; }
@@ -214,3 +214,11 @@ html[data-theme='dark'] { --link-hover: #9cc8f5; }
 html[data-theme='dark'] .tchart { background: #dfe4ea; padding: 4px; border-radius: 4px; }
 html[data-theme='dark'] .tchart tbody th { background: transparent; }
 html[data-theme='dark'] .tchart td[style*='background'] { border-color: rgb(0 0 0 / .15) !important; }
+/* the evolution stage you're on is a plain box, not a link */
+main .evo.cur b { color: var(--ink) !important; text-decoration: none !important; }
+/* type charts: one whiteish panel in both modes; the outer border goes dark in dark mode */
+.tchart { background: #f4f7fb; padding: 5px; border: 1px solid var(--line); border-radius: 4px; }
+html[data-theme='dark'] .tchart { background: #e6eaef; border: 2px solid #0b0c0e; box-shadow: 0 0 0 1px #3a4049; }
+html[data-theme='dark'] .tchart th, html[data-theme='dark'] .tchart th * :not(a) { color: #1c2733; }
+html[data-theme='dark'] .tchart tbody th { color: #1c2733 !important; }
+html[data-theme='dark'] .tchart thead th:first-child { color: #3e4c5d !important; }

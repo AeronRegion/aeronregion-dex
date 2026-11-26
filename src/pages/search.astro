@@ -83,7 +83,7 @@ import { TYPES } from '../lib/types';
     const SPR = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
     out.innerHTML = list.map((i) => { const [, name, types, art, num, url, , hid] = data.species[i];
       const hTag = abName && hid === abName ? '<span class="hid">Hidden ability</span>' : '';
-      return `<a class="card" href="${url}"><img src="${art ? SPR + art + '.png' : ''}" alt="" loading="lazy" width="52" height="52" /><div><b>${name}</b><small>#${String(num).padStart(4, '0')}</small><div class="chips">${types.map(chip).join(' ')}</div>${hTag}</div></a>`; }).join('');
+      return `<a class="card" href="${url}"><img src="${art ? SPR + 'versions/generation-vii/icons/' + art + '.png' : ''}" data-fb="${art ? SPR + art + '.png' : ''}" onerror="if(this.dataset.fb&&this.src!==this.dataset.fb){this.src=this.dataset.fb;this.classList.add('fb')}" alt="" loading="lazy" width="40" height="30" /><div><b>${name}</b><small>#${String(num).padStart(4, '0')}</small><div class="chips">${types.map(chip).join(' ')}</div>${hTag}</div></a>`; }).join('');
   };
   document.getElementById('f')!.addEventListener('submit', (e) => { e.preventDefault(); search(); });
   gameSel.addEventListener('change', () => { bit = gameSel.value; if (tool.classList.contains('done')) search(); });

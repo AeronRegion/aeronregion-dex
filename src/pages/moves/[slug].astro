@@ -2,7 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import Type from '../../components/Type.astro';
 import Cat from '../../components/Cat.astro';
-import { moves, speciesById, slug, pokeUrl, iconUrl, GAMES, meta } from '../../lib/data';
+import { moves, speciesById, slug, pokeUrl, iconUrl, boxIconUrl, GAMES, meta } from '../../lib/data';
 import learnedByData from '../../data/learnedBy.json';
 
 export function getStaticPaths() {
@@ -65,7 +65,7 @@ const hasC = learners.some((l) => l.mask & 1);
     <div class="cards" id="learners">
       {learners.map(({ s, mask }) => (
         <a class="card" href={pokeUrl(s)} data-mask={mask} data-q={`${s.name} ${s.types.join(' ')}`.toLowerCase()}>
-          <img src={iconUrl(s.art)} alt="" loading="lazy" width="52" height="52" />
+          <img src={boxIconUrl(s.art)} data-fb={iconUrl(s.art)} onerror="if(this.dataset.fb&&this.src!==this.dataset.fb){this.src=this.dataset.fb;this.classList.add('fb')}" alt="" loading="lazy" width="40" height="30" />
           <div><b>{s.name}</b><small>#{String(s.num).padStart(4, '0')}</small><div class="chips">{s.types.map((t: string) => <Type type={t} small link={false} />)}</div></div>
         </a>
       ))}
