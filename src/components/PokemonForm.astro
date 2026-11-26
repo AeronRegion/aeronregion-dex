@@ -18,8 +18,7 @@ const SPRITE_GENS = [
   { key: 'g4', gen: 4, label: 'Gen 4', game: 'Platinum', path: 'versions/generation-iv/platinum', shiny: 'versions/generation-iv/platinum/shiny' },
   { key: 'g5', gen: 5, label: 'Gen 5', game: 'Black & White', path: 'versions/generation-v/black-white', shiny: 'versions/generation-v/black-white/shiny' },
   { key: 'g6', gen: 6, label: 'Gen 6', game: 'X & Y', path: 'versions/generation-vi/x-y', shiny: 'versions/generation-vi/x-y/shiny' },
-  { key: 'g7', gen: 7, label: 'Gen 7', game: 'Ultra Sun & Moon', path: 'versions/generation-vii/ultra-sun-ultra-moon', shiny: 'versions/generation-vii/ultra-sun-ultra-moon/shiny' },
-  { key: 'home', gen: 1, label: 'Gen 8–9', game: 'HOME', path: 'other/home', shiny: 'other/home/shiny' },
+  { key: 'home', gen: 1, label: 'Gen 7–9', game: 'HOME', path: 'other/home', shiny: 'other/home/shiny' },
 ];
 // a sprite that doesn't exist: blank the cell, and drop the whole game column when nothing in it exists
 const GONE = "var td=this.closest('td'),t=td.closest('table'),k=td.dataset.col;td.classList.add('gone');if(Array.prototype.every.call(t.querySelectorAll('td[data-col='+k+']'),function(c){return c.classList.contains('gone')}))t.querySelectorAll('[data-col='+k+']').forEach(function(c){c.hidden=true})";
@@ -178,7 +177,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
           </tbody>
         </table>
       </div>
-      <p class="note">Sprites from PokéAPI. Gen 1 had no shiny Pokémon; Gen 8 and 9 are shown with HOME renders.</p>
+      <p class="note">Sprites from PokéAPI. Gen 1 had no shiny Pokémon; Gen 7 onward is shown with HOME renders.</p>
     </>}
   </section>
 
