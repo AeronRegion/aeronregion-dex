@@ -24,7 +24,7 @@ const SPRITE_GENS = [
 const GONE = "var td=this.closest('td'),t=td.closest('table'),k=td.dataset.col;td.classList.add('gone');if(Array.prototype.every.call(t.querySelectorAll('td[data-col='+k+']'),function(c){return c.classList.contains('gone')}))t.querySelectorAll('[data-col='+k+']').forEach(function(c){c.hidden=true})";
 const imp = (m: number) => { const inch = Math.round(m * 39.3701); return `${Math.floor(inch / 12)}′${String(inch % 12).padStart(2, '0')}″`; };
 const abil = [s.abilities['0'], s.abilities['1']].filter(Boolean);
-const statColor = (b: number) => b < 50 ? '#e06a5a' : b < 80 ? '#f2a65a' : b < 100 ? '#e8c64a' : b < 130 ? '#8cc35b' : '#3fa66a';
+const statColor = (b: number) => `hsl(${Math.min(360, Math.floor(b * 180 / 255))}, 85%, 45%)`; // Showdown's stat bar colors
 
 // moves tab
 const catOrder: Record<string, number> = { Physical: 0, Special: 1, Status: 2 };

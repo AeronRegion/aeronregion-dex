@@ -49,7 +49,7 @@ export const boxIconUrl = (art: string | null) => art ? `${SPR}/pokemon/versions
 export const GAMES: Record<number, string> = {
   9: 'Scarlet / Violet', 8: 'Sword / Shield', 7: 'Sun / Moon / USUM', 6: 'X / Y / ORAS', 5: 'Black / White', 4: 'DPPt / HGSS', 3: 'RSE / FRLG', 2: 'Gold / Silver / Crystal', 1: 'Red / Blue / Yellow',
 };
-export const STATS: [string, string][] = [['hp', 'HP'], ['atk', 'Attack'], ['def', 'Defense'], ['spa', 'Sp. Atk'], ['spd', 'Sp. Def'], ['spe', 'Speed']];
+export const STATS: [string, string][] = [['hp', 'HP'], ['atk', 'Attack'], ['def', 'Defense'], ['spa', 'Sp. Atk.'], ['spd', 'Sp. Def.'], ['spe', 'Speed']];
 export const statRange = (k: string, b: number) => k === 'hp'
   ? [2 * b + 110, 2 * b + 204]
   : [Math.floor((2 * b + 5) * 0.9), Math.floor((2 * b + 99) * 1.1)];

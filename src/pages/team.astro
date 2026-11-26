@@ -57,7 +57,7 @@ import { GAMES, meta } from '../lib/data';
     const SPR = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/';
     const chip = (t: string) => `<span class="tchip" style="background:${COLORS[t] ?? '#888'}">${t}</span>`;
     const STAT = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'];
-    const STATNAME = ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed'];
+    const STATNAME = ['HP', 'Attack', 'Defense', 'Sp. Atk.', 'Sp. Def.', 'Speed'];
     // nature -> [raised stat index, lowered stat index] (1..5); neutral natures have equal indexes
     const NAT: Record<string, [number, number]> = {};
     [['Hardy', 'Lonely', 'Adamant', 'Naughty', 'Brave'], ['Bold', 'Docile', 'Impish', 'Lax', 'Relaxed'], ['Modest', 'Mild', 'Bashful', 'Rash', 'Quiet'], ['Calm', 'Gentle', 'Careful', 'Quirky', 'Sassy'], ['Timid', 'Hasty', 'Jolly', 'Naive', 'Serious']]
@@ -192,7 +192,7 @@ import { GAMES, meta } from '../lib/data';
           </div>
           <div class="pair">
             <label class="fl"><span class="ll">Level</span><input class="field" id="f-lv" type="number" min="1" max="100" value="${c ? 50 : m.level}"${c ? ' disabled title="Champions battles are always Lv. 50"' : ''} /></label>
-            <label class="fl"><span class="ll">Tera type</span><select class="field" id="f-tera">${[...TYPES, 'Stellar'].map((x) => `<option${x === m.tera ? ' selected' : ''}>${x}</option>`).join('')}</select></label>
+            <label class="fl"><span class="ll" title="Tera type">Tera</span><select class="field" id="f-tera">${[...TYPES, 'Stellar'].map((x) => `<option${x === m.tera ? ' selected' : ''}>${x}</option>`).join('')}</select></label>
           </div>
         </div>
         <div class="col b">
@@ -455,7 +455,10 @@ import { GAMES, meta } from '../lib/data';
   .ed :global(.col.a .fl .ll) { flex: none; width: 3.6rem; text-align: right; }
   .ed :global(.col.a .pair .fl .ll) { width: auto; }
   .ed :global(.col.a .fl .field) { flex: 1; }
-  .ed :global(.col.a .pair) { grid-template-columns: 1fr 1fr; gap: .4rem; }
+  .ed :global(.col.a .pair) { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: .4rem; }
+  .ed :global(#f-tera) { min-width: 5.8rem; }
+  .ed :global(.col.a .pair .fl) { min-width: 0; }
+  .ed :global(.col.a .pair input.field) { min-width: 0; width: 100%; }
   .ed :global(.col.a .shinybox) { height: auto; }
   .ed :global(.shinytag) { position: absolute; top: 0; right: 1rem; color: #e0a800; font-size: 1.3rem; }
   .ed :global(.shinybox) { display: flex; align-items: center; gap: .4rem; height: 2.6rem; font-size: .95rem; color: var(--ink); font-weight: 600; }
