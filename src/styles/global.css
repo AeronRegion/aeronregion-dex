@@ -325,3 +325,28 @@ table.data td { padding-top: .3rem; padding-bottom: .3rem; }
 @media (max-width: 1180px) { #ed { grid-template-columns: 240px 1fr !important; width: auto; } #ed > .col.c { grid-column: 1 / -1 !important; order: 3; } #ed > .col.b { order: 2; } }
 @media (max-width: 640px) { #ed { grid-template-columns: 1fr !important; } }
 @media (max-width: 640px) { #ed { width: auto !important; } #ed td.sbar { min-width: 0 !important; width: 40px !important; max-width: 40px; } #ed td.sbar i { transform: scaleX(.22); transform-origin: left center; } #ed .col.c .stt input.num { width: 3rem !important; } }
+/* Teambuilder: full-width editor again; move rows show type, category, power, accuracy and PP beside the box */
+#ed { width: auto !important; grid-template-columns: 240px auto minmax(0, 1fr) !important; }
+#ed .mrow { display: flex !important; align-items: center; gap: .55rem; }
+#ed .mrow .mvin { flex: 0 0 210px; width: 210px; }
+#ed .minfo { display: flex; align-items: center; gap: .45rem; font-size: .8rem; white-space: nowrap; color: var(--ink); }
+#ed .minfo small { color: var(--ink-soft); font-size: .7rem; }
+#ed .minfo > span { min-width: 3.2rem; }
+#ed .col.b select { max-width: 210px; }
+@media (max-width: 1180px) { #ed { grid-template-columns: 240px 1fr !important; } }
+@media (max-width: 640px) { #ed { grid-template-columns: 1fr !important; } #ed .mrow { flex-wrap: wrap; } #ed .mrow .mvin { flex: 1 1 100%; width: 100%; } }
+#ed .mrow .mvin { flex: 0 0 150px !important; width: 150px !important; }
+#ed .col.b select { max-width: 150px; }
+#ed .minfo { gap: .35rem; overflow: hidden; }
+#ed .minfo .pa { min-width: 0; font-variant-numeric: tabular-nums; } #ed .minfo .pa small { margin: 0 .15rem; }
+@media (max-width: 640px) { #ed .mrow .mvin { flex: 1 1 100% !important; width: 100% !important; } #ed .col.b select { max-width: none; } }
+/* EV sliders drawn by the site itself, so they look the same in every browser (Opera's dark mode drew them as flat gray bars) */
+#ed input.evr { -webkit-appearance: none; appearance: none; height: 18px; background: transparent; cursor: pointer; margin: 0; }
+#ed input.evr::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: linear-gradient(to right, #2f86d6 var(--fill, 0%), #9aa8b8 var(--fill, 0%)); }
+#ed input.evr::-moz-range-track { height: 6px; border-radius: 3px; background: #9aa8b8; }
+#ed input.evr::-moz-range-progress { height: 6px; border-radius: 3px; background: #2f86d6; }
+#ed input.evr::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; margin-top: -4.5px; border-radius: 50%; background: #fff; border: 2px solid #2f86d6; box-shadow: 0 1px 2px rgb(0 0 0 / .35); }
+#ed input.evr::-moz-range-thumb { width: 13px; height: 13px; border-radius: 50%; background: #fff; border: 2px solid #2f86d6; box-shadow: 0 1px 2px rgb(0 0 0 / .35); }
+html[data-theme='dark'] #ed input.evr::-webkit-slider-runnable-track { background: linear-gradient(to right, #4ea3f0 var(--fill, 0%), #4a525c var(--fill, 0%)); }
+html[data-theme='dark'] #ed input.evr::-moz-range-track { background: #4a525c; }
+html[data-theme='dark'] #ed input.evr::-moz-range-progress { background: #4ea3f0; }
