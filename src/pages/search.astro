@@ -47,7 +47,13 @@ import { TYPES } from '../lib/types';
   autocomplete(abIn, async () => (await load()).abilities.map((label) => ({ label, sub: 'Ability' })), () => {});
   tySel.addEventListener('change', () => { if (tool.classList.contains('done')) search(); });
   const moveItems = async () => { const d = await load(); return Object.values(d.moves).map(([label, type, cat]) => ({ label, type, cat })); };
-  inputs.forEach((inp, i) => autocomplete(inp, moveItems, () => { (inputs[i + 1] ?? inp).focus(); }));
+  // type tag inside each move box once a real move is in it
+  const tagMove = async (inp: HTMLInputElement) => {
+    const d = await load(); inp.parentElement!.querySelector('.mvt')?.remove();
+    const m = Object.values(d.moves).find(([n]) => n.toLowerCase() === inp.value.trim().toLowerCase());
+    if (m) inp.insertAdjacentHTML('afterend', `<span class="mvt" style="background:${TC[m[1]]};color:${light.has(m[1]) ? '#2e1a20' : '#fff'}" title="${m[1]} · ${m[2]}">${m[1].slice(0, 3).toUpperCase()}</span>`);
+  };
+  inputs.forEach((inp, i) => { autocomplete(inp, moveItems, () => { tagMove(inp); (inputs[i + 1] ?? inp).focus(); }); inp.addEventListener('change', () => tagMove(inp)); });
   const gameSel = document.getElementById('game') as HTMLSelectElement;
   let bit = gameSel.value;
 
@@ -84,7 +90,7 @@ import { TYPES } from '../lib/types';
   // restore from a shared link: ?m=rockslide,protect&g=0
   const p = new URLSearchParams(location.search);
   if (p.get('m') || p.get('a') || p.get('t')) load().then((data) => {
-    (p.get('m') ?? '').split(',').slice(0, 4).forEach((m, i) => { if (data.moves[m]) inputs[i].value = data.moves[m][0]; });
+    (p.get('m') ?? '').split(',').slice(0, 4).forEach((m, i) => { if (data.moves[m]) { inputs[i].value = data.moves[m][0]; tagMove(inputs[i]); } });
     if (p.get('a')) { abIn.value = p.get('a')!; abOn.checked = true; abSlot.hidden = false; } if (p.get('t')) { tySel.value = p.get('t')!; tyOn.checked = true; tySlot.hidden = false; }
     const g = p.get('g'); if (g && [...gameSel.options].some((o) => o.value === g)) { gameSel.value = g; bit = g; } search();
   });
@@ -102,6 +108,8 @@ import { TYPES } from '../lib/types';
   .chk { display: inline-flex; align-items: center; gap: .4rem; font-weight: 600; font-size: .9rem; cursor: pointer; }
   .chk input { width: 1.05rem; height: 1.05rem; accent-color: #59c4fb; }
   .slot { position: relative; } .slot .field { width: 100%; }
+  .slots .field { padding-right: 3.2rem; }
+  .slot :global(.mvt) { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: .62rem; font-weight: 800; padding: .05rem .35rem; border: 1px solid rgb(0 0 0 / .25); pointer-events: none; }
   .extra { width: 220px; }
   #f button { white-space: nowrap; }
   :global(.card .hid) { display: inline-block; margin-top: .2rem; font-size: .7rem; font-weight: 700; background: var(--ink); color: var(--petal); padding: 0 .4rem; }

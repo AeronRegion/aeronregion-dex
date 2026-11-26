@@ -114,6 +114,8 @@ import { GAMES, meta } from '../lib/data';
     const bg = (m: number) => m === 1 ? '' : m === 0 ? '#2e3436' : m >= 4 ? '#73d216' : m > 1 ? '#4e9a06' : m <= 0.25 ? '#7c0000' : '#a40000';
     const cell = (m: number, title = '') => `<td title="${title}" style="${bg(m) ? `background:${bg(m)};color:${m === 0 ? '#fff' : '#ffdd57'}` : ''}">${txt(m)}</td>`;
     const head = (d: Idx) => `<thead><tr><th></th>${team.map((t) => { const s = d.species[t.i]; return `<th class="mh" title="${esc(s[1])}"><img src="${s[3] ? SPR + s[3] + '.png' : ''}" alt="" width="40" height="40" /></th>`; }).join('')}`;
+    // small type tag shown inside a move box
+    const mvTag = (x: [string, string, string] | null) => x ? `<span class="mvt" style="background:${COLORS[x[1]]}" title="${x[1]} · ${x[2]}">${x[1].slice(0, 3).toUpperCase()}</span>` : '';
     const abilitiesOf = (s: Sp) => [...s[6], ...(s[7] ? [s[7]] : [])];
 
     const draw = () => {
@@ -157,14 +159,14 @@ import { GAMES, meta } from '../lib/data';
       $('team').innerHTML = team.map((t, k) => { const s = d.species[t.i]; const abs = abilitiesOf(s); return `<div class="mon" data-k="${k}">
         <div class="top"><img src="${s[3] ? SPR + s[3] + '.png' : ''}" alt="" width="48" height="48" /><div><a href="${s[5]}">${esc(s[1])}</a><div>${s[2].map(chip).join('')}</div></div><button type="button" class="rm" aria-label="Remove ${esc(s[1])}">×</button></div>
         <select class="field absel" aria-label="Ability">${abs.map((a) => `<option${a === t.ab ? ' selected' : ''}>${esc(a)}</option>`).join('')}</select>
-        ${[0, 1, 2, 3].map((j) => { const x = t.moves[j] ? mv(t.moves[j]) : null; return `<div class="slot"><input class="field mvin" data-j="${j}" placeholder="Move ${j + 1}" value="${x ? esc(x[0]) : ''}" autocomplete="off" /></div>`; }).join('')}
+        ${[0, 1, 2, 3].map((j) => { const x = t.moves[j] ? mv(t.moves[j]) : null; return `<div class="slot"><input class="field mvin" data-j="${j}" placeholder="Move ${j + 1}" value="${x ? esc(x[0]) : ''}" autocomplete="off" />${mvTag(x)}</div>`; }).join('')}
       </div>`; }).join('');
       $('team').querySelectorAll<HTMLElement>('.mon').forEach((el) => {
         const t = team[+el.dataset.k!];
         el.querySelector<HTMLSelectElement>('.absel')!.addEventListener('change', (e) => { t.ab = (e.target as HTMLSelectElement).value; draw(); });
         el.querySelectorAll<HTMLInputElement>('.mvin').forEach((inp) => {
           const j = +inp.dataset.j!;
-          const setMove = (name: string) => { const id = Object.keys(d.moves).find((m) => d.moves[m][0].toLowerCase() === name.trim().toLowerCase()) ?? ''; t.moves[j] = id; draw(); };
+          const setMove = (name: string) => { const id = Object.keys(d.moves).find((m) => d.moves[m][0].toLowerCase() === name.trim().toLowerCase()) ?? ''; t.moves[j] = id; inp.parentElement!.querySelector('.mvt')?.remove(); inp.insertAdjacentHTML('afterend', mvTag(id ? mv(id) : null)); draw(); };
           autocomplete(inp, async () => (await learnOf(t.i)).map((m) => d.moves[m]).filter(Boolean).map(([label, type, cat]) => ({ label, type, cat })).sort((a, b) => a.label.localeCompare(b.label)), (it) => { setMove(it.label); (el.querySelectorAll<HTMLInputElement>('.mvin')[j + 1])?.focus(); }, 12, true);
           inp.addEventListener('change', () => setMove(inp.value));
         });
@@ -271,7 +273,8 @@ import { GAMES, meta } from '../lib/data';
   .team :global(.rm) { align-self: flex-start; border: 0; background: none; font: inherit; font-size: 1.2rem; font-weight: 800; cursor: pointer; color: var(--ink-soft); padding: 0 .3rem; }
   .team :global(.rm:hover) { color: #a40000; }
   .team :global(.slot) { position: relative; }
-  .team :global(.mvin) { width: 100%; padding: .3rem .5rem; font-size: .85rem; }
+  .team :global(.mvin) { width: 100%; padding: .3rem 3rem .3rem .5rem; font-size: .85rem; }
+  .team :global(.mvt) { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font-size: .6rem; font-weight: 800; color: #fff; text-shadow: 1px 1px 1px rgb(0 0 0 / .55); padding: .05rem .3rem; border: 1px solid rgb(0 0 0 / .25); pointer-events: none; }
   .sums { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; margin-bottom: 1rem; }
   .sums > div { min-width: 0; }
   @media (max-width: 1000px) { .sums { grid-template-columns: 1fr; } }
