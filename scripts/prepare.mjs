@@ -161,7 +161,7 @@ const TARGET = {
   self: 'User', adjacentAlly: 'Adjacent ally', adjacentAllyOrSelf: 'User or adjacent ally', allySide: "User's side", foeSide: "Foes' side",
   allyTeam: "User's team", allies: 'User and allies', all: 'Entire field', any: 'Any Pokémon', randomNormal: 'Random adjacent foe', scripted: 'Varies',
 };
-const moves = Dex.moves.all().filter((m) => m.exists && !m.isZ && !m.isMax && !['CAP', 'Custom', 'LGPE'].includes(m.isNonstandard))
+const moves = Dex.moves.all().filter((m) => m.exists && !(m.id === 'hiddenpower' && m.name !== 'Hidden Power') && !m.isZ && !m.isMax && !['CAP', 'Custom', 'LGPE'].includes(m.isNonstandard))
   .map((m) => ({
     id: m.id, name: m.name, type: m.type, cat: m.category, power: m.basePower || null, acc: m.accuracy === true ? null : m.accuracy,
     pp: m.pp, maxpp: Math.floor(m.pp * 1.6), pri: m.priority, target: TARGET[m.target] ?? m.target, targetKey: m.target,
