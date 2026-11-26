@@ -317,7 +317,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
 </script>
 
 <style>
-  .hd { display: grid; grid-template-columns: 200px 1fr 330px; gap: 1.6rem; align-items: start; height: 268px; }
+  .hd { display: grid; grid-template-columns: 200px 1fr 330px; gap: 1.6rem; align-items: start; height: 228px; }
   .hd h1 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .art { width: 210px; height: 210px; object-fit: contain; margin-top: -6px; }
   .no { font-weight: 600; color: var(--ink-soft); }
@@ -334,28 +334,28 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .st b { text-align: right; }
   .bar { height: 12px; background: var(--track); } .bar i { display: block; height: 100%; }
   .tot .mm { grid-column: 3 / 5; white-space: nowrap; }
-  .mm { color: var(--ink-soft); font-size: .82rem; text-align: right; }
+  .mm { color: var(--ink-soft); font-size: .88rem; text-align: right; }
   .tot { border-top: 2px solid var(--ink); margin-top: .3rem; }
   .dt { display: grid; grid-template-columns: repeat(9, 42px); gap: 6px 3px; }
   .tc { display: flex; flex-direction: column; text-align: center; font-weight: 700; font-size: .7rem; }
-  .tc a { min-width: 0; height: 22px; line-height: 21px; font-size: .64rem; text-decoration: none; color: #fff; text-shadow: 1px 1px 1px rgb(0 0 0 / .6); border: 1px solid rgb(0 0 0 / .2); border-radius: 0; }
+  .tc a { min-width: 0; height: 22px; line-height: 21px; font-size: .72rem; margin-bottom: 3px; font-weight: 700 !important; text-decoration: none; color: #fff; text-shadow: 1px 1px 1px rgb(0 0 0 / .6); border: 1px solid rgb(0 0 0 / .2); border-radius: 0; }
   .abilrow { display: flex; align-items: center; gap: .6rem; margin-bottom: .6rem; flex-wrap: wrap; }
   .abilrow .lab { font-weight: 600; font-size: .85rem; color: var(--ink-soft); }
   .tc b.chg { outline: 2px solid var(--ink); outline-offset: -2px; }
-  .tc b { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; box-sizing: border-box; font-size: .9rem; background: var(--card); border: 1px solid var(--line); border-top: 0; }
+  .tc b { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; box-sizing: border-box; font-size: 1rem; font-weight: 700 !important; background: var(--card); border: 1px solid var(--line); }
   .evos { display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; }
   .stage { display: flex; flex-direction: column; align-items: center; gap: .6rem; }
   .stage.many { display: grid; grid-template-columns: repeat(4, minmax(110px, 1fr)); gap: .4rem .6rem; }
   .evo { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--ink); padding: .3rem .6rem; border: 2px solid transparent; }
   .evo.cur b { text-decoration: underline; text-decoration-thickness: 3px; text-decoration-color: #59c4fb; text-underline-offset: 4px; }
   .evo img { width: 84px; height: 84px; object-fit: contain; }
-  .evo em { font-style: normal; font-size: .75rem; background: var(--petal-deep); padding: 0 .4rem; }
+  .evo em { font-style: normal; font-size: .82rem; background: var(--petal-deep); padding: 0 .4rem; }
   .evo b { font-weight: 700; }
   .etypes { display: flex; gap: .2rem; margin-top: .15rem; }
   .arr { display: flex; flex-direction: column; align-items: center; gap: .1rem; color: var(--ink-soft); font-size: 1.4rem; line-height: 1; margin-top: -2.2rem; max-width: 9rem; text-align: center; }
   .evos.branch { flex-direction: column; }
   .evos.branch .arr { margin-top: 0; transform: rotate(90deg); }
-  .arr em { font-style: normal; font-size: .75rem; font-weight: 600; color: var(--ink); background: var(--petal-deep); padding: .05rem .45rem; line-height: 1.4; }
+  .arr em { font-style: normal; font-size: .82rem; font-weight: 600; color: var(--ink); background: var(--petal-deep); padding: .05rem .45rem; line-height: 1.4; }
   .loc { font-size: .95rem; }
   .loc th { text-align: left; font-weight: 700; padding: .4rem 1rem .4rem 0; width: 200px; vertical-align: top; }
   .loc td { padding: .4rem 0; vertical-align: top; }

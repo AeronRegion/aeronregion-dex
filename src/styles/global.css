@@ -162,12 +162,12 @@ html[data-theme='dark'] .evb, html[data-theme='dark'] a.evb:hover { color: #2e1a
 html[data-theme='dark'] b.pos { color: #7bd35a; } html[data-theme='dark'] b.neg { color: #ff7a6e; }
 
 /* ── Utility look (concept A2, Showdown-like light blue): small plain type, thin lines, bold only for titles and headings ── */
-html, body { font-family: Verdana, Geneva, Tahoma, sans-serif !important; font-size: 13px !important; }
+html, body { font-family: Verdana, Geneva, Tahoma, sans-serif !important; font-size: 14px !important; }
 body * { font-weight: 400 !important; letter-spacing: 0 !important; }
 h1, h1 * { font-weight: 700 !important; font-size: 22px; }
 h1 .kind { font-weight: 400 !important; }
 h3, .sec, .tabs button[aria-selected='true'] { font-weight: 700 !important; text-transform: none; }
-h3, .sec { font-size: 13px !important; }
+h3, .sec { font-size: 15px !important; }
 .field, .sm, select.field { border: 1px solid var(--line-2) !important; border-radius: 3px !important; box-shadow: none !important; font-size: 12px !important; background-color: var(--card) !important; }
 input.field, .sm { padding: 3px 6px !important; }
 select.field { padding: 3px 2rem 3px 6px !important; }
@@ -176,9 +176,9 @@ select.field { padding: 3px 2rem 3px 6px !important; }
 .ed, .mlist, .mon { background: var(--card) !important; }
 .mhead { background: var(--petal-deep) !important; border-bottom: 1px solid var(--line-2) !important; font-size: 11px !important; }
 .mr { font-size: 12px !important; padding: 2px 8px !important; }
-.tchip { border-radius: 3px !important; font-size: 9px !important; text-transform: uppercase; }
+.tchip { border-radius: 3px !important; font-size: 10.5px !important; }
 .ed .fl { font-size: 11px !important; }
-table.data td, table.data th { font-size: 12px !important; }
+table.data td, table.data th { font-size: 13px !important; }
 
 html:not([data-theme='dark']) .site-header { background: linear-gradient(#3e5f86, #2b4566) !important; border-bottom: 1px solid #1c2f47 !important; }
 html:not([data-theme='dark']) .field, html:not([data-theme='dark']) select.field { background-color: #fff !important; }
@@ -188,3 +188,10 @@ html:not([data-theme='dark']) .mr { background: #fff; }
 html:not([data-theme='dark']) .mr:nth-child(even) { background: #f5f8fc; }
 html:not([data-theme='dark']) .mr.cur { background: #dbeeff !important; }
 html:not([data-theme='dark']) .mr.on, html:not([data-theme='dark']) .mr:hover { background: #cddcef !important; }
+
+/* plain text links in page content read as links */
+main p a:not([class]), main .note a, .ab { color: var(--link) !important; }
+main p a:not([class]):hover, main .note a:hover { text-decoration: underline; }
+/* type chips: a little larger and always readable */
+.chip { font-size: .78rem !important; }
+.chip.small { font-size: .72rem !important; }
