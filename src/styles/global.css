@@ -283,63 +283,10 @@ table.data td { padding-top: .3rem; padding-bottom: .3rem; }
 .pstats .ps b { font-weight: 700 !important; text-align: right; }
 .mlist .mr .chip, .mlist .mr .tchip, .mlist .mr .ac-t { margin-right: 2px; }
 .mlist .mr > span:has(.chip), .mlist .mr > span:has(.tchip) { white-space: nowrap; }
-.ed td.sbar { min-width: 184px; width: 184px; padding: 0 .5rem 0 .2rem; }
-.ed td.sbar i { display: block; height: 11px; }
-.ed .stt td.n b { font-weight: 700 !important; }
-@media (max-width: 640px) { .ed td.sbar { min-width: 0; width: 34%; } .ed td.sbar i { max-width: 100%; } }
-.ed td.sbar { overflow: hidden; }
-@media (max-width: 640px) { .ed td.sbar { min-width: 0 !important; width: 70px !important; } }
-.ed .col.c .stt { width: auto !important; }
-.ed .col.c .stt .barc { width: 210px !important; } .ed .col.c .stt .barc input { width: 200px; }
-.ed .col.c .stt input.num { width: 4.2rem; }
-@media (max-width: 640px) { .ed td.sbar { width: 36px !important; padding-right: .2rem !important; } .ed .col.c .stt input.num { width: 3.2rem; } .ed .col.c .stt th, .ed .col.c .stt td { padding-left: .15rem !important; padding-right: .15rem !important; } }
-#ed .col.c table.stt { width: auto !important; }
-@media (max-width: 640px) { #ed td.sbar { width: 40px !important; max-width: 40px; } #ed td.sbar i { transform: scaleX(.22); transform-origin: left center; } }
-#ed .col.c .stt input.num { width: 4.2rem !important; }
-#ed .col.c .stt .barc input { width: 200px !important; }
-@media (max-width: 640px) { #ed .col.c .stt input.num { width: 3.2rem !important; } }
-#ed .col.c table.stt { align-self: flex-start; justify-self: start; }
-/* Teambuilder: like Showdown, the pick list takes the stats panel's place while it's open, right under the moves */
 /* Teambuilder: held item icon beside the Item box and on the artwork, like Showdown */
 #ed .itemic { width: 30px; height: 30px; margin: -4px -2px -4px -4px; image-rendering: pixelated; flex: none; }
 #ed .who { position: relative; }
 #ed .whoitem { position: absolute; right: 8px; bottom: 4px; width: 40px !important; height: 40px !important; image-rendering: pixelated; background: var(--card); border: 1px solid var(--line); border-radius: 50%; }
-#ed td.sbar { min-width: 184px !important; width: 184px !important; }
-/* Teambuilder: moves and nature stay a sensible width instead of stretching across the page */
-#ed { grid-template-columns: 240px minmax(0, 440px) !important; }
-#ed > .col.c, #ed > .mlist { grid-column: 1 / -1; }
-@media (max-width: 640px) { #ed { grid-template-columns: 1fr !important; } }
-/* Teambuilder layout: details | stats | moves, with the pick list as a full-width row underneath */
-#ed { grid-template-columns: 240px auto minmax(260px, 1fr) !important; }
-#ed > .col.a { order: 1; } #ed > .col.c { order: 2; grid-column: auto !important; border-top: 0 !important; padding-top: 0 !important; } #ed > .col.b { order: 3; } #ed > .mlist { order: 4; grid-column: 1 / -1; }
-#ed td.sbar { min-width: 112px !important; width: 112px !important; }
-#ed .col.c .stt .barc { width: 130px !important; } #ed .col.c .stt .barc input { width: 120px !important; }
-#ed .col.c .stt input.num { width: 3.6rem !important; }
-@media (max-width: 1100px) { #ed { grid-template-columns: 240px 1fr !important; } #ed > .col.c { grid-column: 1 / -1 !important; order: 3; } #ed > .col.b { order: 2; } }
-@media (max-width: 640px) { #ed { grid-template-columns: 1fr !important; } #ed > .col.c { order: 3; } }
-/* Teambuilder: full-length stat bars (as in Showdown), narrow moves column, editor only as wide as its contents */
-#ed { grid-template-columns: 240px auto 230px !important; gap: 1.2rem !important; width: fit-content; max-width: 100%; }
-#ed td.sbar { min-width: 184px !important; width: 184px !important; }
-#ed .col.c .stt .barc { width: 110px !important; } #ed .col.c .stt .barc input { width: 100px !important; }
-#ed .col.c .stt input.num { width: 3.3rem !important; }
-@media (max-width: 1180px) { #ed { grid-template-columns: 240px 1fr !important; width: auto; } #ed > .col.c { grid-column: 1 / -1 !important; order: 3; } #ed > .col.b { order: 2; } }
-@media (max-width: 640px) { #ed { grid-template-columns: 1fr !important; } }
-@media (max-width: 640px) { #ed { width: auto !important; } #ed td.sbar { min-width: 0 !important; width: 40px !important; max-width: 40px; } #ed td.sbar i { transform: scaleX(.22); transform-origin: left center; } #ed .col.c .stt input.num { width: 3rem !important; } }
-/* Teambuilder: full-width editor again; move rows show type, category, power, accuracy and PP beside the box */
-#ed { width: auto !important; grid-template-columns: 240px auto minmax(0, 1fr) !important; }
-#ed .mrow { display: flex !important; align-items: center; gap: .55rem; }
-#ed .mrow .mvin { flex: 0 0 210px; width: 210px; }
-#ed .minfo { display: flex; align-items: center; gap: .45rem; font-size: .8rem; white-space: nowrap; color: var(--ink); }
-#ed .minfo small { color: var(--ink-soft); font-size: .7rem; }
-#ed .minfo > span { min-width: 3.2rem; }
-#ed .col.b select { max-width: 210px; }
-@media (max-width: 1180px) { #ed { grid-template-columns: 240px 1fr !important; } }
-@media (max-width: 640px) { #ed { grid-template-columns: 1fr !important; } #ed .mrow { flex-wrap: wrap; } #ed .mrow .mvin { flex: 1 1 100%; width: 100%; } }
-#ed .mrow .mvin { flex: 0 0 150px !important; width: 150px !important; }
-#ed .col.b select { max-width: 150px; }
-#ed .minfo { gap: .35rem; overflow: hidden; }
-#ed .minfo .pa { min-width: 0; font-variant-numeric: tabular-nums; } #ed .minfo .pa small { margin: 0 .15rem; }
-@media (max-width: 640px) { #ed .mrow .mvin { flex: 1 1 100% !important; width: 100% !important; } #ed .col.b select { max-width: none; } }
 /* EV sliders drawn by the site itself, so they look the same in every browser (Opera's dark mode drew them as flat gray bars) */
 #ed input.evr { -webkit-appearance: none; appearance: none; height: 18px; background: transparent; cursor: pointer; margin: 0; }
 #ed input.evr::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: linear-gradient(to right, #2f86d6 var(--fill, 0%), #9aa8b8 var(--fill, 0%)); }
@@ -394,10 +341,108 @@ html[data-theme='dark'] #ed input.evr::-moz-range-progress { background: #4ea3f0
   table.dextable .chip.small { width: 3.1rem !important; }
   table.dextable .sprite { width: 28px !important; height: 21px !important; }
   table.data .col-pokemon { font-size: .7rem; }
-  /* Teambuilder: narrower boxes so the moving stat bars get room */
-  #ed td.sbar { width: 84px !important; max-width: 84px; min-width: 84px !important; }
-  #ed td.sbar i { transform: scaleX(.45) !important; }
-  #ed .col.c .stt input.num { width: 2.6rem !important; padding-left: .3rem; padding-right: .2rem; }
 }
 @media (max-width: 640px) { .formtabs { flex-wrap: wrap !important; overflow: visible !important; row-gap: 2px; } .formtabs button { font-size: .8rem !important; padding: .35rem .6rem !important; } }
 @media (max-width: 640px) { table.dextable .col-hp, table.dextable .col-atk, table.dextable .col-def, table.dextable .col-spa, table.dextable .col-spd, table.dextable .col-spe, table.dextable .col-total { padding-left: 3px !important; padding-right: 0 !important; font-size: .64rem !important; } table.dextable .col-name { font-size: .74rem; } }
+
+/* ===== Teambuilder: Showdown's compact layout, using the full width =====
+   set card on top (art | details + names | moves | stat summary), then the EV editor and the pick list side by side */
+#ed.sd { display: grid !important; grid-template-columns: minmax(0, 590px) minmax(0, 1fr) !important; grid-template-areas: "card card" "evp list"; gap: .7rem 1.1rem !important; padding: .7rem .8rem !important; width: auto !important; }
+#ed.sd > .setcard { grid-area: card; display: grid; grid-template-columns: 112px 240px minmax(250px, 1fr) 200px; grid-template-areas: "art det mv sum" "nm nm mv sum"; gap: .35rem .9rem; padding-bottom: .7rem; border-bottom: 1px solid var(--line); }
+#ed.sd > .evp { grid-area: evp; display: block !important; border: 0 !important; padding: 0 !important; min-width: 0; }
+#ed.sd > .mlist { grid-area: list; margin: 0 !important; align-self: start; }
+#ed.sd > .mlist .mbody { max-height: 300px !important; }
+#ed.sd .cap { display: block; font-size: 11px; font-weight: 600; color: var(--ink-soft); line-height: 1.2; margin-bottom: 2px; }
+#ed.sd .cap small { font-weight: 400; margin-left: .3rem; }
+#ed.sd .c-art { grid-area: art; position: relative; display: flex; align-items: center; justify-content: center; }
+#ed.sd .c-art > img:not(.whoitem) { width: 104px !important; height: 104px !important; object-fit: contain; }
+#ed.sd .whoitem { width: 32px !important; height: 32px !important; right: 0 !important; bottom: 0 !important; }
+#ed.sd .shinytag { position: absolute; left: 2px; top: 0; color: #d4a017; }
+#ed.sd .c-det { grid-area: det; min-width: 0; }
+#ed.sd .detbox { display: grid; grid-template-columns: 3.2rem 3.4rem 2.6rem 1fr; gap: 0; border: 1px solid var(--line-2); background: var(--field, #fff); border-radius: 3px; }
+#ed.sd .detbox label { display: flex; flex-direction: column; padding: 2px 5px; border-left: 1px solid var(--line); min-width: 0; }
+#ed.sd .detbox label:first-child { border-left: 0; }
+#ed.sd .detbox small { font-size: 10px; color: var(--ink-soft); }
+#ed.sd .detbox .field { border: 0 !important; padding: 0 !important; height: 1.4rem !important; background: transparent !important; box-shadow: none !important; width: 100%; min-width: 0 !important; font-size: .85rem; }
+#ed.sd .detbox .shinybox { height: 1.4rem; display: flex; align-items: center; }
+#ed.sd .c-det .types { margin-top: .4rem; display: flex; gap: 3px; align-items: center; flex-wrap: wrap; }
+#ed.sd .c-det .types .dexl { margin-left: auto; font-size: .8rem; }
+#ed.sd .c-nm { grid-area: nm; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .45rem; }
+#ed.sd .c-nm .fl { display: flex !important; flex-direction: column !important; align-items: stretch !important; gap: 0 !important; min-width: 0; }
+#ed.sd .c-nm .iwrap { display: flex; align-items: center; gap: 2px; }
+#ed.sd .c-nm .iwrap .field { flex: 1; min-width: 0; }
+#ed.sd .itemic { width: 24px !important; height: 24px !important; margin: 0 !important; }
+#ed.sd .c-mv { grid-area: mv; display: flex !important; flex-direction: column; gap: .3rem !important; min-width: 0; }
+#ed.sd .c-mv .mrow { display: flex !important; align-items: center; gap: .5rem; }
+#ed.sd .c-mv .mvin { flex: 0 0 170px; width: 170px; }
+#ed.sd .c-mv .minfo { display: flex; align-items: center; gap: .35rem; font-size: .8rem; white-space: nowrap; overflow: hidden; }
+#ed.sd .c-sum { grid-area: sum; border: 1px solid var(--line-2); background: var(--field, #fff); border-radius: 3px; padding: 3px 6px; align-self: start; }
+#ed.sd .c-sum .sr { display: grid; grid-template-columns: 28px 1fr 34px; align-items: center; height: 19px; font-size: 11px; }
+#ed.sd .c-sum .sr span { color: var(--ink-soft); }
+#ed.sd .c-sum .sr span.up { color: #2f7a3f; font-weight: 700; } #ed.sd .c-sum .sr span.down { color: #b3261e; font-weight: 700; }
+#ed.sd .c-sum .sr i { display: block; height: 7px; transform: scaleX(.6); transform-origin: left center; }
+#ed.sd .c-sum .sr b { text-align: right; font-weight: 600; }
+#ed.sd .evp h3.sec { margin: 0 0 .3rem !important; font-size: .95rem; }
+#ed.sd .evp table.stt { width: auto !important; }
+#ed.sd .evp td.sbar { width: 184px; min-width: 184px; padding: 0 .5rem 0 .2rem; }
+#ed.sd .evp td.sbar i { display: block; height: 11px; }
+#ed.sd .evp input.num { width: 3.6rem !important; }
+#ed.sd .evp .barc { width: 150px; } #ed.sd .evp .barc input { width: 140px; }
+#ed.sd .evp .stt th, #ed.sd .evp .stt td { padding-top: 2px; padding-bottom: 2px; }
+#ed.sd .evfoot { display: flex; align-items: center; gap: 1.5rem; margin-top: .45rem; flex-wrap: wrap; }
+#ed.sd .evfoot .rem { font-size: .9rem; color: var(--ink-soft); } #ed.sd .evfoot .rem b { color: var(--ink); }
+#ed.sd .evfoot .evleft.over { color: #b3261e !important; }
+#ed.sd .evfoot .natl { display: flex; align-items: center; gap: .45rem; font-size: .9rem; }
+#ed.sd .evfoot select { width: 190px; }
+#ed.sd .tip { font-size: .78rem; margin: .35rem 0 0; }
+#ed.sd .tip kbd { border: 1px solid var(--line-2); border-radius: 3px; padding: 0 4px; font-size: .75rem; background: var(--field, #fff); }
+#ed.sd .edel { top: .4rem !important; right: .6rem !important; }
+/* empty slot: only the Pokémon box and the list */
+#ed.sd.empty > .evp, #ed.sd.empty .setcard > :not(.c-nm), #ed.sd.empty .c-nm > :not(:first-child) { display: none !important; }
+#ed.sd.empty { grid-template-areas: "card card" "list list"; }
+#ed.sd.empty .c-nm { grid-template-columns: minmax(0, 320px); }
+/* narrower screens: stack */
+@media (max-width: 1100px) {
+  #ed.sd { grid-template-columns: 1fr !important; grid-template-areas: "card" "evp" "list"; }
+  #ed.sd > .setcard { grid-template-columns: 112px minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "art det sum" "nm nm nm" "mv mv mv"; }
+}
+@media (max-width: 640px) {
+  #ed.sd > .setcard { grid-template-columns: 90px minmax(0, 1fr); grid-template-areas: "art det" "nm nm" "mv mv" "sum sum"; }
+  #ed.sd .c-art > img:not(.whoitem) { width: 88px !important; height: 88px !important; }
+  #ed.sd .c-nm { grid-template-columns: 1fr; }
+  #ed.sd .c-mv .mvin { flex: 1 1 auto; width: auto; min-width: 0; }
+  #ed.sd .evp td.sbar { width: 60px; min-width: 60px; max-width: 60px; overflow: hidden; }
+  #ed.sd .evp td.sbar i { transform: scaleX(.33); transform-origin: left center; }
+  #ed.sd .evp .barc { display: none; }
+  #ed.sd .evp input.num { width: 2.8rem !important; }
+}
+/* pick list beside the EV editor: one line per entry, long descriptions cut off (hover shows them) */
+#ed.sd > .mlist { container-type: inline-size; }
+#ed.sd .mlist .mr .d { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+#ed.sd .mlist .mr { padding-top: .22rem !important; padding-bottom: .22rem !important; }
+#ed.sd .mlist[data-kind='mv'] .mhead, #ed.sd .mlist[data-kind='mv'] .mr { grid-template-columns: 9.5rem 4.9rem 1.9rem 2.3rem 2.3rem 1.9rem minmax(0, 1fr) !important; gap: .45rem !important; }
+#ed.sd .mlist .mbody { overflow-x: hidden !important; }
+@container (max-width: 760px) {
+  #ed.sd .mlist[data-kind='sp'] .mhead, #ed.sd .mlist[data-kind='sp'] .mr { grid-template-columns: 32px minmax(0, 1fr) 10.2rem repeat(7, 2.05rem) !important; gap: .3rem !important; }
+  #ed.sd .mlist[data-kind='sp'] .mhead > :nth-child(4), #ed.sd .mlist[data-kind='sp'] .mr > :nth-child(4) { display: none; }
+  #ed.sd .mlist[data-kind='mv'] .mhead > :nth-child(7), #ed.sd .mlist[data-kind='mv'] .mr > :nth-child(7) { display: none; }
+  #ed.sd .mlist[data-kind='mv'] .mhead, #ed.sd .mlist[data-kind='mv'] .mr { grid-template-columns: minmax(0, 1fr) 4.9rem 1.9rem 2.4rem 2.4rem 2rem !important; }
+}
+/* Pokémon filters in the pick list */
+#ed .mfilt { padding: .35rem .7rem; border-bottom: 1px solid var(--line); font-size: .85rem; display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; }
+#ed .mfilt[hidden] { display: none; }
+#ed .fchip, #ed .fadd { border: 1px solid var(--line-2); background: var(--field, #fff); border-radius: 3px; padding: 0 .45rem; font-size: .8rem; font-weight: 600; cursor: pointer; color: var(--ink); }
+#ed .fchip:hover { border-color: #b3261e; color: #b3261e; }
+#ed .fadd { font-weight: 400; color: var(--link); margin-left: .3rem; }
+#ed .fadd:hover { border-color: var(--link); }
+#ed .fsug { padding: .35rem .7rem; border-bottom: 1px solid var(--line); font-size: .82rem; color: var(--ink-soft); background: color-mix(in srgb, var(--card) 70%, var(--petal-deep)); }
+#ed.sd .c-sum { margin-top: 1.15rem; }
+html[data-theme='dark'] #ed.sd .detbox, html[data-theme='dark'] #ed.sd .c-sum, html[data-theme='dark'] #ed.sd .tip kbd, html[data-theme='dark'] #ed .fchip, html[data-theme='dark'] #ed .fadd { background: #2a2e34 !important; }
+@container (max-width: 460px) {
+  #ed.sd .mlist[data-kind='mv'] .mhead, #ed.sd .mlist[data-kind='mv'] .mr { grid-template-columns: minmax(0, 1fr) 4.9rem 1.9rem 2.4rem !important; }
+  #ed.sd .mlist[data-kind='mv'] .mhead > :nth-child(n+5), #ed.sd .mlist[data-kind='mv'] .mr > :nth-child(n+5) { display: none; }
+  #ed.sd .mlist[data-kind='mv'] .mr b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #ed.sd .mlist[data-kind='sp'] .mhead, #ed.sd .mlist[data-kind='sp'] .mr { grid-template-columns: 32px minmax(0, 1fr) 2.6rem !important; }
+  #ed.sd .mlist[data-kind='sp'] .mhead > :nth-child(n+3):not(:last-child), #ed.sd .mlist[data-kind='sp'] .mr > :nth-child(n+3):not(:last-child) { display: none; }
+}
+@media (max-width: 640px) { #ed.sd .c-sum { display: none; } }

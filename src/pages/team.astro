@@ -172,6 +172,11 @@ import { GAMES, meta } from '../lib/data';
       document.getElementById('plus')?.addEventListener('click', () => { const m = newMon(0); m.sp = ''; m.ab = ''; t.mons.push(m); sel = t.mons.length - 1; drawTeams(); drawStrip(); drawEd(); setTimeout(() => { const f = $('f-sp') as HTMLInputElement | null; f?.focus(); f?.dispatchEvent(new Event('focus')); }, 0); });
     };
     const sortState: Record<string, { by: string; dir: number } | null> = {};
+    // Showdown-style Pokémon filters: type, ability or move chips; a Pokémon must match all of them
+    type Filt = { t: 'type' | 'ability' | 'move'; v: string; label: string };
+    const filters: Filt[] = [];
+    let allAb: string[] | null = null;
+    const ALL_ABILITIES = () => (allAb ??= [...new Set(idx.species.flatMap((x) => [...x[6], ...(x[7] ? [x[7]] : [])]))].sort());
     const bboxCache = new Map<string, Promise<number[] | null>>();
     const bbox = (url: string) => {
       if (!bboxCache.has(url)) bboxCache.set(url, new Promise((res) => {
@@ -207,33 +212,42 @@ import { GAMES, meta } from '../lib/data';
       const [u, d] = NAT[m.nature]; const cap = CAP(), c = champ();
       const mark = (k: number) => (k && u !== d ? (k === u ? 'up' : k === d ? 'down' : '') : '');
       const sfx = (k: number) => (mark(k) === 'up' ? '+' : mark(k) === 'down' ? '-' : '');
+      const evTot = m.evs.reduce((a, b) => a + b, 0);
+      const SHORT = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'];
+      // Showdown's compact layout: one set card on top (art, details, names, moves, stat summary), then the stat editor and the pick list side by side
+      ed.classList.add('sd');
       ed.innerHTML = `
         <button type="button" class="edel" id="f-rm" title="Delete this Pokémon from the team">🗑 Delete</button>
-        <div class="col a">
-          <div class="who">${itemIcon(m.item) ? `<img class="whoitem" src="${itemIcon(m.item)}" alt="${esc(m.item)}" title="${esc(m.item)}" width="40" height="40" />` : ''}<img src="${s[3] ? SPR + 'pokemon/other/official-artwork/' + (m.shiny ? 'shiny/' : '') + s[3] + '.png' : ''}" alt="${m.shiny ? 'Shiny ' : ''}${esc(s[1])}" width="150" height="150" />${m.shiny ? '<span class="shinytag" title="Shiny">★</span>' : ''}</div>
-          <div class="slot"><label class="fl"><span class="ll">Pokémon</span><input class="field" id="f-sp" value="${empty ? '' : esc(s[1])}" placeholder="Choose a Pokémon" autocomplete="off" /></label></div>
-          <div class="types">${s[2].map(chip).join(' ')} <a href="${s[5]}" class="dexl">Dex page</a></div>
-          <div class="slot"><label class="fl"><span class="ll">Ability</span><input class="field" id="f-ab" value="${esc(m.ab)}" autocomplete="off" /></label></div>
-          <div class="slot"><label class="fl"><span class="ll">Item</span>${itemIcon(m.item) ? `<img class="itemic" src="${itemIcon(m.item)}" alt="" width="30" height="30" />` : ''}<input class="field" id="f-item" value="${esc(m.item)}" placeholder="No item" autocomplete="off" /></label></div>
-          <div class="pair">
-            <label class="fl"><span class="ll">Gender</span><select class="field" id="f-gen"><option value=""${!m.gender ? ' selected' : ''}>Any</option><option value="M"${m.gender === 'M' ? ' selected' : ''}>Male</option><option value="F"${m.gender === 'F' ? ' selected' : ''}>Female</option></select></label>
-            <label class="fl"><span class="ll">Shiny</span><span class="shinybox"><input type="checkbox" id="f-shiny"${m.shiny ? ' checked' : ''} /> ${m.shiny ? 'Yes' : 'No'}</span></label>
+        <div class="setcard">
+          <div class="c-art who">${itemIcon(m.item) ? `<img class="whoitem" src="${itemIcon(m.item)}" alt="${esc(m.item)}" title="${esc(m.item)}" width="32" height="32" />` : ''}<img src="${s[3] ? SPR + 'pokemon/other/home/' + (m.shiny ? 'shiny/' : '') + s[3] + '.png' : ''}" data-fb="${s[3] ? SPR + 'pokemon/other/official-artwork/' + (m.shiny ? 'shiny/' : '') + s[3] + '.png' : ''}" onerror="if(this.dataset.fb&&this.src!==this.dataset.fb)this.src=this.dataset.fb" alt="${m.shiny ? 'Shiny ' : ''}${esc(s[1])}" width="104" height="104" />${m.shiny ? '<span class="shinytag" title="Shiny">★</span>' : ''}</div>
+          <div class="c-det">
+            <span class="cap">Details</span>
+            <div class="detbox">
+              <label><small>Level</small><input class="field" id="f-lv" type="number" min="1" max="100" value="${c ? 50 : m.level}"${c ? ' disabled title="Champions battles are always Lv. 50"' : ''} /></label>
+              <label><small>Gender</small><select class="field" id="f-gen"><option value=""${!m.gender ? ' selected' : ''}>—</option><option value="M"${m.gender === 'M' ? ' selected' : ''}>M</option><option value="F"${m.gender === 'F' ? ' selected' : ''}>F</option></select></label>
+              <label><small>Shiny</small><span class="shinybox"><input type="checkbox" id="f-shiny"${m.shiny ? ' checked' : ''} /></span></label>
+              <label><small>Tera</small><select class="field" id="f-tera">${[...TYPES, 'Stellar'].map((x) => `<option${x === m.tera ? ' selected' : ''}>${x}</option>`).join('')}</select></label>
+            </div>
+            <div class="types">${s[2].map(chip).join(' ')} <a href="${s[5]}" class="dexl">Dex page</a></div>
           </div>
-          <div class="pair">
-            <label class="fl"><span class="ll">Level</span><input class="field" id="f-lv" type="number" min="1" max="100" value="${c ? 50 : m.level}"${c ? ' disabled title="Champions battles are always Lv. 50"' : ''} /></label>
-            <label class="fl"><span class="ll" title="Tera type">Tera</span><select class="field" id="f-tera">${[...TYPES, 'Stellar'].map((x) => `<option${x === m.tera ? ' selected' : ''}>${x}</option>`).join('')}</select></label>
+          <div class="c-nm">
+            <label class="fl"><span class="cap">Pokémon</span><input class="field" id="f-sp" value="${empty ? '' : esc(s[1])}" placeholder="Choose a Pokémon" autocomplete="off" /></label>
+            <label class="fl"><span class="cap">Item</span><span class="iwrap">${itemIcon(m.item) ? `<img class="itemic" src="${itemIcon(m.item)}" alt="" width="24" height="24" />` : ''}<input class="field" id="f-item" value="${esc(m.item)}" placeholder="No item" autocomplete="off" /></span></label>
+            <label class="fl"><span class="cap">Ability</span><input class="field" id="f-ab" value="${esc(m.ab)}" autocomplete="off" /></label>
+          </div>
+          <div class="c-mv col b">
+            <span class="cap">Moves</span>
+            ${[0, 1, 2, 3].map((j) => `<div class="slot mrow"><input class="field mvin" data-j="${j}" value="${esc(m.moves[j] ? moveName(m.moves[j]) : '')}" placeholder="Move ${j + 1}" autocomplete="off" />${moveInfo(m.moves[j])}</div>`).join('')}
+          </div>
+          <div class="c-sum">
+            <span class="cap">Stats <small>${c ? 'SP' : 'EV'}</small></span>
+            ${SHORT.map((x, k) => `<div class="sr" data-k="${k}"><span class="${mark(k)}">${x}</span><i style="${sdBar(st[k] * 100 / (c ? 50 : m.level || 100), k)}"></i><b>${m.evs[k] ? m.evs[k] : ''}${sfx(k)}</b></div>`).join('')}
           </div>
         </div>
-        <div class="col b">
-          <h3 class="sec">Moves</h3>
-          ${[0, 1, 2, 3].map((j) => `<div class="slot mrow"><input class="field mvin" data-j="${j}" value="${esc(m.moves[j] ? moveName(m.moves[j]) : '')}" placeholder="Move ${j + 1}" autocomplete="off" />${moveInfo(m.moves[j])}</div>`).join('')}
-          <h3 class="sec">Nature</h3>
-          <select class="field" id="f-nat">${Object.keys(NAT).sort().map((n) => `<option value="${n}"${n === m.nature ? ' selected' : ''}>${natLabel(n)}</option>`).join('')}</select>
-        </div>
-        <div class="col c">
-          <h3 class="sec">Stats <span class="soft evleft${evTotal > cap.total ? ' over' : ''}">${cap.label} left: ${cap.total - evTotal}</span></h3>
+        <div class="col c evp">
+          <h3 class="sec">${c ? 'Stat Points' : 'EVs'}</h3>
           <table class="stt">
-            <thead><tr><th></th><th class="n">Base</th><th class="sbh"></th><th>${c ? 'SP' : 'EVs'}</th><th></th>${c ? '' : '<th>IVs</th>'}<th class="n">Stat</th></tr></thead>
+            <thead><tr><th></th><th class="n">Base</th><th class="sbh"></th><th>${c ? 'SP' : 'EVs'}</th><th></th>${c ? '' : '<th>IVs</th>'}<th class="n"></th></tr></thead>
             <tbody>${base.map((b, k) => `<tr>
               <th class="${mark(k)}" title="${k ? 'Type + or - after the EVs to raise or lower this stat with your nature' : ''}">${STATNAME[k]}</th>
               <td class="n"><b>${b}</b></td>
@@ -243,14 +257,18 @@ import { GAMES, meta } from '../lib/data';
               ${c ? '' : `<td><input class="field num iv" data-k="${k}" type="number" min="0" max="31" value="${m.ivs[k]}" aria-label="${STATNAME[k]} IVs" /></td>`}
               <td class="n"><b>${st[k]}</b></td></tr>`).join('')}</tbody>
           </table>
-          <p class="note">Base stat total ${base.reduce((a, b) => a + b, 0)}. ${c ? 'Champions: up to 32 Stat Points per stat and 66 in total; each point adds 1 to the stat. Always Lv. 50 with perfect IVs. Copy for Showdown converts the points to EVs.' : 'EVs go up to 252 per stat and 510 in total.'}</p>
+          <div class="evfoot">
+            <span class="rem">Remaining: <b class="evleft${evTot > cap.total ? ' over' : ''}">${cap.total - evTot}</b></span>
+            <label class="natl">Nature <select class="field" id="f-nat">${Object.keys(NAT).sort().map((n) => `<option value="${n}"${n === m.nature ? ' selected' : ''}>${natLabel(n)}</option>`).join('')}</select></label>
+          </div>
+          <p class="note tip">Type <kbd>+</kbd> or <kbd>-</kbd> after a stat's ${c ? 'points' : 'EVs'} to set the nature.</p>
         </div>`;
       // Some shiny artwork (e.g. Indeedee-F) is drawn at a different scale than the normal art; scale it to match
-      const art = ed.querySelector<HTMLImageElement>('.who img:not(.whoitem)');
-      if (art && m.shiny && s[3]) fitShiny(art, SPR + 'pokemon/other/official-artwork/' + s[3] + '.png');
+      // HOME renders are drawn the same way for normal and shiny, so no resizing is needed
       const reStats = () => { // update numbers without rebuilding the inputs, so sliders keep focus while dragging
         const st2 = statsOf(m); ed.querySelectorAll<HTMLElement>('.stt tbody tr').forEach((tr, k) => { tr.querySelector('td:last-child b')!.textContent = String(st2[k]); tr.querySelector<HTMLElement>('.sbar i')!.setAttribute('style', sdBar(st2[k] * 100 / (champ() ? 50 : m.level || 100), k)); });
-        const tot = m.evs.reduce((a, b) => a + b, 0); const el = ed.querySelector('.evleft')!; el.textContent = `${cap.label} left: ${cap.total - tot}`; el.classList.toggle('over', tot > cap.total);
+        const tot = m.evs.reduce((a, b) => a + b, 0); const el = ed.querySelector('.evleft')!; el.textContent = String(cap.total - tot); el.classList.toggle('over', tot > cap.total);
+        ed.querySelectorAll<HTMLElement>('.c-sum .sr').forEach((r, k) => { r.querySelector('i')!.setAttribute('style', sdBar(st2[k] * 100 / (champ() ? 50 : m.level || 100), k)); r.querySelector('b')!.textContent = (m.evs[k] ? String(m.evs[k]) : '') + sfx(k); });
         save();
       };
       ed.querySelector<HTMLInputElement>('#f-lv')!.addEventListener('change', (e) => { const el = e.target as HTMLInputElement; m.level = Math.max(1, Math.min(100, Math.round(+el.value) || 50)); el.value = String(m.level); reStats(); });
@@ -273,7 +291,7 @@ import { GAMES, meta } from '../lib/data';
       const i = spIndex.get(m.sp) ?? 0;
       // Showdown-style picker: a list under the editor for whichever box has focus (Pokémon, ability, item or a move).
       // Each row carries the information you need to choose, and typing filters it.
-      ed.querySelector('.col.c')!.insertAdjacentHTML('beforebegin', '<div class="mlist" hidden><div class="mhead"></div><div class="mbody"></div></div>');
+      ed.insertAdjacentHTML('beforeend', '<div class="mlist" hidden><div class="mfilt" hidden></div><div class="mhead"></div><div class="mbody"></div></div>');
       const hideList = () => { const main = document.querySelector<HTMLElement>('main'); if (main) main.style.minHeight = main.offsetHeight + 'px'; list.hidden = true; };
       const list = ed.querySelector<HTMLElement>('.mlist')!, headEl = list.querySelector<HTMLElement>('.mhead')!, body = list.querySelector<HTMLElement>('.mbody')!;
       type Kind = 'sp' | 'ab' | 'item' | 'mv';
@@ -294,7 +312,22 @@ import { GAMES, meta } from '../lib/data';
         const st = sortState[k]; if (!st) return keys;
         return [...keys].sort((a, b) => { const va = sortVal(k, a, st.by), vb = sortVal(k, b, st.by); const c = typeof va === 'number' ? (vb as number) - va : String(va).localeCompare(String(vb)); return st.dir * c || nameOf(k, a).localeCompare(nameOf(k, b)); });
       };
-      const poolOf = (k: Kind): string[] => k === 'mv' ? movePool : k === 'sp' ? idx.species.map((_, x) => String(x)) : k === 'ab' ? abilitiesOf(s) : tb.items.map((_, x) => String(x));
+      const passes = (x: number) => filters.every((f) => f.t === 'type' ? idx.species[x][2].includes(f.v) : f.t === 'ability' ? abilitiesOf(idx.species[x]).includes(f.v) : learnOf(x).includes(f.v));
+      const filtEl = list.querySelector<HTMLElement>('.mfilt')!;
+      const drawFilt = () => {
+        filtEl.hidden = kind !== 'sp' || !filters.length;
+        filtEl.innerHTML = 'Filters: ' + filters.map((f, q) => `<button type="button" class="fchip" data-q="${q}" title="Remove this filter">${esc(f.label)} ×</button>`).join('') + '<span class="soft"> (Backspace in an empty box removes the last one)</span>';
+      };
+      const suggest = (v: string) => {
+        if (kind !== 'sp' || v.length < 2) return '';
+        const has = (t: string, val: string) => filters.some((f) => f.t === t && f.v === val);
+        const ty = TYPES.filter((x) => x.toLowerCase().startsWith(v) && !has('type', x)).map((x) => ['type', x, x + ' type']);
+        const ab = ALL_ABILITIES().filter((x) => x.toLowerCase().startsWith(v) && !has('ability', x)).slice(0, 3).map((x) => ['ability', x, x + ' (ability)']);
+        const mv = Object.keys(idx.moves).filter((x) => idx.moves[x][0].toLowerCase().startsWith(v) && !has('move', x)).slice(0, 3).map((x) => ['move', x, idx.moves[x][0] + ' (move)']);
+        const all = [...ty, ...ab, ...mv];
+        return all.length ? `<div class="fsug">Filter by: ${all.map(([t, val, label]) => `<button type="button" class="fadd" data-t="${t}" data-v="${esc(val)}" data-l="${esc(label.replace(/ \((ability|move)\)$/, '').replace(/ type$/, ''))}">${esc(label)}</button>`).join('')}</div>` : '';
+      };
+      const poolOf = (k: Kind): string[] => k === 'mv' ? movePool : k === 'sp' ? idx.species.map((_, x) => String(x)).filter((x) => !filters.length || passes(+x)) : k === 'ab' ? abilitiesOf(s) : tb.items.map((_, x) => String(x));
       const nameOf = (k: Kind, key: string) => k === 'mv' ? idx.moves[key][0] : k === 'sp' ? idx.species[+key][1] : k === 'ab' ? key : tb.items[+key][0];
       const extraMatch = (k: Kind, key: string, v: string) => k === 'mv' ? idx.moves[key][1].toLowerCase() === v : k === 'sp' ? idx.species[+key][2].some((t) => t.toLowerCase() === v) : false;
       // the entry already in the box being changed: highlighted and scrolled to when the list opens
@@ -303,15 +336,15 @@ import { GAMES, meta } from '../lib/data';
         const cls = `mr${on ? ' on' : ''}${isCur(k, key) ? ' cur' : ''}`;
         if (k === 'mv') {
           const [name, type, cat] = idx.moves[key]; const md = tb.moves[key] ?? [null, null, 0, ''];
-          return `<div class="${cls}${m.moves.includes(key) ? ' has' : ''}" data-x="${key}"><b>${esc(name)}</b>${chip(type)}<svg viewBox="0 0 28 14" width="30" height="15" role="img" aria-label="${cat}"><title>${cat}</title>${CAT_SVG[cat] ?? ''}</svg><span class="r">${md[0] ?? '—'}</span><span class="r">${md[1] ?? '—'}</span><span class="r">${md[2]}</span><span class="d">${esc(md[3])}</span></div>`;
+          return `<div class="${cls}${m.moves.includes(key) ? ' has' : ''}" data-x="${key}"><b>${esc(name)}</b>${chip(type)}<svg viewBox="0 0 28 14" width="30" height="15" role="img" aria-label="${cat}"><title>${cat}</title>${CAT_SVG[cat] ?? ''}</svg><span class="r">${md[0] ?? '—'}</span><span class="r">${md[1] ?? '—'}</span><span class="r">${md[2]}</span><span class="d" title="${esc(md[3])}">${esc(md[3])}</span></div>`;
         }
         if (k === 'sp') {
           const x = idx.species[+key], st = tb.stats[+key];
-          return `<div class="${cls}${x[0] === m.sp ? ' has' : ''}" data-x="${key}"><img src="${x[3] ? SPR + 'pokemon/' + x[3] + '.png' : ''}" alt="" width="32" height="32" loading="lazy" /><b>${esc(x[1])}</b><span>${x[2].map(chip).join(' ')}</span><span class="d">${esc([...x[6], ...(x[7] ? [x[7] + ' (H)'] : [])].join(', '))}</span>${st.map((v) => `<span class="r">${v}</span>`).join('')}<span class="r"><b>${st.reduce((a, b) => a + b, 0)}</b></span></div>`;
+          return `<div class="${cls}${x[0] === m.sp ? ' has' : ''}" data-x="${key}"><img src="${x[3] ? SPR + 'pokemon/' + x[3] + '.png' : ''}" alt="" width="32" height="32" loading="lazy" /><b>${esc(x[1])}</b><span>${x[2].map(chip).join(' ')}</span><span class="d" title="${esc([...x[6], ...(x[7] ? [x[7] + ' (H)'] : [])].join(', '))}">${esc([...x[6], ...(x[7] ? [x[7] + ' (H)'] : [])].join(', '))}</span>${st.map((v) => `<span class="r">${v}</span>`).join('')}<span class="r"><b>${st.reduce((a, b) => a + b, 0)}</b></span></div>`;
         }
-        if (k === 'ab') return `<div class="${cls}${key === m.ab ? ' has' : ''}" data-x="${esc(key)}"><b>${esc(key)}${key === s[7] ? ' <span class="soft">(hidden)</span>' : ''}</b><span class="d">${esc(tb.abilities[key] ?? '')}</span></div>`;
+        if (k === 'ab') return `<div class="${cls}${key === m.ab ? ' has' : ''}" data-x="${esc(key)}"><b>${esc(key)}${key === s[7] ? ' <span class="soft">(hidden)</span>' : ''}</b><span class="d" title="${esc(tb.abilities[key] ?? '')}">${esc(tb.abilities[key] ?? '')}</span></div>`;
         const [name, icon, desc] = tb.items[+key];
-        return `<div class="${cls}${name === m.item ? ' has' : ''}" data-x="${key}"><img src="${icon ? SPR + 'items/' + icon + '.png' : ''}" alt="" width="30" height="30" loading="lazy" /><b>${esc(name)}</b><span class="d">${esc(desc)}</span></div>`;
+        return `<div class="${cls}${name === m.item ? ' has' : ''}" data-x="${key}"><img src="${icon ? SPR + 'items/' + icon + '.png' : ''}" alt="" width="30" height="30" loading="lazy" /><b>${esc(name)}</b><span class="d" title="${esc(desc)}">${esc(desc)}</span></div>`;
       };
       let kind: Kind = 'mv', slot = -1, shown: string[] = [], act = -1, field: HTMLInputElement | null = null;
       const LIMIT = 150;
@@ -319,13 +352,14 @@ import { GAMES, meta } from '../lib/data';
         const v = q.trim().toLowerCase(), pool = poolOf(kind);
         shown = !v ? sorted(kind, pool) : [...pool.filter((x) => nameOf(kind, x).toLowerCase().startsWith(v)), ...pool.filter((x) => { const n = nameOf(kind, x).toLowerCase(); return !n.startsWith(v) && (n.includes(v) || extraMatch(kind, x, v)); })];
         act = v && shown.length ? 0 : -1;
-        body.innerHTML = shown.length ? shown.slice(0, LIMIT).map((x, k) => rowOf(kind, x, k === act)).join('') + (shown.length > LIMIT ? `<p class="note" style="padding:.5rem .7rem">Showing ${LIMIT} of ${shown.length}. Type to narrow it down.</p>` : '') : '<p class="note" style="padding:.5rem .7rem">Nothing matches.</p>';
+        drawFilt();
+        body.innerHTML = suggest(v) + (shown.length ? shown.slice(0, LIMIT).map((x, k) => rowOf(kind, x, k === act)).join('') + (shown.length > LIMIT ? `<p class="note" style="padding:.5rem .7rem">Showing ${LIMIT} of ${shown.length}. Type to narrow it down.</p>` : '') : '<p class="note" style="padding:.5rem .7rem">Nothing matches.</p>');
       };
-      const open = (k: Kind, inp: HTMLInputElement, j = -1) => {
-        kind = k; slot = j; field = inp; list.dataset.kind = k; headEl.innerHTML = HEAD[k]; markSort(); list.hidden = false; inp.select(); fill(''); body.scrollTop = 0;
+      const open = (k: Kind, inp: HTMLInputElement, j = -1, quiet = false) => {
+        kind = k; slot = j; field = inp; list.dataset.kind = k; headEl.innerHTML = HEAD[k]; markSort(); list.hidden = false; if (!quiet) inp.select(); fill(''); body.scrollTop = 0;
         const cur3 = body.querySelector<HTMLElement>('.mr.cur'); if (cur3) body.scrollTop = cur3.getBoundingClientRect().top - body.getBoundingClientRect().top - body.clientHeight / 2 + cur3.offsetHeight / 2;
         ed.querySelectorAll('.editing').forEach((x) => x.classList.remove('editing')); inp.classList.add('editing');
-        if (list.getBoundingClientRect().top > innerHeight - 120) list.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        if (!quiet && list.getBoundingClientRect().top > innerHeight - 120) list.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       };
       const focusNext = (sel2: string) => (ed.querySelector<HTMLInputElement>(sel2))?.focus();
       const choose = (key: string) => {
@@ -342,6 +376,7 @@ import { GAMES, meta } from '../lib/data';
           if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); act = Math.max(0, Math.min(rows.length - 1, act + (e.key === 'ArrowDown' ? 1 : -1))); rows.forEach((r, x) => r.classList.toggle('on', x === act)); rows[act]?.scrollIntoView({ block: 'nearest' }); }
           else if (e.key === 'Enter' && act >= 0) { e.preventDefault(); choose(shown[act]); }
           else if (e.key === 'Escape') { hideList(); inp.blur(); }
+          else if (e.key === 'Backspace' && k === 'sp' && !inp.value && filters.length) { e.preventDefault(); filters.pop(); fill(''); }
         });
       };
       wire(ed.querySelector<HTMLInputElement>('#f-sp')!, 'sp');
@@ -353,14 +388,20 @@ import { GAMES, meta } from '../lib/data';
         const j = +inp.dataset.j!; wire(inp, 'mv', j);
         inp.addEventListener('change', () => { const v = inp.value.trim().toLowerCase(); if (!v) { m.moves[j] = ''; save(); } else { const hit = movePool.find((x) => idx.moves[x][0].toLowerCase() === v); if (hit) { m.moves[j] = hit; save(); } } });
       });
+      if (!empty) { const mv = ed.querySelectorAll<HTMLInputElement>('.mvin'); const j0 = Math.max(0, m.moves.findIndex((x, q) => q < 4 && !x)); queueMicrotask(() => { if (!ed.contains(document.activeElement)) open('mv', mv[j0 < 4 ? j0 : 0], j0 < 4 ? j0 : 0, true); }); }
       const markSort = () => headEl.querySelectorAll<HTMLElement>('[data-s]').forEach((b) => { const st = sortState[kind]; b.classList.toggle('sorted', st?.by === b.dataset.s); b.dataset.dir = st?.by === b.dataset.s ? String(st!.dir) : ''; });
       headEl.addEventListener('mousedown', (e) => {
         const b = (e.target as HTMLElement).closest<HTMLElement>('[data-s]'); if (!b) return; e.preventDefault();
         const by = b.dataset.s!, cur2 = sortState[kind]; sortState[kind] = cur2?.by === by ? (cur2.dir === 1 ? { by, dir: -1 } : null) : { by, dir: 1 };
         markSort(); fill(field?.value && field.value !== field.defaultValue ? field.value : ''); body.scrollTop = 0;
       });
-      body.addEventListener('mousedown', (e) => { const r = (e.target as HTMLElement).closest<HTMLElement>('.mr'); if (r) { e.preventDefault(); choose(r.dataset.x!); } });
-      document.addEventListener('mousedown', (e) => { if (!list.hidden && !(e.target as HTMLElement).closest('.mlist') && e.target !== field) hideList(); });
+      body.addEventListener('mousedown', (e) => {
+        const fa = (e.target as HTMLElement).closest<HTMLElement>('.fadd');
+        if (fa) { e.preventDefault(); filters.push({ t: fa.dataset.t as Filt['t'], v: fa.dataset.v!, label: fa.dataset.l! }); if (field) field.value = ''; fill(''); return; }
+        const r = (e.target as HTMLElement).closest<HTMLElement>('.mr'); if (r) { e.preventDefault(); choose(r.dataset.x!); }
+      });
+      filtEl.addEventListener('mousedown', (e) => { const b = (e.target as HTMLElement).closest<HTMLElement>('.fchip'); if (!b) return; e.preventDefault(); filters.splice(+b.dataset.q!, 1); fill(field?.value ?? ''); });
+      // the list stays open beside the stat editor (Showdown shows it in the same spot); Escape still closes it
       const clampEv = (k: number, v: number) => { const others = m.evs.reduce((a, b, x) => a + (x === k ? 0 : b), 0); return Math.max(0, Math.min(cap.per, v, cap.total - others)); };
       ed.querySelectorAll<HTMLInputElement>('.evr').forEach((r) => r.addEventListener('input', () => {
         const k = +r.dataset.k!; m.evs[k] = clampEv(k, +r.value); r.value = String(m.evs[k]); r.style.setProperty('--fill', (m.evs[k] / cap.per) * 100 + '%'); (ed.querySelector(`.ev[data-k="${k}"]`) as HTMLInputElement).value = String(m.evs[k]) + sfx(k); reStats();

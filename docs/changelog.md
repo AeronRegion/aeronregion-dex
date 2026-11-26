@@ -15,3 +15,4 @@
 - 2026-11-26: Phones: tables, type chart and natures grid fit the screen (low-priority columns hidden on phones), form tabs wrap, region jump bar no longer hides under the header; Teambuilder stat bars get more room on phones
 - 2026-11-26: Move category icons redrawn as round PokemonDB-style badges (one shared drawing in src/lib/ac.ts)
 - 2026-11-26: Added `npm run check:mobile` (scripts/check-mobile.mjs) and a CLAUDE.md rule to run it before every visual push
+- 2026-11-26: Teambuilder rebuilt on Showdown's compact layout: set card on top, EV editor and always-open pick list side by side, "Remaining" for the selected format, HOME renders for normal and shiny art, Pokémon filters (type/ability/move chips)
