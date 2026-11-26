@@ -124,7 +124,7 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
 </html>
 <style>
   .site-header { position: sticky; top: 0; z-index: 50; background: var(--brick-deep); border-bottom: 3px solid #000; }
-  .bar { display: flex; align-items: center; gap: 1.4rem; height: 56px; }
+  .bar { display: flex; align-items: center; gap: 1.4rem; height: 56px; width: min(100% - 2.5rem, 1280px); }
   .home, .more > button, .lnk { font: inherit; font-weight: 700; font-size: 1rem; color: var(--on-brick); text-decoration: none; background: none; border: 0; cursor: pointer;
     display: flex; align-items: center; gap: .45rem; height: 56px; padding: 0 .2rem; border-bottom: 3px solid transparent; margin-bottom: -3px; }
   .brand { display: flex; align-items: center; gap: .55rem; font-weight: 800; font-size: 1.45rem; color: var(--on-brick); text-decoration: none; white-space: nowrap; margin-right: .6rem; }
@@ -153,12 +153,13 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
   .find input { width: 100%; font: inherit; font-size: .9rem; padding: .38rem .7rem; border: 2px solid var(--brick); background: var(--card); color: var(--ink); }
   @media (max-width: 700px) {
     .bar { flex-wrap: wrap; height: auto; gap: 0 .9rem; padding-top: .3rem; row-gap: 0; }
-    .brand { font-size: 1.15rem; margin-right: auto; } .brand img { width: 30px; height: 30px; }
+    .brand { margin-right: auto; }
     .nav { flex: none; gap: .9rem; justify-content: flex-start; }
     .home, .more > button { height: 44px; font-size: .95rem; }
-    .find { flex: 1 1 70%; order: 9; padding: .1rem 0 .5rem; }
+    .find { flex: 1 1 200px; order: 9; padding: .1rem 0 .5rem; }
+    .mode { order: 10; margin: -.4rem -.4rem 0 0; }
     .menu { left: auto; right: -.6rem; }
-    .ar { order: 10; font-size: .85rem; padding: .32rem .5rem; margin: -.4rem 0 0 .5rem; }
+    .ar { order: 11; font-size: .85rem; padding: .32rem .5rem; margin: -.4rem 0 0 0; }
     .arl { display: none; }
     .ar::before { content: "AR"; }
   }

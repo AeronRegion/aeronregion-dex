@@ -219,9 +219,25 @@ const items = Dex.items.all().filter((i) => i.exists && !['CAP', 'Custom', 'LGPE
 }).sort((a, b) => a.name.localeCompare(b.name));
 
 // ── Abilities ────────────────────────────────────────────────────────────
+// Pokémon with an ability; abilities only a folded-away form has (Ogerpon's masks, Terapagos's Tera forms)
+// count for the page that form lives on
+const outIds = new Set(out.map((s) => s.id));
+function holdersOf(a) {
+  const direct = out.filter((s) => Object.values(s.abilities).includes(a.name)).map((s) => [s.id, s.abilities.H === a.name ? 'H' : 'N']);
+  if (direct.length) return direct;
+  const seen = new Set(); const res = [];
+  for (const s of Dex.species.all()) {
+    if (!s.exists || s.num <= 0 || !Object.values(s.abilities).includes(a.name)) continue;
+    const from = s.changesFrom ? Dex.species.get(s.changesFrom).id : null;
+    const host = outIds.has(s.id) ? s.id : from && outIds.has(from) ? from : Dex.species.get(s.baseSpecies).id;
+    if (!outIds.has(host) || seen.has(host)) continue;
+    seen.add(host); res.push([host, s.abilities.H === a.name ? 'H' : 'N']);
+  }
+  return res;
+}
 const abilities = Dex.abilities.all().filter((a) => a.exists && a.num > 0 && !['CAP', 'Custom'].includes(a.isNonstandard)).map((a) => ({
   id: a.id, name: a.name, gen: a.gen, desc: a.desc || a.shortDesc, short: a.shortDesc || a.desc,
-  holders: out.filter((s) => Object.values(s.abilities).includes(a.name)).map((s) => [s.id, s.abilities.H === a.name ? 'H' : 'N']),
+  holders: holdersOf(a),
 })).sort((a, b) => a.name.localeCompare(b.name));
 const write = (n, d) => fs.writeFileSync(`${OUT}/${n}.json`, JSON.stringify(d));
 write('species', out); write('abilities', abilities); write('moves', moves); write('items', items); write('learn', learn); write('learnedBy', learnedBy);
