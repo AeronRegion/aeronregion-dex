@@ -274,7 +274,9 @@ import { GAMES, meta } from '../lib/data';
     });
     fmtSel.addEventListener('change', () => {
       const was = champ(); team().fmt = fmtSel.value; const now = champ();
-      if (was !== now) for (const m of team().mons) m.evs = m.evs.map(now ? evToSp : spToEv) as Set6;
+      // spreads that already fit Stat Point limits (someone typed Champions numbers into EV boxes) are kept as they are
+      const fitsSp = (m: Mon) => m.evs.every((v) => v <= 32) && m.evs.reduce((a, b) => a + b, 0) <= 66;
+      if (was !== now) for (const m of team().mons) if (!(now && fitsSp(m))) m.evs = m.evs.map(now ? evToSp : spToEv) as Set6;
       if (was !== now) say(now ? 'Switched to Champions: EV spreads were converted to Stat Points.' : 'Switched away from Champions: Stat Points were converted to EVs.');
       save(); drawEd();
     });
