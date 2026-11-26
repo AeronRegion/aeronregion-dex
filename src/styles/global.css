@@ -496,3 +496,8 @@ table.data small.hx { display: block; font-size: .68rem; font-weight: 600; color
 #ed.sd > .setcard { grid-template-columns: 112px 240px minmax(250px, 1fr); grid-template-areas: "art det mv" "nm nm mv"; }
 @media (max-width: 1100px) { #ed.sd > .setcard { grid-template-columns: 112px minmax(0, 1fr); grid-template-areas: "art det" "nm nm" "mv mv"; } }
 @media (max-width: 640px) { #ed.sd > .setcard { grid-template-columns: 90px minmax(0, 1fr); grid-template-areas: "art det" "nm nm" "mv mv"; } }
+/* narrow pick list: move description drops to a second line instead of disappearing */
+@container (max-width: 760px) {
+  #ed.sd .mlist[data-kind='mv'] .mr > .d:nth-child(7) { display: block !important; grid-column: 1 / -1; margin-top: -.15rem; font-size: .74rem; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #ed.sd .mlist[data-kind='mv'] .mr { row-gap: 0 !important; }
+}
