@@ -1,4 +1,13 @@
 # Changelog
 
+- 2026-11-25: Light-blue Showdown-like look (thin borders, less bold, Segoe UI body text; logo text stays Rubik); gray dark mode with a theme cookie shared with aeronregion.net
+- 2026-11-25: Links are blue; underlined only inside sentences, otherwise underline on hover. Pokémon names never underlined
+- 2026-11-25: Type labels: one fixed size everywhere, white text; Water and the paler type colors deepened
+- 2026-11-25: Pokémon cards (move/ability/search pages): small box icons and PokemonDB-style "#0131 / Water · Ice" text; box icons in every Pokémon table
+- 2026-11-25: Pokémon page: PokemonDB-style base stat table with Showdown bar colors; type defense cells 32px squares; current evolution shown as a box, not a link
+- 2026-11-25: Type chart sits on a light panel in both modes (dark outer border in dark mode)
+- 2026-11-25: Added Let's Go, Z- and Max/G-Max moves (935 moves); "Pure" type filter renamed "Mono"
+- 2026-11-25: Uniform pass: one button style, thin tabs and badges, full-width egg group and EV yield tables
+- 2026-11-25: Teambuilder: empty slot from +, fresh EVs on species change, Showdown-style stat bars that follow the calculated stats, + or - after EVs sets the nature, item icons, move type/category/power/accuracy beside each move, details | stats | moves layout, custom EV sliders, shiny art aligned to the normal art
 - 2026-11-26: Added CLAUDE.md with working rules and locked decisions; started docs/
 - 2026-11-26: README brought up to date (current pages, Teambuilder and Coverage checker, data files, known gaps)
