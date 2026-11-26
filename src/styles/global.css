@@ -222,3 +222,6 @@ html[data-theme='dark'] .tchart { background: #e6eaef; border: 2px solid #0b0c0e
 html[data-theme='dark'] .tchart th, html[data-theme='dark'] .tchart th * :not(a) { color: #1c2733; }
 html[data-theme='dark'] .tchart tbody th { color: #1c2733 !important; }
 html[data-theme='dark'] .tchart thead th:first-child { color: #3e4c5d !important; }
+/* Pokémon names stay blue but are not underlined (underline only on hover) */
+main a[href^='/pokemon/'], main .card b, main .evo b, main table.data td a[href^='/pokemon/'] { text-decoration: none !important; }
+main a[href^='/pokemon/']:hover, main .card:hover b, main .evo a:hover b { text-decoration: underline !important; text-decoration-thickness: 1px !important; }

@@ -242,6 +242,7 @@ import { GAMES, meta } from '../lib/data';
       // Showdown-style picker: a list under the editor for whichever box has focus (Pokémon, ability, item or a move).
       // Each row carries the information you need to choose, and typing filters it.
       ed.insertAdjacentHTML('beforeend', '<div class="mlist" hidden><div class="mhead"></div><div class="mbody"></div></div>');
+      const hideList = () => { const main = document.querySelector<HTMLElement>('main'); if (main) main.style.minHeight = main.offsetHeight + 'px'; list.hidden = true; };
       const list = ed.querySelector<HTMLElement>('.mlist')!, headEl = list.querySelector<HTMLElement>('.mhead')!, body = list.querySelector<HTMLElement>('.mbody')!;
       type Kind = 'sp' | 'ab' | 'item' | 'mv';
       const movePool = learnOf(i).filter((x) => idx.moves[x]).sort((a, b) => idx.moves[a][0].localeCompare(idx.moves[b][0]));
@@ -308,7 +309,7 @@ import { GAMES, meta } from '../lib/data';
           const rows = body.querySelectorAll('.mr');
           if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); act = Math.max(0, Math.min(rows.length - 1, act + (e.key === 'ArrowDown' ? 1 : -1))); rows.forEach((r, x) => r.classList.toggle('on', x === act)); rows[act]?.scrollIntoView({ block: 'nearest' }); }
           else if (e.key === 'Enter' && act >= 0) { e.preventDefault(); choose(shown[act]); }
-          else if (e.key === 'Escape') { list.hidden = true; inp.blur(); }
+          else if (e.key === 'Escape') { hideList(); inp.blur(); }
         });
       };
       wire(ed.querySelector<HTMLInputElement>('#f-sp')!, 'sp');
@@ -327,7 +328,7 @@ import { GAMES, meta } from '../lib/data';
         markSort(); fill(field?.value && field.value !== field.defaultValue ? field.value : ''); body.scrollTop = 0;
       });
       body.addEventListener('mousedown', (e) => { const r = (e.target as HTMLElement).closest<HTMLElement>('.mr'); if (r) { e.preventDefault(); choose(r.dataset.x!); } });
-      document.addEventListener('mousedown', (e) => { if (!list.hidden && !(e.target as HTMLElement).closest('.mlist') && e.target !== field) list.hidden = true; });
+      document.addEventListener('mousedown', (e) => { if (!list.hidden && !(e.target as HTMLElement).closest('.mlist') && e.target !== field) hideList(); });
       const clampEv = (k: number, v: number) => { const others = m.evs.reduce((a, b, x) => a + (x === k ? 0 : b), 0); return Math.max(0, Math.min(cap.per, v, cap.total - others)); };
       ed.querySelectorAll<HTMLInputElement>('.evr').forEach((r) => r.addEventListener('input', () => {
         const k = +r.dataset.k!; m.evs[k] = clampEv(k, +r.value); r.value = String(m.evs[k]); (ed.querySelector(`.ev[data-k="${k}"]`) as HTMLInputElement).value = String(m.evs[k]); reStats();
