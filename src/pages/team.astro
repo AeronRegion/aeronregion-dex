@@ -15,6 +15,7 @@ import { GAMES, meta } from '../lib/data';
     <label class="lab2">Format
       <select class="field" id="fmt">
         <option value="all" selected>All games</option>
+        <option value="champ">Pokémon Champions (Stat Points)</option>
         {meta.cobbleverse && <option value="0">Cobbleverse {meta.cobbleverse}</option>}
         {[9, 8, 7].map((g) => <option value={g}>{GAMES[g]}</option>)}
       </select>
@@ -68,7 +69,7 @@ import { GAMES, meta } from '../lib/data';
     const fmtSel = $('fmt') as HTMLSelectElement;
     const learnOf = (i: number) => {
       if (!learnable) { learnable = new Map(); for (const [m, arr] of Object.entries(idx.learn)) for (let k = 0; k < arr.length; k += 2) { const e: [string, number] = [m, arr[k + 1]]; const l = learnable.get(arr[k]); l ? l.push(e) : learnable.set(arr[k], [e]); } }
-      const w = fmtSel.value === 'all' ? -1 : 1 << +fmtSel.value;
+      const w = fmtSel.value === 'all' || fmtSel.value === 'champ' ? -1 : 1 << +fmtSel.value;
       return (learnable.get(i) ?? []).filter(([, mask]) => mask & w).map(([m]) => m);
     };
     const spOf = (m: Mon) => idx.species[spIndex.get(m.sp) ?? -1];
@@ -77,11 +78,19 @@ import { GAMES, meta } from '../lib/data';
     const moveName = (id: string) => { const hp = id.match(/^hiddenpower-(\w+)$/); if (hp) return `Hidden Power [${cap(hp[1])}]`; return idx.moves[id]?.[0] ?? ''; };
     const moveType = (id: string) => { const hp = id.match(/^hiddenpower-(\w+)$/); if (hp) return cap(hp[1]); return idx.moves[id]?.[1] ?? ''; };
     const newMon = (i: number): Mon => { const s = idx.species[i]; return { sp: s[0], ab: abilitiesOf(s)[0] ?? '', item: '', moves: ['', '', '', ''], nature: 'Serious', evs: [0, 0, 0, 0, 0, 0], ivs: [31, 31, 31, 31, 31, 31], level: 50, tera: s[2][0] }; };
+    // Pokémon Champions: Stat Points (66 total, 32 per stat) instead of EVs; always Lv 50 with 31 IVs.
+    // The first point is worth 4 EVs and each one after it 8, so 32 SP = 252 EVs.
+    const champ = () => team().fmt === 'champ';
+    const spToEv = (sp: number) => (sp > 0 ? Math.min(252, 4 + 8 * (sp - 1)) : 0);
+    const evToSp = (ev: number) => (ev >= 4 ? Math.min(32, 1 + Math.floor((ev - 4) / 8)) : 0);
+    const CAP = () => (champ() ? { per: 32, total: 66, step: 1, label: 'Stat Points' } : { per: 252, total: 510, step: 4, label: 'EVs' });
     const statsOf = (m: Mon) => {
       const base = tb.stats[spIndex.get(m.sp)!]; const [u, d] = NAT[m.nature] ?? [1, 1];
+      const c = champ(), lv = c ? 50 : m.level;
       return base.map((b, k) => {
-        const core = Math.floor(((2 * b + m.ivs[k] + Math.floor(m.evs[k] / 4)) * m.level) / 100);
-        if (k === 0) return m.sp === 'shedinja' ? 1 : core + m.level + 10;
+        const ev = c ? spToEv(m.evs[k]) : m.evs[k], iv = c ? 31 : m.ivs[k];
+        const core = Math.floor(((2 * b + iv + Math.floor(ev / 4)) * lv) / 100);
+        if (k === 0) return m.sp === 'shedinja' ? 1 : core + lv + 10;
         return Math.floor((core + 5) * (u === d ? 1 : k === u ? 1.1 : k === d ? 0.9 : 1));
       });
     };
@@ -109,11 +118,12 @@ import { GAMES, meta } from '../lib/data';
     const monText = (m: Mon) => {
       const s = spOf(m); const lines = [`${s[1]}${m.item ? ` @ ${m.item}` : ''}`];
       if (m.ab) lines.push(`Ability: ${m.ab}`);
-      if (m.level !== 100) lines.push(`Level: ${m.level}`);
+      const c = champ();
+      const lv = c ? 50 : m.level; if (lv !== 100) lines.push(`Level: ${lv}`);
       if (m.tera) lines.push(`Tera Type: ${m.tera}`);
-      const ev = statLine(m.evs, 0); if (ev) lines.push(`EVs: ${ev}`);
+      const ev = statLine((c ? m.evs.map(spToEv) : m.evs) as Set6, 0); if (ev) lines.push(`EVs: ${ev}`);
       lines.push(`${m.nature} Nature`);
-      const iv = statLine(m.ivs, 31); if (iv) lines.push(`IVs: ${iv}`);
+      const iv = c ? '' : statLine(m.ivs, 31); if (iv) lines.push(`IVs: ${iv}`);
       for (const id of m.moves) if (id) lines.push(`- ${moveName(id)}`);
       return lines.join('\n');
     };
@@ -148,6 +158,7 @@ import { GAMES, meta } from '../lib/data';
           }
         }
         while (m.moves.length < 4) m.moves.push(''); m.moves = m.moves.slice(0, 4);
+        if (champ()) { const tot = m.evs.reduce((a, b) => a + b, 0); if (tot > 66 || m.evs.some((v) => v > 32)) m.evs = m.evs.map(evToSp) as Set6; m.level = 50; m.ivs = [31, 31, 31, 31, 31, 31]; }
         out.push(m); if (out.length >= 12) break;
       }
       return { out, miss };
@@ -173,7 +184,7 @@ import { GAMES, meta } from '../lib/data';
       sel = Math.min(sel, t.mons.length - 1); ed.hidden = false;
       const m = t.mons[sel], s = spOf(m), st = statsOf(m), base = tb.stats[spIndex.get(m.sp)!];
       const evTotal = m.evs.reduce((a, b) => a + b, 0);
-      const [u, d] = NAT[m.nature];
+      const [u, d] = NAT[m.nature]; const cap = CAP(), c = champ();
       const mark = (k: number) => (k && u !== d ? (k === u ? 'up' : k === d ? 'down' : '') : '');
       ed.innerHTML = `
         <div class="col a">
@@ -183,7 +194,7 @@ import { GAMES, meta } from '../lib/data';
           <label class="fl">Ability<select class="field" id="f-ab">${abilitiesOf(s).map((a) => `<option${a === m.ab ? ' selected' : ''}>${esc(a)}</option>`).join('')}</select></label>
           <div class="slot"><label class="fl">Item<input class="field" id="f-item" value="${esc(m.item)}" placeholder="No item" autocomplete="off" /></label></div>
           <div class="pair">
-            <label class="fl">Level<input class="field" id="f-lv" type="number" min="1" max="100" value="${m.level}" /></label>
+            <label class="fl">Level<input class="field" id="f-lv" type="number" min="1" max="100" value="${c ? 50 : m.level}"${c ? ' disabled title="Champions battles are always Lv. 50"' : ''} /></label>
             <label class="fl">Tera type<select class="field" id="f-tera">${[...TYPES, 'Stellar'].map((x) => `<option${x === m.tera ? ' selected' : ''}>${x}</option>`).join('')}</select></label>
           </div>
           <button type="button" class="sm danger" id="f-rm">Remove from team</button>
@@ -195,22 +206,22 @@ import { GAMES, meta } from '../lib/data';
           <select class="field" id="f-nat">${Object.keys(NAT).sort().map((n) => `<option value="${n}"${n === m.nature ? ' selected' : ''}>${natLabel(n)}</option>`).join('')}</select>
         </div>
         <div class="col c">
-          <h3 class="sec">Stats <span class="soft evleft${evTotal > 510 ? ' over' : ''}">EVs left: ${510 - evTotal}</span></h3>
+          <h3 class="sec">Stats <span class="soft evleft${evTotal > cap.total ? ' over' : ''}">${cap.label} left: ${cap.total - evTotal}</span></h3>
           <table class="stt">
-            <thead><tr><th></th><th class="n">Base</th><th></th><th>EVs</th><th>IVs</th><th class="n">Stat</th></tr></thead>
+            <thead><tr><th></th><th class="n">Base</th><th></th><th>${c ? 'SP' : 'EVs'}</th>${c ? '' : '<th>IVs</th>'}<th class="n">Stat</th></tr></thead>
             <tbody>${base.map((b, k) => `<tr>
               <th class="${mark(k)}">${STATNAME[k]}${mark(k) === 'up' ? ' +' : mark(k) === 'down' ? ' −' : ''}</th>
               <td class="n soft">${b}</td>
-              <td class="barc"><input type="range" class="evr" data-k="${k}" min="0" max="252" step="4" value="${m.evs[k]}" aria-label="${STATNAME[k]} EVs" /></td>
-              <td><input class="field num ev" data-k="${k}" type="number" min="0" max="252" step="4" value="${m.evs[k]}" aria-label="${STATNAME[k]} EVs" /></td>
-              <td><input class="field num iv" data-k="${k}" type="number" min="0" max="31" value="${m.ivs[k]}" aria-label="${STATNAME[k]} IVs" /></td>
+              <td class="barc"><input type="range" class="evr" data-k="${k}" min="0" max="${cap.per}" step="${cap.step}" value="${m.evs[k]}" aria-label="${STATNAME[k]} ${cap.label}" /></td>
+              <td><input class="field num ev" data-k="${k}" type="number" min="0" max="${cap.per}" step="${cap.step}" value="${m.evs[k]}" aria-label="${STATNAME[k]} ${cap.label}" /></td>
+              ${c ? '' : `<td><input class="field num iv" data-k="${k}" type="number" min="0" max="31" value="${m.ivs[k]}" aria-label="${STATNAME[k]} IVs" /></td>`}
               <td class="n"><b>${st[k]}</b></td></tr>`).join('')}</tbody>
           </table>
-          <p class="note">Base stat total ${base.reduce((a, b) => a + b, 0)}. EVs go up to 252 per stat and 510 in total.</p>
+          <p class="note">Base stat total ${base.reduce((a, b) => a + b, 0)}. ${c ? 'Champions: up to 32 Stat Points per stat and 66 in total; each point adds 1 to the stat. Always Lv. 50 with perfect IVs. Copy for Showdown converts the points to EVs.' : 'EVs go up to 252 per stat and 510 in total.'}</p>
         </div>`;
       const reStats = () => { // update numbers without rebuilding the inputs, so sliders keep focus while dragging
         const st2 = statsOf(m); ed.querySelectorAll<HTMLElement>('.stt tbody tr').forEach((tr, k) => (tr.querySelector('td:last-child b')!.textContent = String(st2[k])));
-        const tot = m.evs.reduce((a, b) => a + b, 0); const el = ed.querySelector('.evleft')!; el.textContent = `EVs left: ${510 - tot}`; el.classList.toggle('over', tot > 510);
+        const tot = m.evs.reduce((a, b) => a + b, 0); const el = ed.querySelector('.evleft')!; el.textContent = `${cap.label} left: ${cap.total - tot}`; el.classList.toggle('over', tot > cap.total);
         save();
       };
       autocomplete(ed.querySelector<HTMLInputElement>('#f-sp')!, () => idx.species.map((x) => ({ label: x[1], sub: x[2].join(' / ') })), (it) => {
@@ -234,7 +245,7 @@ import { GAMES, meta } from '../lib/data';
           (it) => { setMove(it.label); drawEd(); (ed.querySelectorAll<HTMLInputElement>('.mvin')[j + 1])?.focus(); }, 12, true);
         inp.addEventListener('change', () => { setMove(inp.value); drawEd(); });
       });
-      const clampEv = (k: number, v: number) => { const others = m.evs.reduce((a, b, x) => a + (x === k ? 0 : b), 0); return Math.max(0, Math.min(252, v, 510 - others)); };
+      const clampEv = (k: number, v: number) => { const others = m.evs.reduce((a, b, x) => a + (x === k ? 0 : b), 0); return Math.max(0, Math.min(cap.per, v, cap.total - others)); };
       ed.querySelectorAll<HTMLInputElement>('.evr').forEach((r) => r.addEventListener('input', () => {
         const k = +r.dataset.k!; m.evs[k] = clampEv(k, +r.value); r.value = String(m.evs[k]); (ed.querySelector(`.ev[data-k="${k}"]`) as HTMLInputElement).value = String(m.evs[k]); reStats();
       }));
@@ -261,7 +272,12 @@ import { GAMES, meta } from '../lib/data';
       armed = 0; b.textContent = 'Delete team';
       teams.splice(cur, 1); if (!teams.length) teams.push(blank()); cur = Math.max(0, cur - 1); sel = 0; drawAll();
     });
-    fmtSel.addEventListener('change', () => { team().fmt = fmtSel.value; save(); drawEd(); });
+    fmtSel.addEventListener('change', () => {
+      const was = champ(); team().fmt = fmtSel.value; const now = champ();
+      if (was !== now) for (const m of team().mons) m.evs = m.evs.map(now ? evToSp : spToEv) as Set6;
+      if (was !== now) say(now ? 'Switched to Champions: EV spreads were converted to Stat Points.' : 'Switched away from Champions: Stat Points were converted to EVs.');
+      save(); drawEd();
+    });
     $('exp').addEventListener('click', async () => { if (!team().mons.length) return; await navigator.clipboard.writeText(exportText()); say('Copied. In Showdown: Teambuilder → New team → Import from text, then paste.'); });
     $('share').addEventListener('click', async () => {
       if (!team().mons.length) return;
