@@ -197,7 +197,7 @@ import { GAMES, meta } from '../lib/data';
         </div>
         <div class="col b">
           <h3 class="sec">Moves</h3>
-          ${[0, 1, 2, 3].map((j) => `<div class="slot mrow"><input class="field mvin" data-j="${j}" value="${esc(m.moves[j] ? moveName(m.moves[j]) : '')}" placeholder="Move ${j + 1}" autocomplete="off" />${m.moves[j] ? chip(moveType(m.moves[j])) : ''}</div>`).join('')}
+          ${[0, 1, 2, 3].map((j) => `<div class="slot mrow"><input class="field mvin" data-j="${j}" value="${esc(m.moves[j] ? moveName(m.moves[j]) : '')}" placeholder="Move ${j + 1}" autocomplete="off" /></div>`).join('')}
           <h3 class="sec">Nature</h3>
           <select class="field" id="f-nat">${Object.keys(NAT).sort().map((n) => `<option value="${n}"${n === m.nature ? ' selected' : ''}>${natLabel(n)}</option>`).join('')}</select>
         </div>
