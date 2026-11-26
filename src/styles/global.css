@@ -267,3 +267,9 @@ html[data-theme='dark'] .card .chip { color: color-mix(in srgb, var(--c) 75%, #f
 table.data td { padding-top: .3rem; padding-bottom: .3rem; }
 /* home: stat bars match the Pokémon pages */
 .pstats .ps i, .pstats .ps u { border-radius: 4px; }
+/* every type label is the same width and centered, like PokemonDB (cards use plain text instead) */
+.chip:not(.card .chip), .ac-t, .tchip { display: inline-block !important; box-sizing: border-box; text-align: center !important; padding-left: 0 !important; padding-right: 0 !important; white-space: nowrap; }
+.chip.small:not(.card .chip), .ac-t, .tchip { width: 4.9rem !important; font-size: .7rem !important; }
+.chip:not(.small):not(.card .chip) { width: 5.6rem !important; }
+.chip.small:not(.card .chip), .ac-t, .tchip { height: 1.25rem !important; line-height: calc(1.25rem - 2px) !important; padding-top: 0 !important; padding-bottom: 0 !important; border-width: 1px !important; vertical-align: middle; }
+.chip:not(.small):not(.card .chip) { height: 1.5rem !important; line-height: calc(1.5rem - 2px) !important; padding-top: 0 !important; padding-bottom: 0 !important; border-width: 1px !important; }
