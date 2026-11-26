@@ -183,9 +183,13 @@ import { GAMES, meta } from '../lib/data';
     };
     const fitShiny = async (img: HTMLImageElement, normalUrl: string) => {
       const [n, sh] = await Promise.all([bbox(normalUrl), bbox(img.src)]); if (!n || !sh) return;
+      // match the shiny drawing's size and centre to the normal drawing's (both measured as a fraction of the image)
       const size = (q: number[]) => Math.max(q[2] - q[0], q[3] - q[1]) / q[4];
-      const k = size(n) / size(sh); if (Math.abs(1 - k) < 0.08) return;
-      img.style.transform = `scale(${k.toFixed(3)})`; img.style.transformOrigin = 'center bottom';
+      const cx = (q: number[]) => (q[0] + q[2]) / 2 / q[4], cy = (q: number[]) => (q[1] + q[3]) / 2 / q[4];
+      const k = size(n) / size(sh), S = img.clientWidth || 150;
+      const tx = (cx(n) - k * cx(sh)) * S, ty = (cy(n) - k * cy(sh)) * S;
+      if (Math.abs(1 - k) < 0.04 && Math.abs(tx) < 3 && Math.abs(ty) < 3) return;
+      img.style.transformOrigin = '0 0'; img.style.transform = `translate(${tx.toFixed(1)}px, ${ty.toFixed(1)}px) scale(${k.toFixed(3)})`;
     };
     // type, category, power and accuracy shown beside each chosen move
     const moveInfo = (key: string) => {
