@@ -227,3 +227,7 @@ main a[href^='/pokemon/'], main .card b, main .evo b, main table.data td a[href^
 main a[href^='/pokemon/']:hover, main .card:hover b, main .evo a:hover b { text-decoration: underline !important; text-decoration-thickness: 1px !important; }
 /* logo text keeps the original heavy Rubik wordmark */
 header .brand, .brand { font-family: 'Rubik Variable', 'Rubik', system-ui, sans-serif !important; font-weight: 800 !important; font-size: 1.45rem !important; letter-spacing: 0 !important; }
+/* names in tables, lists and info rows: blue, no underline until hover. Only links inside sentences stay underlined. */
+main a, main .card b, main .evo b, .ab { text-decoration: none !important; }
+main p a:not([class]), main .note a, main p.note a { text-decoration: underline !important; text-decoration-thickness: 1px !important; text-underline-offset: 2px; }
+main a:not(.chip):not(.block):not(.tile):not(.sm):not(.tc a):not(.tchart a):not(.pick a):not(.hero a):hover, main .card:hover b, main .evo a:hover b, .ab:hover { text-decoration: underline !important; text-decoration-thickness: 1px !important; text-underline-offset: 2px; }
