@@ -225,3 +225,5 @@ html[data-theme='dark'] .tchart thead th:first-child { color: #3e4c5d !important
 /* Pokémon names stay blue but are not underlined (underline only on hover) */
 main a[href^='/pokemon/'], main .card b, main .evo b, main table.data td a[href^='/pokemon/'] { text-decoration: none !important; }
 main a[href^='/pokemon/']:hover, main .card:hover b, main .evo a:hover b { text-decoration: underline !important; text-decoration-thickness: 1px !important; }
+/* logo text keeps the original heavy Rubik wordmark */
+header .brand, .brand { font-family: 'Rubik Variable', 'Rubik', system-ui, sans-serif !important; font-weight: 800 !important; font-size: 1.45rem !important; letter-spacing: 0 !important; }
