@@ -1,7 +1,7 @@
 ---
 // Sortable Pokémon table used by the Pokédex list and type pages.
 import Type from './Type.astro';
-import { pokeUrl, iconUrl } from '../lib/data';
+import { pokeUrl, iconUrl, boxIconUrl } from '../lib/data';
 const { list, id = 'dex' } = Astro.props as { list: any[]; id?: string };
 ---
 <table class="data sortable dextable" id={id}>
@@ -11,7 +11,7 @@ const { list, id = 'dex' } = Astro.props as { list: any[]; id?: string };
     {list.map((s) => (
       <tr data-q={`${s.name} ${s.num} ${Object.values(s.abilities).join(' ')}`.toLowerCase()} data-t={s.types.join(' ')} data-form={s.forme ? 1 : 0}>
         <td class="n soft" data-v={s.num}>{String(s.num).padStart(4, '0')}</td>
-        <td><img class="sprite" src={iconUrl(s.art)} alt="" loading="lazy" width="40" height="40" /></td>
+        <td><img class="sprite" src={boxIconUrl(s.art)} data-fb={iconUrl(s.art)} onerror="if(this.dataset.fb&&this.src!==this.dataset.fb){this.src=this.dataset.fb;this.classList.add('fb')}" alt="" loading="lazy" width="40" height="30" /></td>
         <td><a href={pokeUrl(s)}>{s.name}</a></td>
         <td><div class="chips">{s.types.map((t: string) => <Type type={t} small />)}</div></td>
         <td class="tgt">{s.ev.join(', ')}</td>

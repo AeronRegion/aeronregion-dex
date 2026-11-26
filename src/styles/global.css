@@ -242,3 +242,28 @@ html[data-theme='dark'] .card .chip { color: color-mix(in srgb, var(--c) 75%, #f
 .card .chip + .chip::before { content: '\00a0·\00a0'; color: var(--ink-soft); font-weight: 400; }
 /* type labels: always white text, with a slight shadow so lighter types stay legible */
 .chip:not(.card .chip), .ac-t, .mvt, .tchip, .tc a, .tchart th a, .tchart thead a, .pick a, #ptypes a { color: #fff !important; text-shadow: 0 1px 1px rgb(0 0 0 / .55) !important; }
+
+/* ===== Uniform pass: one set of borders, buttons, tabs and table sprites everywhere ===== */
+/* primary buttons (.block, e.g. Find Pokémon) look like the site's other buttons, just filled blue */
+.block, html[data-theme='dark'] .block { background: var(--brick) !important; color: var(--on-brick) !important; border: 1px solid var(--brick-deep) !important; box-shadow: none !important; outline: 0 !important; border-radius: 3px; font-weight: 600 !important; padding: .35rem 1rem !important; font-size: .95rem !important; }
+.block:hover, html[data-theme='dark'] .block:hover { background: var(--brick-deep) !important; color: #fff !important; }
+/* tabs: thin lines like the rest of the site */
+.tabs { border-bottom: 1px solid var(--line-2) !important; }
+.tabs button { border: 1px solid transparent !important; border-bottom: 0 !important; margin-bottom: -1px !important; border-radius: 3px 3px 0 0; font-size: 1rem !important; padding: .45rem 1.3rem !important; }
+.tabs button[aria-selected='true'] { border-color: var(--line-2) !important; background: var(--card) !important; }
+.formtabs { border-bottom: 1px solid var(--line-2) !important; }
+.formtabs button { border-width: 1px !important; border-radius: 3px 3px 0 0; }
+.formtabs button[aria-selected='true'] { background: var(--card) !important; color: var(--ink) !important; font-weight: 600 !important; }
+/* small boxes and badges: 1px borders */
+.evb { border-width: 1px !important; border-color: rgb(0 0 0 / .35) !important; font-weight: 600 !important; border-radius: 2px; }
+.tile { border: 1px solid var(--line-2) !important; box-shadow: none !important; border-radius: 4px; }
+.tile:hover { transform: none !important; border-color: var(--link) !important; box-shadow: 0 2px 6px rgb(0 0 0 / .12) !important; }
+.nat td { border: 1px solid var(--line-2) !important; font-weight: 600 !important; border-radius: 2px; }
+.nat th.up { background: #3f7f55 !important; } .nat th.down { background: #a24a42 !important; }
+.nat th.up, .nat th.down { font-weight: 600 !important; border-radius: 2px; }
+/* table sprites: small box icons like PokemonDB, the same size in every table */
+.sprite { width: 40px !important; height: 30px !important; object-fit: contain; image-rendering: pixelated !important; display: block; }
+.sprite.fb { height: 40px !important; margin: -5px 0; image-rendering: auto !important; }
+table.data td { padding-top: .3rem; padding-bottom: .3rem; }
+/* home: stat bars match the Pokémon pages */
+.pstats .ps i, .pstats .ps u { border-radius: 4px; }
