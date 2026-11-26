@@ -8,23 +8,23 @@
    ───────────────────────────────────────────────────────────── */
 :root {
   /* Color */
-  --petal:        #f2f3f5;  /* page background */
-  --petal-deep:   #e1e4e8;  /* hover rows, subtle fills */
+  --petal:        #dfe6ee;  /* page background */
+  --petal-deep:   #cddcef;  /* hover rows, subtle fills */
   --blossom:      #e895b0;  /* primary buttons */
-  --ink:          #1f2329;  /* text, outlines */
-  --ink-soft:     #5d6570;  /* secondary text on petal */
-  --brick:        #3b4049;  /* dark bands, nav, footer */
-  --brick-deep:   #23262b;
-  --on-brick:     #f2f3f5;
-  --on-brick-soft:#aab1bb;
+  --ink:          #1c2733;  /* text, outlines */
+  --ink-soft:     #4a5b6e;  /* secondary text on petal */
+  --brick:        #3e5f86;  /* dark bands, nav, footer */
+  --brick-deep:   #2b4566;
+  --on-brick:     #f2f6fb;
+  --on-brick-soft:#b8c8db;
   --teal:         #56c6bb;  /* online / live */
   --teal-ink:     #1f6f67;  /* teal text on petal */
   --leaf:         #b4c07c;
-  --card:         #ffffff;  /* inputs, cards, table cells */
-  --line:         #d8dce1;  /* hairlines, empty cells */
-  --line-2:       #c6cbd2;
-  --stripe:       #eceef1;
-  --zebra:        rgb(0 0 0 / .025);
+  --card:         #f4f7fb;  /* inputs, cards, table cells */
+  --line:         #b8c6d6;  /* hairlines, empty cells */
+  --line-2:       #7f95ad;
+  --stripe:       #e6edf5;
+  --zebra:        rgb(255 255 255 / .55);
   --shadow:       var(--ink);
   --hover:        #1f7fb8;
   --link:         #2369a8;
@@ -32,7 +32,7 @@
   --weak-bg:      #fbe3e0;
   --res-bg:       #e4f2d9;
   --cov-bg:       #e3f4fd;
-  --track:        #e3e6ea;
+  --track:        #cfd9e4;
 
   /* Nametag plate (the floating label above players) */
   --tag-bg:       rgb(0 0 0 / .32);

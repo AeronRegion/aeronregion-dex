@@ -161,7 +161,7 @@ html[data-theme='dark'] img.sprite, html[data-theme='dark'] .evo img { filter: d
 html[data-theme='dark'] .evb, html[data-theme='dark'] a.evb:hover { color: #2e1a20; border-color: #000; }
 html[data-theme='dark'] b.pos { color: #7bd35a; } html[data-theme='dark'] b.neg { color: #ff7a6e; }
 
-/* ── Utility look (concept A1): small plain type, thin lines, bold only for titles and headings ── */
+/* ── Utility look (concept A2, Showdown-like light blue): small plain type, thin lines, bold only for titles and headings ── */
 html, body { font-family: Verdana, Geneva, Tahoma, sans-serif !important; font-size: 13px !important; }
 body * { font-weight: 400 !important; letter-spacing: 0 !important; }
 h1, h1 * { font-weight: 700 !important; font-size: 22px; }
@@ -172,12 +172,19 @@ h3, .sec { font-size: 13px !important; }
 input.field, .sm { padding: 3px 6px !important; }
 select.field { padding: 3px 2rem 3px 6px !important; }
 .sm { background: linear-gradient(var(--card), var(--petal-deep)) !important; color: var(--ink) !important; }
-.ed, .mlist, .slotb, .mon { border: 1px solid var(--line-2) !important; border-radius: 4px !important; box-shadow: none !important; }
+.ed, .mlist, .mon { border: 1px solid var(--line-2) !important; border-radius: 4px !important; box-shadow: none !important; }
 .ed, .mlist, .mon { background: var(--card) !important; }
-.slotb { background: var(--card) !important; }
-.slotb.on { background: var(--petal-deep) !important; border-color: var(--ink-soft) !important; }
 .mhead { background: var(--petal-deep) !important; border-bottom: 1px solid var(--line-2) !important; font-size: 11px !important; }
 .mr { font-size: 12px !important; padding: 2px 8px !important; }
 .tchip { border-radius: 3px !important; font-size: 9px !important; text-transform: uppercase; }
 .ed .fl { font-size: 11px !important; }
 table.data td, table.data th { font-size: 12px !important; }
+
+html:not([data-theme='dark']) .site-header { background: linear-gradient(#3e5f86, #2b4566) !important; border-bottom: 1px solid #1c2f47 !important; }
+html:not([data-theme='dark']) .field, html:not([data-theme='dark']) select.field { background-color: #fff !important; }
+html:not([data-theme='dark']) .ed, html:not([data-theme='dark']) .mlist { background: #edf2f8 !important; }
+html:not([data-theme='dark']) .mhead { background: linear-gradient(#e4ecf5, #d3deea) !important; }
+html:not([data-theme='dark']) .mr { background: #fff; }
+html:not([data-theme='dark']) .mr:nth-child(even) { background: #f5f8fc; }
+html:not([data-theme='dark']) .mr.cur { background: #dbeeff !important; }
+html:not([data-theme='dark']) .mr.on, html:not([data-theme='dark']) .mr:hover { background: #cddcef !important; }

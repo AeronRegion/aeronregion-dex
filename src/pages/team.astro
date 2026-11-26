@@ -164,8 +164,10 @@ import { GAMES, meta } from '../lib/data';
     const drawStrip = () => {
       const t = team();
       $('strip').innerHTML = t.mons.map((m, k) => { const s = spOf(m); return `<button type="button" class="slotb${k === sel ? ' on' : ''}" data-k="${k}" draggable="true" title="Drag to reorder"><img src="${s[3] ? SPR + 'pokemon/' + (m.shiny ? 'shiny/' : '') + s[3] + '.png' : ''}" alt="" width="56" height="56" /><span>${esc(s[1])}</span></button>`; }).join('') +
-        (t.mons.length < 14 ? `<div class="slotadd"><input class="field" id="addmon" placeholder="+ Add Pokémon" autocomplete="off" /></div>` : '');
+        (t.mons.length < 14 ? `<button type="button" class="slotplus" id="plus" title="Add a Pokémon" aria-label="Add a Pokémon">+</button><div class="slotadd" hidden><input class="field" id="addmon" placeholder="Add a Pokémon…" autocomplete="off" /></div>` : '');
       const addIn = document.getElementById('addmon') as HTMLInputElement | null;
+      document.getElementById('plus')?.addEventListener('click', () => { const w = addIn!.parentElement!; w.hidden = false; document.getElementById('plus')!.hidden = true; addIn!.focus(); });
+      addIn?.addEventListener('blur', () => setTimeout(() => { if (!addIn.value) { addIn.parentElement!.hidden = true; const p = document.getElementById('plus'); if (p) p.hidden = false; } }, 200));
       if (addIn) autocomplete(addIn, () => idx.species.map((s) => ({ label: s[1], sub: s[2].join(' / ') })), (it) => { const i = findSpecies(it.label); if (i < 0) return; t.mons.push(newMon(i)); sel = t.mons.length - 1; save(); drawTeams(); drawStrip(); drawEd(); });
     };
     const sortState: Record<string, { by: string; dir: number } | null> = {};
@@ -178,22 +180,21 @@ import { GAMES, meta } from '../lib/data';
       const [u, d] = NAT[m.nature]; const cap = CAP(), c = champ();
       const mark = (k: number) => (k && u !== d ? (k === u ? 'up' : k === d ? 'down' : '') : '');
       ed.innerHTML = `
+        <button type="button" class="edel" id="f-rm" title="Delete this Pokémon from the team">🗑 Delete</button>
         <div class="col a">
-          <div class="who"><img src="${s[3] ? SPR + 'pokemon/other/official-artwork/' + (m.shiny ? 'shiny/' : '') + s[3] + '.png' : ''}" alt="${m.shiny ? 'Shiny ' : ''}${esc(s[1])}" width="150" height="150" />${m.shiny ? '<span class="shinytag" title="Shiny">★</span>' : ''}</div>
-          <div class="slot"><label class="fl">Pokémon<input class="field" id="f-sp" value="${esc(s[1])}" autocomplete="off" /></label></div>
+          <div class="who"><img src="${s[3] ? SPR + 'pokemon/other/official-artwork/' + (m.shiny ? 'shiny/' : '') + s[3] + '.png' : ''}" alt="${m.shiny ? 'Shiny ' : ''}${esc(s[1])}" width="96" height="96" />${m.shiny ? '<span class="shinytag" title="Shiny">★</span>' : ''}</div>
+          <div class="slot"><label class="fl"><span class="ll">Pokémon</span><input class="field" id="f-sp" value="${esc(s[1])}" autocomplete="off" /></label></div>
           <div class="types">${s[2].map(chip).join(' ')} <a href="${s[5]}" class="dexl">Dex page</a></div>
-          <div class="slot"><label class="fl">Ability<input class="field" id="f-ab" value="${esc(m.ab)}" autocomplete="off" /></label></div>
-          <div class="slot"><label class="fl">Item<input class="field" id="f-item" value="${esc(m.item)}" placeholder="No item" autocomplete="off" /></label></div>
+          <div class="slot"><label class="fl"><span class="ll">Ability</span><input class="field" id="f-ab" value="${esc(m.ab)}" autocomplete="off" /></label></div>
+          <div class="slot"><label class="fl"><span class="ll">Item</span><input class="field" id="f-item" value="${esc(m.item)}" placeholder="No item" autocomplete="off" /></label></div>
           <div class="pair">
-            <label class="fl">Gender<select class="field" id="f-gen"><option value=""${!m.gender ? ' selected' : ''}>Random</option><option value="M"${m.gender === 'M' ? ' selected' : ''}>Male</option><option value="F"${m.gender === 'F' ? ' selected' : ''}>Female</option></select></label>
-            <label class="fl">Shiny<span class="shinybox"><input type="checkbox" id="f-shiny"${m.shiny ? ' checked' : ''} /> ${m.shiny ? 'Yes' : 'No'}</span></label>
+            <label class="fl"><span class="ll">Gender</span><select class="field" id="f-gen"><option value=""${!m.gender ? ' selected' : ''}>Any</option><option value="M"${m.gender === 'M' ? ' selected' : ''}>Male</option><option value="F"${m.gender === 'F' ? ' selected' : ''}>Female</option></select></label>
+            <label class="fl"><span class="ll">Shiny</span><span class="shinybox"><input type="checkbox" id="f-shiny"${m.shiny ? ' checked' : ''} /> ${m.shiny ? 'Yes' : 'No'}</span></label>
           </div>
           <div class="pair">
-            <label class="fl">Level<input class="field" id="f-lv" type="number" min="1" max="100" value="${c ? 50 : m.level}"${c ? ' disabled title="Champions battles are always Lv. 50"' : ''} /></label>
-            <label class="fl">Tera type<select class="field" id="f-tera">${[...TYPES, 'Stellar'].map((x) => `<option${x === m.tera ? ' selected' : ''}>${x}</option>`).join('')}</select></label>
+            <label class="fl"><span class="ll">Level</span><input class="field" id="f-lv" type="number" min="1" max="100" value="${c ? 50 : m.level}"${c ? ' disabled title="Champions battles are always Lv. 50"' : ''} /></label>
+            <label class="fl"><span class="ll">Tera type</span><select class="field" id="f-tera">${[...TYPES, 'Stellar'].map((x) => `<option${x === m.tera ? ' selected' : ''}>${x}</option>`).join('')}</select></label>
           </div>
-          <div class="order"><button type="button" class="sm" id="f-left"${sel === 0 ? ' disabled' : ''} aria-label="Move earlier in the team">← Move</button><button type="button" class="sm" id="f-right"${sel === t.mons.length - 1 ? ' disabled' : ''} aria-label="Move later in the team">Move →</button></div>
-          <button type="button" class="sm danger" id="f-rm">Remove from team</button>
         </div>
         <div class="col b">
           <h3 class="sec">Moves</h3>
@@ -236,8 +237,6 @@ import { GAMES, meta } from '../lib/data';
         save(); drawEd();
       }));
       const shift = (dir: number) => { const to = sel + dir; if (to < 0 || to >= t.mons.length) return; [t.mons[sel], t.mons[to]] = [t.mons[to], t.mons[sel]]; sel = to; save(); drawStrip(); drawEd(); };
-      ed.querySelector('#f-left')!.addEventListener('click', () => shift(-1));
-      ed.querySelector('#f-right')!.addEventListener('click', () => shift(1));
       ed.querySelector('#f-rm')!.addEventListener('click', () => { t.mons.splice(sel, 1); sel = Math.max(0, sel - 1); save(); drawTeams(); drawStrip(); drawEd(); });
       const i = spIndex.get(m.sp)!;
       // Showdown-style picker: a list under the editor for whichever box has focus (Pokémon, ability, item or a move).
@@ -432,23 +431,29 @@ import { GAMES, meta } from '../lib/data';
   .sm:hover { background: var(--petal-deep); color: var(--ink); }
   .impbox { display: flex; flex-direction: column; gap: .4rem; margin: .6rem 0; }
   .impbox textarea { width: 100%; font: inherit; font-size: .85rem; }
-  .strip { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; align-items: stretch; }
-  .strip :global(.slotb) { display: flex; flex-direction: column; align-items: center; gap: .1rem; width: 96px; padding: .3rem; font: inherit; font-size: .75rem; font-weight: 700; border: 2px solid var(--line-2); background: var(--card); color: var(--ink); cursor: pointer; }
-  .strip :global(.slotb span) { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .strip :global(.slotb.on) { border-color: var(--ink); background: var(--petal-deep); box-shadow: 3px 3px 0 var(--shadow); }
-  .strip :global(.slotb) { cursor: grab; }
-  .strip :global(.slotb.dragging) { opacity: .4; }
-  .strip :global(.slotb.over) { outline: 3px dashed var(--ink); outline-offset: 2px; }
-  .ed :global(.order) { display: flex; gap: .4rem; }
-  .ed :global(.order .sm) { flex: 1; font-size: .8rem; padding: .25rem .4rem; }
-  .ed :global(.order .sm:disabled) { opacity: .4; cursor: default; }
-  .strip :global(.slotadd) { position: relative; display: flex; align-items: center; width: 200px; }
+  /* team row: Showdown-style tabs with a small sprite and the name */
+  .strip { display: flex; flex-wrap: wrap; gap: 2px; margin: 1rem 0 0; align-items: flex-end; }
+  .strip :global(.slotb) { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 72px; height: 62px; padding: 2px 3px 3px; font: inherit; font-size: 11px; border: 1px solid var(--line-2); border-bottom: 0; border-radius: 4px 4px 0 0; background: var(--petal-deep); color: var(--ink); cursor: grab; }
+  .strip :global(.slotb img) { width: 40px; height: 40px; object-fit: contain; image-rendering: pixelated; }
+  .strip :global(.slotb span) { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.2; }
+  .strip :global(.slotb.on) { background: var(--card); height: 66px; }
+  .strip :global(.slotplus) { width: 54px; height: 62px; font: inherit; font-size: 1.6rem; line-height: 1; border: 1px solid var(--line-2); border-bottom: 0; border-radius: 4px 4px 0 0; background: var(--petal-deep); color: var(--ink-soft); cursor: pointer; }
+  .strip :global(.slotplus:hover) { color: var(--ink); background: var(--card); }
+  .strip :global(.slotadd) { position: relative; display: flex; align-items: center; width: 220px; height: 54px; }
   .strip :global(.slotadd .field) { width: 100%; }
-  .ed { display: grid; grid-template-columns: 240px 1fr 1.3fr; gap: 1.6rem; border: 2px solid var(--ink); background: var(--card); padding: 1rem; }
+  .ed { position: relative; border-top-left-radius: 0 !important; display: grid; grid-template-columns: 240px 1fr 1.3fr; gap: 1.6rem; border: 2px solid var(--ink); background: var(--card); padding: 1rem; }
   @media (max-width: 1000px) { .ed { grid-template-columns: 1fr 1fr; } .ed :global(.col.c) { grid-column: 1 / -1; } }
   @media (max-width: 640px) { .ed { grid-template-columns: 1fr; } .ed :global(.barc), .ed :global(.stt thead th:nth-child(3)) { display: none; } }
   .ed :global(.col) { display: flex; flex-direction: column; gap: .5rem; min-width: 0; }
   .ed :global(.who) { display: flex; justify-content: center; position: relative; }
+  .ed :global(.col.a) { gap: .3rem; }
+  .ed :global(.col.a .who img) { width: 96px; height: 96px; }
+  .ed :global(.col.a .fl) { flex-direction: row; align-items: center; gap: .4rem; }
+  .ed :global(.col.a .fl .ll) { flex: none; width: 3.6rem; text-align: right; }
+  .ed :global(.col.a .pair .fl .ll) { width: auto; }
+  .ed :global(.col.a .fl .field) { flex: 1; }
+  .ed :global(.col.a .pair) { grid-template-columns: 1fr 1fr; gap: .4rem; }
+  .ed :global(.col.a .shinybox) { height: auto; }
   .ed :global(.shinytag) { position: absolute; top: 0; right: 1rem; color: #e0a800; font-size: 1.3rem; }
   .ed :global(.shinybox) { display: flex; align-items: center; gap: .4rem; height: 2.6rem; font-size: .95rem; color: var(--ink); font-weight: 600; }
   .ed :global(.shinybox input) { width: 1.15rem; height: 1.15rem; accent-color: #e0a800; }
@@ -494,6 +499,8 @@ import { GAMES, meta } from '../lib/data';
     .ed :global(.mlist[data-kind='ab'] .mhead), .ed :global(.mlist[data-kind='ab'] .mr), .ed :global(.mlist[data-kind='item'] .mr) { grid-template-columns: 30px 1fr; }
     .ed :global(.mlist[data-kind='ab'] .mr) { grid-template-columns: 1fr; } .ed :global(.mlist[data-kind='item'] .mr .d) { grid-column: 2; }
   }
+  .ed :global(.edel) { position: absolute; top: .4rem; right: .5rem; font: inherit; font-size: 11px; background: none; border: 1px solid transparent; color: #b3261e; cursor: pointer; padding: 2px 6px; border-radius: 3px; z-index: 2; }
+  .ed :global(.edel:hover) { border-color: #b3261e; background: var(--weak-bg); }
   .ed :global(.danger) { border-color: #a40000; color: #a40000; align-self: flex-start; }
   .ed :global(.stt) { width: 100%; border-collapse: collapse; }
   .ed :global(.stt th), .ed :global(.stt td) { padding: .15rem .3rem; font-size: .88rem; }
