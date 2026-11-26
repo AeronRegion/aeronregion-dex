@@ -449,3 +449,18 @@ html[data-theme='dark'] #ed.sd .detbox, html[data-theme='dark'] #ed.sd .c-sum, h
 /* team tabs: same box icon for shiny (box icons have no shiny version), with a small star */
 .slotb { position: relative; }
 .slotb .tabstar { position: absolute; top: 2px; right: 4px; font-style: normal; font-size: 11px; color: #d4a017; line-height: 1; }
+/* Coverage checker: square cells (32px, 26px on phones) instead of wide flat rectangles */
+.mx td, .mx td.tot { width: 32px !important; min-width: 32px; max-width: 32px; height: 32px !important; padding: 0 !important; }
+.mx th.mh, .mx th.tot { width: 32px !important; max-width: 32px; }
+.mx th.mh span { max-width: 32px !important; }
+.mx th.mh img { width: 32px; height: 24px; object-fit: contain; }
+@media (max-width: 640px) {
+  .mx { border-spacing: 1px !important; }
+  .mx td, .mx td.tot { width: 25px !important; min-width: 25px; max-width: 25px; height: 25px !important; font-size: .7rem !important; }
+  .mx th.mh, .mx th.tot { width: 25px !important; max-width: 25px; font-size: .55rem !important; }
+  .mx th.mh img { width: 25px; height: 19px; }
+  .mx tbody th .chip { width: 3.3rem !important; font-size: .55rem !important; }
+  .mx .gap { width: 6px !important; }
+}
+.mx { width: auto !important; table-layout: fixed; }
+.mx th.tot { white-space: nowrap; overflow: visible; font-size: .7rem !important; }
