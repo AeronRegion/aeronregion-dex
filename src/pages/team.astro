@@ -182,7 +182,7 @@ import { GAMES, meta } from '../lib/data';
       ed.innerHTML = `
         <button type="button" class="edel" id="f-rm" title="Delete this Pokémon from the team">🗑 Delete</button>
         <div class="col a">
-          <div class="who"><img src="${s[3] ? SPR + 'pokemon/other/official-artwork/' + (m.shiny ? 'shiny/' : '') + s[3] + '.png' : ''}" alt="${m.shiny ? 'Shiny ' : ''}${esc(s[1])}" width="96" height="96" />${m.shiny ? '<span class="shinytag" title="Shiny">★</span>' : ''}</div>
+          <div class="who"><img src="${s[3] ? SPR + 'pokemon/other/official-artwork/' + (m.shiny ? 'shiny/' : '') + s[3] + '.png' : ''}" alt="${m.shiny ? 'Shiny ' : ''}${esc(s[1])}" width="150" height="150" />${m.shiny ? '<span class="shinytag" title="Shiny">★</span>' : ''}</div>
           <div class="slot"><label class="fl"><span class="ll">Pokémon</span><input class="field" id="f-sp" value="${esc(s[1])}" autocomplete="off" /></label></div>
           <div class="types">${s[2].map(chip).join(' ')} <a href="${s[5]}" class="dexl">Dex page</a></div>
           <div class="slot"><label class="fl"><span class="ll">Ability</span><input class="field" id="f-ab" value="${esc(m.ab)}" autocomplete="off" /></label></div>
@@ -447,7 +447,7 @@ import { GAMES, meta } from '../lib/data';
   .ed :global(.col) { display: flex; flex-direction: column; gap: .5rem; min-width: 0; }
   .ed :global(.who) { display: flex; justify-content: center; position: relative; }
   .ed :global(.col.a) { gap: .3rem; }
-  .ed :global(.col.a .who img) { width: 96px; height: 96px; }
+  .ed :global(.col.a .who img) { width: 150px; height: 150px; }
   .ed :global(.col.a .fl) { flex-direction: row; align-items: center; gap: .4rem; }
   .ed :global(.col.a .fl .ll) { flex: none; width: 3.6rem; text-align: right; }
   .ed :global(.col.a .pair .fl .ll) { width: auto; }
