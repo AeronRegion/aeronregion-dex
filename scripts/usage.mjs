@@ -26,6 +26,18 @@ const addTeam = (F, team, w, l) => {
     for (const o of names) if (o !== x.name) inc(M.mates, o);
   }
 };
+const newF = () => ({ teams: 0, tours: 0, games: 0, mons: new Map() });
+// "October 31-November 1, 2026" / "May 29-31, 2026" -> "2026-10-31" (first day)
+const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+const startDate = (txt) => { const y = txt.match(/(\d{4})\s*$/)?.[1]; const m = txt.match(/([A-Za-z]+)\s+(\d{1,2})/); const mi = m ? MONTHS.indexOf(m[1].toLowerCase()) : -1; return y && mi >= 0 ? `${y}-${String(mi + 1).padStart(2, '0')}-${m[2].padStart(2, '0')}` : ''; };
+// one event's own file, plus its line in the parent format's event list
+const writeEvent = (base, E, meta) => {
+  const id = `${base}_${meta.key}`;
+  const m = { id, base, label: meta.name, source: meta.source, period: meta.date, tours: 1, total: E.teams, players: meta.players, battles: Math.round(E.games / 2), def: false, event: true };
+  fs.writeFileSync(`${OUT}/${id}.json`, JSON.stringify({ ...m, mons: sheetMons(E) }));
+  index.push(m);
+  return { id, name: meta.name, date: meta.date, players: meta.players, teams: E.teams, battles: m.battles };
+};
 const sheetMons = (F) => [...F.mons].map(([name, M]) => ({
   name, usage: round((M.n / F.teams) * 100), n: M.n, wr: M.w + M.l ? round((M.w / (M.w + M.l)) * 100) : null,
   moves: top(M.moves, M.n, 30, 0.3), items: top(M.items, M.n, 20, 0.3), abilities: top(M.abilities, M.n, 5, 0.3),
@@ -108,16 +120,24 @@ try {
     const teams = st.filter((p) => Array.isArray(p.decklist) && p.decklist.length);
     if (!teams.length) continue;
     const f = t.format || 'unknown';
-    if (!byFmt.has(f)) byFmt.set(f, { teams: 0, tours: 0, from: t.date, to: t.date, mons: new Map() });
+    if (!byFmt.has(f)) byFmt.set(f, { ...newF(), from: t.date, to: t.date, events: [] });
     const F = byFmt.get(f); F.tours++;
     if (t.date < F.from) F.from = t.date; if (t.date > F.to) F.to = t.date;
-    for (const p of teams) addTeam(F, p.decklist.map((x) => ({ name: x.name, moves: x.attacks, item: x.item, ability: x.ability, tera: x.tera, nature: x.nature })), p.record?.wins ?? 0, p.record?.losses ?? 0);
+    const E = newF();
+    for (const p of teams) {
+      const team = p.decklist.map((x) => ({ name: x.name, moves: x.attacks, item: x.item, ability: x.ability, tera: x.tera, nature: x.nature }));
+      const w = p.record?.wins ?? 0, l = p.record?.losses ?? 0, g = w + l + (p.record?.ties ?? 0);
+      addTeam(F, team, w, l); addTeam(E, team, w, l); F.games += g; E.games += g;
+    }
+    // big tournaments (64+ players) also get their own page
+    if ((t.players ?? 0) >= 64 && E.teams >= 32) F.events.push({ E, meta: { key: t.id.slice(-8), name: t.name, date: t.date.slice(0, 10), players: t.players, source: 'Limitless tournaments' } });
     await new Promise((r) => setTimeout(r, 250)); // be gentle with their API
   }
   for (const [fmt, F] of byFmt) {
     if (F.teams < 32) continue;
     const id = `lt-${fmt.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
-    const meta = { id, label: `Reg ${fmt}`, source: 'Limitless tournaments', period: `${F.from.slice(0, 10)} to ${F.to.slice(0, 10)}`, tours: F.tours, total: F.teams };
+    const events = F.events.map((x) => writeEvent(id, x.E, x.meta)).sort((a, b) => b.players - a.players);
+    const meta = { id, base: id, def: true, label: `Reg ${fmt}`, source: 'Limitless tournaments', period: `${F.from.slice(0, 10)} to ${F.to.slice(0, 10)}`, tours: F.tours, total: F.teams, battles: Math.round(F.games / 2), events };
     fs.writeFileSync(`${OUT}/${id}.json`, JSON.stringify({ ...meta, mons: sheetMons(F) }));
     index.push(meta);
     console.log('limitless', fmt, F.tours, F.teams);
@@ -138,15 +158,23 @@ try {
     const rec = new Map((st.standings?.players ?? []).map((p) => [p.n, p.s ?? [0, 0, 0]]));
     const teams = roster.filter((r) => r.d === 'M' && Array.isArray(r.tl) && r.tl.length);
     if (teams.length < 16) continue;
-    if (!bySeason.has(season)) bySeason.set(season, { teams: 0, tours: 0, events: [], mons: new Map() });
-    const F = bySeason.get(season); F.tours++; F.events.push(e.title.replace(/^\d{4}\s+/, '').replace(/ Pokémon VGC| Pokémon VG/, ''));
+    if (!bySeason.has(season)) bySeason.set(season, { ...newF(), events: [] });
+    const F = bySeason.get(season); F.tours++;
+    const E = newF();
     // tl rows: [dex, form, nature, tera, ability, name, item, moves]
-    for (const r of teams) { const s = rec.get(r.n) ?? [0, 0, 0]; addTeam(F, r.tl.map((x) => ({ name: x[5].replace(/ \[[^\]]+\]$/, (f) => (/Form\]$/.test(f) ? '' : f)), nature: x[2], tera: x[3], ability: x[4], item: x[6], moves: x[7] })), s[0], s[1]); }
+    for (const r of teams) {
+      const s = rec.get(r.n) ?? [0, 0, 0];
+      const team = r.tl.map((x) => ({ name: x[5].replace(/ \[[^\]]+\]$/, (f) => (/Form\]$/.test(f) ? '' : f)), nature: x[2], tera: x[3], ability: x[4], item: x[6], moves: x[7] }));
+      addTeam(F, team, s[0], s[1]); addTeam(E, team, s[0], s[1]);
+    }
+    for (const s3 of rec.values()) { const g = s3[0] + s3[1] + s3[2]; F.games += g; E.games += g; }
+    F.events.push({ E, meta: { key: e.id, name: e.title.replace(/^\d{4}\s+/, '').replace(/ Pokémon VGC| Pokémon VG/, ''), date: startDate(e.dates), players: rec.size, source: 'Official majors (RK9 team lists via Pokedata)' } });
     await new Promise((r) => setTimeout(r, 300));
   }
   for (const [season, F] of bySeason) {
     const id = `pd-${season}`;
-    const meta = { id, label: `${season} season majors`, source: 'Official majors (RK9 team lists via Pokedata)', period: F.events.join(', '), tours: F.tours, total: F.teams };
+    const events = F.events.map((x) => writeEvent(id, x.E, x.meta)).sort((a, b) => b.players - a.players);
+    const meta = { id, base: id, def: true, label: `${season} season majors`, source: 'Official majors (RK9 team lists via Pokedata)', period: events.map((x) => x.name).join(', '), tours: F.tours, total: F.teams, battles: Math.round(F.games / 2), events };
     fs.writeFileSync(`${OUT}/${id}.json`, JSON.stringify({ ...meta, mons: sheetMons(F) }));
     index.push(meta);
     console.log('majors', season, F.tours, F.teams);
