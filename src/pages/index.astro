@@ -1,18 +1,18 @@
 ---
-import { fmtDate } from '../lib/usage';
+import { fmtDate, formats } from '../lib/usage';
 import Base from '../layouts/Base.astro';
 import { moves, abilities, items, meta, groups } from '../lib/data';
 import { TYPES, typeColors } from '../lib/types';
 const ITEM = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/';
 const tiles = [
   { href: '/pokedex/', name: 'Pokédex', icon: 'poke-ball', text: `${groups.length} Pokémon` },
-  { href: '/moves/', name: 'Moves', icon: 'tm-normal', text: `${moves.length} moves` },
-  { href: '/abilities/', name: 'Abilities', icon: 'ability-capsule', text: `${abilities.length} abilities` },
+  { href: '/team/', name: 'Teambuilder', icon: 'leftovers', text: 'Import & export sets' },
+  { href: '/usage/', name: 'VGC usage', icon: 'choice-scarf', text: `${formats.filter((f: any) => f.def && !f.bo3).length} formats` },
   { href: '/types/', name: 'Type chart', icon: null, text: 'Matchups' },
 ];
 const _tries = [['Garchomp', '/pokemon/garchomp/'], ['Fake Out', '/moves/fake-out/'], ['Intimidate', '/abilities/intimidate/'], ['Choice Scarf', '/items/choice-scarf/']];
 ---
-<Base description="Stats, type matchups, movepools, tiers and evolutions from across the major Pokémon sites in one place, built around Cobbleverse spawns and movepools.">
+<Base description="The Aeron Region Pokémon database: stats, type matchups and movepools built around Cobbleverse spawns, plus a Teambuilder and weekly VGC and Smogon usage stats.">
   <section class="hero" id="potd">
     <div class="hero-in">
       <div class="left">
@@ -45,8 +45,8 @@ const _tries = [['Garchomp', '/pokemon/garchomp/'], ['Fake Out', '/moves/fake-ou
   </div>
 
   <div class="about">
-    <p>Every Pokémon site shows a different slice of the picture: PokemonDB has the clean stat pages, Bulbapedia the evolution and breeding details, Smogon the tiers, Serebii the locations. ARdex puts those pieces side by side on one page, and builds it around Cobbleverse {meta.cobbleverse}, with spawns and movepools read straight from the pack's own files. It's made for hunting, training and team building on the server.</p>
-    <p class="note">Data from Cobbleverse, Pokémon Showdown and PokéAPI · Updated {fmtDate(meta.built)} · Part of <a href="https://aeronregion.net">Aeron Region</a></p>
+    <p>ARdex is the Aeron Region's Pokémon database and toolkit. Every Pokémon, move, ability and item has its own page with stats, type matchups and full movepools, plus where it spawns in Cobbleverse {meta.cobbleverse}, read straight from the pack's own files. When you're ready to battle, the Teambuilder imports and exports Showdown sets, the coverage checker shows what your team can't hit, and VGC usage shows what's being played on the Showdown ladder, in Smogon tiers and at official majors, refreshed every week.</p>
+    <p class="note">Data from Cobbleverse, Pokémon Showdown, PokéAPI, Limitless and RK9 team lists · Updated {fmtDate(meta.built)} · Part of <a href="https://aeronregion.net">Aeron Region</a></p>
   </div>
 </Base>
 

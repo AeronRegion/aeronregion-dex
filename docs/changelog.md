@@ -59,3 +59,4 @@
 - 2026-11-27: Usage: the Pokémon list no longer jumps when you click a name; build reads usage files from disk one at a time (the bundled set ran out of memory)
 - 2026-11-27: Header search: dual-typed Pokémon show both types as small round type symbols
 - 2026-11-27: Header search: small type symbols were cut off on the right; now centered in full 18px circles
+- 2026-11-27: Homepage: Teambuilder and VGC usage tiles replace Moves and Abilities; rewrote the about text
