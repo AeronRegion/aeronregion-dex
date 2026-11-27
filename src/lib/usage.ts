@@ -64,5 +64,27 @@ export const formats = (idx.formats as any[])
   .map((f) => ({ ...f, name: formatName(f), group: f.id.slice(0, 2) }))
   .map((f) => ({ ...f, current: f.group !== 'sd' || f.current !== false }))
   .sort((a, b) => GROUPS.findIndex((g) => g.key === a.group) - GROUPS.findIndex((g) => g.key === b.group) || Number(b.current) - Number(a.current) || (a.group === 'pd' ? b.id.localeCompare(a.id) : b.period.localeCompare(a.period)) || b.total - a.total);
+// Picker parts: which game/season a format belongs to, a short name inside that group, and its Bo3 twin.
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+export const monthName = (p: string) => (/^\d{4}-\d{2}$/.test(p) ? `${MON[+p.slice(5) - 1]} ${p.slice(0, 4)}` : p);
+for (const f of formats as any[]) {
+  if (f.group === 'sd') {
+    const m = f.label.match(/^gen(\d)(champions)?vgc(\d{4})(.*?)(bo3)?$/);
+    f.bo3 = !!m?.[5]; f.base = f.id.replace(/bo3$/, '');
+    f.game = m?.[2] ? 'Champions' : m ? `${GAME[m[1]] ?? 'Gen ' + m[1]} ${m[3]}` : 'Other';
+    f.short = f.name.replace(/ \(Bo3\)$/, '').replace(/^(Champions|Scarlet & Violet|Sword & Shield)( \d{4})? /, '').replace(/^VGC \d{4} (Series)/, '$1');
+    f.order = m?.[2] ? 9999 : m ? +m[3] : 0;
+  } else {
+    f.bo3 = false; f.base = f.id; f.game = f.group === 'pd' ? 'Official majors' : f.name.startsWith('Champions') ? 'Champions' : 'Scarlet & Violet';
+    f.short = f.group === 'pd' ? f.name.replace(' (official majors)', '') : f.name.replace(/^(Champions|Scarlet & Violet) /, '');
+    f.order = 0;
+  }
+}
+export const twin = (f: any) => (formats as any[]).find((x) => x.group === f.group && x.base === f.base && x.bo3 !== f.bo3);
+export const pickerGroups = (src: string) => {
+  const list = (formats as any[]).filter((f) => f.group === src && !f.bo3 || (f.group === src && f.bo3 && !twin(f)));
+  const games = [...new Set(list.map((f) => f.game))].sort((a, b) => (list.find((f) => f.game === b)!.order - list.find((f) => f.game === a)!.order));
+  return games.map((g) => ({ game: g, items: list.filter((f) => f.game === g).sort((a, b) => b.period.localeCompare(a.period)) }));
+};
 export const updated = idx.updated as string;
 export const loadFormat = (id: string) => get(id);

@@ -532,9 +532,11 @@ import { GAMES, meta } from '../lib/data';
         try {
           const { out, looksSp } = parseTeam(unb64(add));
           if (out.length) {
-            const last = +(localStorage.getItem('ardex-cur') ?? 0);
-            if (!teams.length) teams.push({ ...blank(), fmt: looksSp ? 'champ' : 'all' });
-            cur = teams[last] ? last : 0;
+            // ?to=<team number> or ?to=new (picked on the usage page); otherwise the last team you had open
+            const to = p.get('to'), last = +(localStorage.getItem('ardex-cur') ?? 0);
+            if (to === 'new' || !teams.length) teams.push({ ...blank(), name: p.get('name') || '', fmt: looksSp ? 'champ' : 'all' });
+            cur = to === 'new' || !teams[to !== null ? +to : last] ? (to === 'new' ? teams.length - 1 : 0) : to !== null ? +to : last;
+            try { localStorage.setItem('ardex-cur', String(cur)); } catch {}
             const t = teams[cur]; const k = t.mons.findIndex((m) => isEmpty(m));
             if (k >= 0) t.mons[k] = out[0]; else t.mons.push(out[0]);
             sel = k >= 0 ? k : t.mons.length - 1;

@@ -31,3 +31,4 @@
 - 2026-11-26: VGC usage: newest season of official majors listed first
 - 2026-11-26: VGC usage redesigned Pikalytics-style (list on the left, full data on the right: base stats, moves, teammates, items, abilities, Tera, nature+EV spreads in one row); past formats since gen 8 (e.g. SV Reg F 2024); wide container; Tera card on every format
 - 2026-11-26: VGC usage: finished formats use their last full month on the ladder (matches Pikalytics), not their busiest month
+- 2026-11-26: VGC usage: format picker reorganized (source tabs, one dropdown grouped by game and year, Bo1/Bo3 toggle); "Add set to Teambuilder" lets you pick which saved team (or a new one); teammates list shows names without type labels

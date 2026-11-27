@@ -60,11 +60,12 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Moveset search: pick up to 4 moves, Cobbleverse movepool by default, results sortable by stat.
 
 ### VGC usage
-- Under Tools ("VGC usage", /usage/). Pikalytics-style layout: Pokémon list with usage on the left (sticky, searchable), the selected Pokémon on the right: base stats, moves (type + category), teammates (with types), items, abilities, Tera types, spreads. Wide container.
+- Under Tools ("VGC usage", /usage/). Pikalytics-style layout: Pokémon list with usage on the left (sticky, searchable), the selected Pokémon on the right: base stats, moves (type + category), teammates (icon + name; no type labels, they'd squeeze the names), items, abilities, Tera types, spreads. Wide container.
 - Spreads always show nature and EVs/Stat Points together in one row (Nature | HP Atk Def SpA SpD Spe | %), never split.
 - Tera types card is shown for every format; formats without Tera say "No Terastallization in this format", SV formats without data say "No Tera data for this period".
 - Format picker grouped by source (Showdown ladder, Limitless tournaments, official majors), current formats first, then past formats (every VGC format since gen 8, each from its last full month on the ladder).
-- "Add set to Teambuilder" (top item/ability/spread/4 moves) and "Copy as Showdown text".
+- Format picker: source tabs (Showdown ladder / Tournaments / Official majors), one dropdown grouped by game and year (Champions, Scarlet & Violet 2026, 2025, 2024…), Bo1/Bo3 as a toggle beside it (never separate list entries).
+- "Add set to Teambuilder ▾" opens a list of your saved teams (plus "+ New team") and adds the set to the one you pick; "Copy as Showdown text".
 - Data refreshes weekly via GitHub Actions (.github/workflows/usage.yml). No Smogon analyses or Pikalytics scraping.
 
 ## Docs index

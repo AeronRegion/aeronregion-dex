@@ -3,7 +3,7 @@
 // (base stats, moves, teammates, items, abilities + Tera, spreads with nature and EVs together).
 // The page carries the data as JSON; the panel is drawn in the browser.
 import { pokeUrl, boxIconUrl, iconUrl, moveUrl, itemUrl, abilityUrl, itemByName, itemIconUrl, moveById } from '../lib/data';
-import { formats, GROUPS, loadFormat, findSpecies, moveName, itemName, abilityName, updated } from '../lib/usage';
+import { formats, GROUPS, loadFormat, findSpecies, moveName, itemName, abilityName, updated, pickerGroups, twin, monthName } from '../lib/usage';
 import { typeColors } from '../lib/types';
 const { id } = Astro.props as { id: string };
 const f = formats.find((x) => x.id === id)!;
@@ -47,12 +47,19 @@ const fmtNum = (n: number) => n.toLocaleString('en-US');
 const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
 ---
 <div class="ufmt">
-  <label class="lab" for="ufmt">Format</label>
-  <select class="field" id="ufmt">
-    {GROUPS.flatMap((g) => [true, false].map((cur) => { const fs = formats.filter((x) => x.group === g.key && x.current === cur); return fs.length > 0 && (
-      <optgroup label={cur ? g.label : `${g.label}: past formats`}>{fs.map((x) => <option value={`/usage/${x.id}/`} selected={x.id === id}>{x.name}{x.group !== 'pd' ? ` · ${x.period}` : ''}</option>)}</optgroup>
-    ); }))}
-  </select>
+  <nav class="usrc" aria-label="Data source">
+    {GROUPS.map((g) => { const first = pickerGroups(g.key)[0]?.items[0]; return first && <a href={`/usage/${first.id}/`} class:list={['segchip', { on: g.key === f.group }]} aria-current={g.key === f.group ? 'page' : undefined}>{({ sd: 'Showdown ladder', lt: 'Tournaments', pd: 'Official majors' } as any)[g.key]}</a>; })}
+  </nav>
+  <div class="upick">
+    <select class="field" id="ufmt" aria-label="Format">
+      {pickerGroups(f.group).map((g) => (
+        <optgroup label={g.game}>{g.items.map((x: any) => <option value={`/usage/${x.id}/`} selected={x.base === f.base}>{x.short}{x.group === 'sd' ? (x.current ? ' (current)' : ` · ${monthName(x.period)}`) : x.group === 'lt' ? ` · ${x.period}` : ''}</option>)}</optgroup>
+      ))}
+    </select>
+    {f.group === 'sd' && (twin(f)
+      ? <span class="ubo" role="group" aria-label="Best of">{[false, true].map((b) => { const x = b === f.bo3 ? f : twin(f); return <a href={`/usage/${x.id}/`} class:list={['segchip', { on: b === f.bo3 }]}>{b ? 'Bo3' : 'Bo1'}</a>; })}</span>
+      : <span class="ubo solo">{f.bo3 ? 'Bo3 only' : 'Bo1 only'}</span>)}
+  </div>
 </div>
 <p class="note">
   {GROUPS.find((g) => g.key === f.group)!.label}: {f.group === 'sd'
@@ -114,12 +121,12 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
           <div class="tys">${m.ty.map(chip).join(' ')}</div>
         </div>
         <dl class="unums"><div><dt>Usage</dt><dd>${pct(m.u)}</dd></div><div><dt>Rank</dt><dd>#${m.r}</dd></div>${D.sheets && m.wr != null ? `<div><dt title="Game win rate of teams with this Pokémon">Win rate</dt><dd>${pct(m.wr)}</dd></div>` : ''}</dl>
-        <div class="uact"><a class="block" href="/team/?add=${encodeURIComponent(b64)}">Add set to Teambuilder</a><button type="button" class="sm" id="ucopy">Copy as Showdown text</button></div>
+        <div class="uact"><div class="uadd"><button type="button" class="block" id="uadd" aria-haspopup="true" aria-expanded="false">Add set to Teambuilder ▾</button><div class="umenu" id="umenu" hidden></div></div><button type="button" class="sm" id="ucopy">Copy as Showdown text</button></div>
       </div>
       <div class="ugrid">
         ${m.st ? card('Base stats', 'c-bs', '', m.st.map((v: number, i: number) => `<div class="urow bsr"><span class="bl">${STATN[i]}</span><span class="bb">${bar(v)}</span><span class="bv">${v}</span></div>`).concat(`<div class="urow bsr tot"><span class="bl">Total</span><span class="bb"></span><span class="bv">${m.st.reduce((x: number, y: number) => x + y, 0)}</span></div>`)) : ''}
         ${card('Moves', 'c-mv', '', m.mv.map(([n, t, c, p, u]: any) => row(`${u ? `<a href="${u}">${esc(n)}</a>` : esc(n)}<span class="tg">${chip(t)}${cat(c)}</span>`, p)))}
-        ${card('Teammates', 'c-mt', '', m.mt.map(([n, k, src, ty, p, fb]: any) => row(`${ic(src, fb)}${byK.has(k) ? `<a class="pk" href="#${k}">${esc(n)}</a>` : esc(n)}<span class="tg">${ty.map(chip).join('')}</span>`, p)))}
+        ${card('Teammates', 'c-mt', '', m.mt.map(([n, k, src, ty, p, fb]: any) => row(`${ic(src, fb)}${byK.has(k) ? `<a class="pk" href="#${k}">${esc(n)}</a>` : esc(n)}`, p)))}
         ${card('Items', 'c-it', '', m.it.map(([n, src, p, u]: any) => row(`${src ? `<img src="${src}" alt="" width="24" height="24" loading="lazy" />` : ''}${u ? `<a href="${u}">${esc(n)}</a>` : esc(n)}`, p)))}
         <div class="ustack">
           ${card('Abilities', 'c-ab', '', m.ab.map(([n, p, u]: any) => row(`<a href="${u}">${esc(n)}</a>`, p)))}
@@ -129,10 +136,26 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
           ? card(D.champ ? 'Spreads (Stat Points)' : 'EV spreads', 'c-sp', spreadHead, m.sp.map(([nat, v, p]: any) => row(`<span class="nat">${nat}</span>${v.map((x: number) => `<span class="sv${x ? '' : ' z'}">${x}</span>`).join('')}`, p)))
           : card('Natures', 'c-sp', '', m.na.map(([n, p]: any) => row(esc(n), p)))}
       </div>`;
+    // pick which saved team gets the set (teams live in this browser, same as the Teambuilder)
+    const addBtn = document.getElementById('uadd')!, menu = document.getElementById('umenu')!;
+    addBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!menu.hidden) { menu.hidden = true; addBtn.setAttribute('aria-expanded', 'false'); return; }
+      let teams: any[] = []; try { teams = JSON.parse(localStorage.getItem('ardex-teams') ?? '[]'); } catch {}
+      const last = +(localStorage.getItem('ardex-cur') ?? 0);
+      const base = `/team/?add=${encodeURIComponent(b64)}`;
+      menu.innerHTML = `<div class="umh">Add ${esc(m.n)} to…</div>` + teams.map((t, i) => {
+        const n = (t.mons ?? []).filter((x: any) => x.sp).length;
+        return `<a class="segchip" href="${base}&to=${i}">${esc(t.name || 'Untitled team')}<small>${n}/6${i === last ? ' · last opened' : ''}</small></a>`;
+      }).join('') + `<a class="segchip new" href="${base}&to=new">+ New team</a>`;
+      menu.hidden = false; addBtn.setAttribute('aria-expanded', 'true');
+    });
     document.getElementById('ucopy')!.addEventListener('click', (e) => { const b = e.currentTarget as HTMLButtonElement; navigator.clipboard?.writeText(m.paste).then(() => { b.textContent = 'Copied'; setTimeout(() => (b.textContent = 'Copy as Showdown text'), 1500); }); });
     document.title = `${m.n}: ${baseTitle}`;
     if (scroll && matchMedia('(max-width: 900px)').matches) panel.scrollIntoView({ block: 'start' });
   };
+  document.addEventListener('click', (e) => { const mn = document.getElementById('umenu'); if (mn && !mn.hidden && !(e.target as HTMLElement).closest('.uadd')) { mn.hidden = true; document.getElementById('uadd')?.setAttribute('aria-expanded', 'false'); } });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { const mn = document.getElementById('umenu'); if (mn) mn.hidden = true; } });
   const go = (k: string, scroll = false) => { history.replaceState(null, '', `#${k}`); draw(k, scroll); };
   document.addEventListener('click', (e) => {
     const a = (e.target as HTMLElement).closest('a[href^="#"]') as HTMLAnchorElement | null;
@@ -148,10 +171,18 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
 </script>
 <style>
   :global(body:has(.uwrap) .wrap) { width: min(100% - 2.5rem, 1500px); }
-  .ufmt { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; margin: .4rem 0; }
-  .ufmt select { min-width: 0; max-width: 100%; }
+  .ufmt { display: flex; gap: .5rem 1.2rem; align-items: center; flex-wrap: wrap; margin: .4rem 0; }
+  .usrc, .ubo { display: inline-flex; }
+  .usrc a, .ubo a { display: inline-block; padding: .3rem .75rem; border: 1px solid var(--line-2); background: var(--card); color: var(--link) !important; text-decoration: none !important; font-size: .88rem; margin-left: -1px; }
+  .usrc a:first-child, .ubo a:first-child { border-radius: 3px 0 0 3px; margin-left: 0; }
+  .usrc a:last-child, .ubo a:last-child { border-radius: 0 3px 3px 0; }
+  .usrc a.on, .ubo a.on { background: #2f6db5; border-color: #24579a; color: #fff !important; position: relative; }
+  .usrc a:not(.on):hover, .ubo a:not(.on):hover { background: rgb(74 144 217 / .12); }
+  .ubo.solo { font-size: .8rem; color: var(--ink-soft); }
+  .upick { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+  .upick select { min-width: 15rem; max-width: 100%; }
   .evs { display: inline; } .evs summary { display: inline; cursor: pointer; color: var(--link, #1f5fbf); } .evs[open] { display: block; margin-top: .3rem; font-size: .85rem; color: var(--ink-soft); }
-  .uwrap { display: grid; grid-template-columns: 265px minmax(0, 1fr); gap: 1rem; align-items: start; margin-top: .6rem; }
+  .uwrap { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 1rem; align-items: start; margin-top: .6rem; }
   .uside { position: sticky; top: 70px; border: 1px solid var(--line-2); border-radius: 4px; background: var(--card); padding: .5rem; }
   .uside #uq { width: 100%; }
   .uhead { display: flex; justify-content: space-between; font-size: .75rem; color: var(--ink-soft); padding: .45rem .3rem .2rem; border-bottom: 1px solid var(--line-2); }
@@ -173,6 +204,13 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   .upanel :global(.unums dt) { font-size: .75rem; color: var(--ink-soft); }
   .upanel :global(.unums dd) { margin: 0; font-size: 1.15rem; font-weight: 600; font-variant-numeric: tabular-nums; }
   .upanel :global(.uact) { display: flex; gap: .5rem; flex-wrap: wrap; width: 100%; }
+  .upanel :global(.uadd) { position: relative; }
+  .upanel :global(.umenu) { position: absolute; top: calc(100% + 4px); left: 0; z-index: 30; min-width: 260px; max-height: 320px; overflow-y: auto; background: var(--card); border: 1px solid var(--line-2); border-radius: 4px; box-shadow: 0 4px 14px rgb(0 0 0 / .15); padding: .25rem 0; }
+  .upanel :global(.umh) { padding: .3rem .7rem; font-size: .78rem; color: var(--ink-soft); }
+  .upanel :global(.umenu a) { display: flex; justify-content: space-between; gap: 1rem; padding: .35rem .7rem; color: var(--link) !important; text-decoration: none !important; }
+  .upanel :global(.umenu a:hover) { background: rgb(74 144 217 / .12); }
+  .upanel :global(.umenu a small) { color: var(--ink-soft); font-size: .75rem; }
+  .upanel :global(.umenu a.new) { border-top: 1px solid var(--line); }
   .upanel :global(.ugrid) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8rem; margin-top: .8rem; align-items: start; }
   .upanel :global(.ucard) { border: 1px solid var(--line-2); border-radius: 4px; background: var(--card); min-width: 0; }
   .upanel :global(.ucard h3) { margin: 0; padding: .4rem .6rem; font-size: .9rem; border-bottom: 1px solid var(--line-2); }
@@ -182,8 +220,8 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   .upanel :global(.urow .l > a) { flex: 0 1 auto; min-width: 2.5rem; overflow: hidden; text-overflow: ellipsis; }
   .upanel :global(.urow .tg) { display: inline-flex; align-items: center; gap: 2px; margin-left: auto; padding-left: .3rem; flex: none; }
   .upanel :global(.urow .p) { flex: none; width: 3.7rem; text-align: right; font-variant-numeric: tabular-nums; }
-  .upanel :global(.chip) { display: inline-block; width: 48px; text-align: center; font-weight: 700; font-size: .66rem; padding: 0; background: var(--c); color: #fff !important; border: 1px solid rgb(0 0 0 / .3); text-decoration: none !important; border-radius: 2px; }
-  .upanel :global(.sprite) { width: 32px; height: 24px; object-fit: contain; flex: none; }
+  .upanel :global(.chip) { display: inline-block; text-align: center; font-weight: 700; font-size: .7rem; padding: 0 .4rem; background: var(--c); color: #fff !important; border: 1px solid rgb(0 0 0 / .3); text-decoration: none !important; white-space: nowrap; }
+  .upanel :global(.urow .sprite) { width: 32px !important; height: 24px !important; object-fit: contain; flex: none; }
   .upanel :global(.ustack) { display: grid; gap: .8rem; align-content: start; min-width: 0; }
   .upanel :global(.unone) { margin: 0; padding: .5rem .6rem; font-size: .84rem; color: var(--ink-soft); }
   .upanel :global(.c-ab .ubody), .upanel :global(.c-te .ubody) { max-height: 150px; }
@@ -203,6 +241,8 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   @media (max-width: 1250px) { .upanel :global(.ugrid) { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 900px) {
     .uwrap { grid-template-columns: 1fr; }
+    .usrc { width: 100%; } .usrc a { flex: 1; text-align: center; padding: .3rem .3rem; font-size: .8rem; }
+    .upick select { flex: 1; min-width: 0; }
     .uside { position: static; }
     .ulist { max-height: 34vh; }
     .upanel :global(.ugrid) { grid-template-columns: 1fr; }
