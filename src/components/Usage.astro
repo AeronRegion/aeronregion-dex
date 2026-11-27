@@ -3,7 +3,7 @@
 // (base stats, moves, teammates, items, abilities + Tera, spreads with nature and EVs together).
 // The page carries the data as JSON; the panel is drawn in the browser.
 import { pokeUrl, boxIconUrl, iconUrl, moveUrl, itemUrl, abilityUrl, itemByName, itemIconUrl, moveById } from '../lib/data';
-import { formats, GROUPS, loadFormat, findSpecies, moveName, itemName, abilityName, updated, pickerGroups, twin, monthName, variants } from '../lib/usage';
+import { formats, GROUPS, loadFormat, findSpecies, moveName, itemName, abilityName, updated, pickerGroups, twin, monthName, variants, fmtDate, fmtRange } from '../lib/usage';
 import { typeColors } from '../lib/types';
 const { id } = Astro.props as { id: string };
 const f = formats.find((x) => x.id === id)!;
@@ -28,22 +28,24 @@ const mons = d.mons.map((m: any, k: number) => {
     ...top4.map((x: string) => `- ${x}`),
   ].filter(Boolean).join('\n');
   return {
-    k: keyOf(m.name, s), n: s?.name ?? m.name, r: k + 1, u: m.usage, wr: m.wr ?? null,
+    k: keyOf(m.name, s), n: s?.name ?? m.name, r: k + 1, u: m.usage, wr: m.wr ?? null, cnt: Math.round(m.n ?? 0),
     url: s ? pokeUrl(s) : null, ic: boxIconUrl(s?.art), fb: iconUrl(s?.art), ty: s?.types ?? [],
     st: s ? [s.stats.hp, s.stats.atk, s.stats.def, s.stats.spa, s.stats.spd, s.stats.spe] : null,
-    mv: m.moves.map(([x, p]: [string, number]) => { const nm = moveName(x); const mm = moveById.get(toID(nm)); return [nm, mm?.type ?? '', mm?.cat ?? '', p, mm ? moveUrl(mm) : '']; }),
-    it: m.items.map(([x, p]: [string, number]) => { const it = itemByName.get(itemName(x)); return [it?.name ?? itemName(x), it?.icon ? itemIconUrl(it.icon) : '', p, it ? itemUrl(it) : '']; }),
-    ab: m.abilities.map(([x, p]: [string, number]) => [abilityName(x), p, abilityUrl(abilityName(x))]),
-    te: (m.tera ?? []).map(([x, p]: [string, number]) => [x, p]),
+    mv: m.moves.map(([x, p]: [string, number]) => { const nm = moveName(x); const mm = moveById.get(toID(nm)); return [nm, mm?.type ?? '', mm?.cat ?? '', p]; }),
+    it: m.items.map(([x, p]: [string, number]) => { const it = itemByName.get(itemName(x)); return [it?.name ?? itemName(x), it?.icon ?? '', p]; }),
+    ab: m.abilities.map(([x, p]: [string, number]) => [abilityName(x), p]),
+    te: (m.tera ?? []).map(([x, p]: [string, number]) => [x.charAt(0).toUpperCase() + x.slice(1), p]),
     sp, na: sp.length ? [] : (m.natures ?? []),
-    mt: m.mates.map(([x, p]: [string, number]) => { const o = findSpecies(x); return [o?.name ?? x, keyOf(x, o), boxIconUrl(o?.art), o?.types ?? [], p, iconUrl(o?.art)]; }),
+    mt: m.mates.map(([x, p]: [string, number]) => { const o = findSpecies(x); return [o?.name ?? x, keyOf(x, o), o?.art ?? '', p]; }),
     paste,
   };
 });
 // Tera exists only in Scarlet & Violet formats; Showdown only started recording it in Sept 2024
 const svFormat = /^Scarlet & Violet/.test(f.name) || (f.group === 'pd' && +f.id.slice(3) >= 2023 && +f.id.slice(3) <= 2026) || (f.group === 'lt' && /^Scarlet/.test(f.name));
-const DATA = { sheets, champ, mons, colors: typeColors, tera: svFormat ? 'nodata' : 'none' };
-const fmtNum = (n: number) => n.toLocaleString('en-US');
+const DATA = { sheets, champ, mons, colors: { ...typeColors, Stellar: '#40a3c5' }, tera: svFormat ? 'nodata' : 'none' };
+const fmtNum = (n: number) => (n ?? 0).toLocaleString('en-US');
+// tournaments and majors: the whole set, or one event of it
+const parent: any = f.group === 'sd' ? null : f.def ? f : formats.find((x) => x.id === f.base);
 const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
 ---
 <div class="ufmt">
@@ -53,7 +55,7 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   <div class="upick">
     <select class="field" id="ufmt" aria-label="Format">
       {pickerGroups(f.group).map((g) => (
-        <optgroup label={g.game}>{g.items.map((x: any) => <option value={`/usage/${x.id}/`} selected={x.fam === f.fam}>{x.short}{x.group === 'sd' ? (x.current ? ' (current)' : ` · ${monthName(x.period)}`) : x.group === 'lt' ? ` · ${x.period}` : ''}</option>)}</optgroup>
+        <optgroup label={g.game}>{g.items.map((x: any) => <option value={`/usage/${x.id}/`} selected={x.fam === f.fam || x.id === f.base}>{x.short}{x.group === 'sd' ? (x.current ? ' (current)' : ` · ${monthName(x.period)}`) : x.group === 'lt' ? ` · ${fmtRange(x.period)}` : ''}</option>)}</optgroup>
       ))}
     </select>
     {f.group === 'sd' && (twin(f)
@@ -71,17 +73,31 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
           : <span class="ubo solo">Rated {f.cutoff}+</span>}
       </>;
     })()}
+    {parent?.events?.length > 0 && (
+      <label class="usel">Event <select class="field ujump">
+        <option value={`/usage/${parent.id}/`} selected={f.def}>All events ({parent.tours})</option>
+        {parent.events.map((e: any) => <option value={`/usage/${e.id}/`} selected={e.id === f.id}>{e.name} · {fmtDate(e.date)} · {fmtNum(e.players)} players</option>)}
+      </select></label>
+    )}
   </div>
 </div>
-<p class="note">
-  {GROUPS.find((g) => g.key === f.group)!.label}: {f.group === 'sd'
-    ? <>{fmtNum(f.total)} battles in {f.period}, players rated {f.cutoff}+.{!f.current && ' This format has ended; this is its last full month on the ladder.'}</>
-    : f.group === 'lt'
-      ? <>{fmtNum(f.total)} teams from {f.tours} tournaments, {f.period}.</>
-      : <>{fmtNum(f.total)} teams from {f.tours} events.</>}
-  {' '}Updated weekly (last {updated}).
-  {f.group === 'pd' && <details class="evs"><summary>Events included</summary>{f.period}</details>}
+<p class="note usum">
+  {f.group === 'sd'
+    ? <>Showdown ladder, {monthName(f.period)}: <b>{fmtNum(f.total)}</b> battles, weighted toward players rated {f.cutoff}+.{!f.current && f.def && ' This format has ended; this is its last full month on the ladder.'}</>
+    : f.event
+      ? <>{f.source.replace(/ \(.*$/, '')}, {fmtDate(f.period)}: <b>{fmtNum(f.players)}</b> players, <b>{fmtNum(f.total)}</b> team sheets, <b>{fmtNum(f.battles)}</b> battles.</>
+      : <>{f.group === 'lt' ? `Limitless tournaments, ${fmtRange(f.period)}` : 'Official majors, Masters division'}: <b>{fmtNum(f.tours)}</b> events, <b>{fmtNum(f.total)}</b> team sheets{f.battles ? <>, <b>{fmtNum(f.battles)}</b> battles</> : ''}.</>}
+  {' '}Updated weekly (last {fmtDate(updated)}).
 </p>
+{parent?.events?.length > 0 && (
+  <details class="uevents">
+    <summary>Events in this data, by size ({parent.events.length}{f.group === 'lt' ? ', 64+ players' : ''})</summary>
+    <table class="data">
+      <thead><tr><th>Event</th><th>Date</th><th class="n">Players</th><th class="n">Team sheets</th><th class="n">Battles</th></tr></thead>
+      <tbody>{[...parent.events].sort((a: any, b: any) => b.battles - a.battles).map((e: any) => <tr><td><a href={`/usage/${e.id}/`}>{e.name}</a></td><td>{fmtDate(e.date)}</td><td class="n">{fmtNum(e.players)}</td><td class="n">{fmtNum(e.teams)}</td><td class="n">{fmtNum(e.battles)}</td></tr>)}</tbody>
+    </table>
+  </details>
+)}
 
 <div class="uwrap">
   <aside class="uside">
@@ -99,12 +115,13 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   </aside>
   <section class="upanel" id="upanel" aria-live="polite"></section>
 </div>
-<p class="note">Sources: Pokémon Showdown usage stats; Limitless (play.limitlesstcg.com); official event team lists from RK9 Labs via Pokedata. "Add set to Teambuilder" uses the top item, ability, spread or nature, and four most used moves.</p>
+<p class="note">Sources: Pokémon Showdown usage stats; Limitless (play.limitlesstcg.com); official event team lists from RK9 Labs via Pokedata. Your set starts with the most common item, ability, Tera type, spread or nature and four moves; click rows to change it.</p>
 <script is:inline type="application/json" id="udata" set:html={JSON.stringify(DATA).replace(/</g, '\\u003c')}></script>
 
 <script>
   import { CAT_SVG } from '../lib/ac';
   const D = JSON.parse(document.getElementById('udata')!.textContent!);
+  const SPR = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites';
   const sel = document.getElementById('ufmt') as HTMLSelectElement;
   sel.addEventListener('change', () => { location.href = sel.value; });
   document.querySelectorAll<HTMLSelectElement>('.ujump').forEach((x) => x.addEventListener('change', () => { location.href = x.value; }));
@@ -115,7 +132,7 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   const cat = (c: string) => c ? `<svg viewBox="0 0 28 14" width="26" height="13" role="img" aria-label="${c}"><title>${c}</title>${(CAT_SVG as any)[c] ?? ''}</svg>` : '';
   const ic = (src: string, fb = '') => src ? `<img class="sprite" src="${src}" data-fb="${fb}" onerror="if(this.dataset.fb&&this.src!==this.dataset.fb)this.src=this.dataset.fb" alt="" loading="lazy" width="32" height="24" />` : '';
   const card = (title: string, cls: string, head: string, rows: string[]) => `<div class="ucard ${cls}"><h3>${title}</h3>${head}<div class="ubody">${rows.length ? rows.join('') : '<p class="soft">No data</p>'}</div></div>`;
-  const row = (left: string, p: number) => `<div class="urow"><span class="l">${left}</span><span class="p">${pct(p)}</span></div>`;
+  const row = (left: string, p: number, kind = '', i = -1) => `<div class="urow${kind ? ' pickable' : ''}"${kind ? ` data-kind="${kind}" data-i="${i}" role="button" tabindex="0"` : ''}><span class="l">${kind ? '<i class="tick" aria-hidden="true"></i>' : ''}${left}</span><span class="p">${pct(p)}</span></div>`;
   const bar = (v: number) => `<i style="width:${Math.min(100, (v / 255) * 100)}%;background:hsl(${Math.min(360, Math.floor((v * 180) / 255))},85%,45%)"></i>`;
   const byK = new Map(D.mons.map((m: any) => [m.k, m]));
   const panel = document.getElementById('upanel')!, list = document.getElementById('ulist')!;
@@ -124,8 +141,20 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
     const m: any = byK.get(k) ?? D.mons[0]; if (!m) { panel.innerHTML = '<p>No data.</p>'; return; }
     list.querySelectorAll('a.on').forEach((a) => a.classList.remove('on'));
     list.querySelector(`a[data-k="${m.k}"]`)?.classList.add('on');
-    const b64 = btoa(unescape(encodeURIComponent(m.paste)));
-    const spreadHead = `<div class="urow sphead"><span class="l"><span class="nat">Nature</span>${STAT.map((s) => `<span class="sv">${s}</span>`).join('')}</span><span class="p"></span></div>`;
+    // the set you're building: starts as the most common pick in each list
+    const P: any = { mv: m.mv.slice(0, 4).map((_: any, i: number) => i), it: m.it.length ? 0 : -1, ab: m.ab.length ? 0 : -1, te: m.te.length ? 0 : -1, sp: m.sp.length ? 0 : -1, na: m.na.length ? 0 : -1 };
+    const pasteOf = () => {
+      const sp = P.sp >= 0 ? m.sp[P.sp] : null, nat = sp ? sp[0] : P.na >= 0 ? m.na[P.na][0] : '';
+      return [
+        `${m.n}${P.it >= 0 ? ` @ ${m.it[P.it][0]}` : ''}`,
+        P.ab >= 0 ? `Ability: ${m.ab[P.ab][0]}` : '', 'Level: 50',
+        P.te >= 0 ? `Tera Type: ${m.te[P.te][0]}` : '',
+        sp ? `EVs: ${sp[1].map((x: number, i: number) => (x ? `${x} ${STAT[i]}` : '')).filter(Boolean).join(' / ')}` : '',
+        nat ? `${nat} Nature` : '',
+        ...P.mv.map((i: number) => `- ${m.mv[i][0]}`),
+      ].filter(Boolean).join('\n');
+    };
+    const spreadHead = `<div class="urow sphead"><span class="l"><i class="tick ghost" aria-hidden="true"></i><span class="nat">Nature</span>${STAT.map((s) => `<span class="sv">${s}</span>`).join('')}</span><span class="p"></span></div>`;
     panel.innerHTML = `
       <div class="utop">
         <img class="uart" src="${m.ic}" data-fb="${m.fb}" onerror="if(this.src!==this.dataset.fb)this.src=this.dataset.fb" alt="" width="68" height="51" />
@@ -133,21 +162,25 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
           <h2>${m.url ? `<a class="pk" href="${m.url}">${esc(m.n)}</a>` : esc(m.n)}</h2>
           <div class="tys">${m.ty.map(chip).join(' ')}</div>
         </div>
-        <dl class="unums"><div><dt>Usage</dt><dd>${pct(m.u)}</dd></div><div><dt>Rank</dt><dd>#${m.r}</dd></div>${D.sheets && m.wr != null ? `<div><dt title="Game win rate of teams with this Pokémon">Win rate</dt><dd>${pct(m.wr)}</dd></div>` : ''}</dl>
-        <div class="uact"><div class="uadd"><button type="button" class="block" id="uadd" aria-haspopup="true" aria-expanded="false">Add set to Teambuilder ▾</button><div class="umenu" id="umenu" hidden></div></div><button type="button" class="sm" id="ucopy">Copy as Showdown text</button></div>
+        <dl class="unums"><div><dt>Usage</dt><dd>${pct(m.u)}</dd></div><div><dt>Rank</dt><dd>#${m.r}</dd></div><div><dt title="${D.sheets ? 'Team sheets with this Pokémon' : 'Teams with this Pokémon in the sampled battles'}">Teams</dt><dd>${(m.cnt ?? 0).toLocaleString('en-US')}</dd></div>${D.sheets && m.wr != null ? `<div><dt title="Game win rate of teams with this Pokémon">Win rate</dt><dd>${pct(m.wr)}</dd></div>` : ''}</dl>
+      </div>
+      <div class="uset">
+        <div class="ush"><b>Your set</b><span class="soft">Click rows below to choose the moves (up to 4), item, ability${m.te.length ? ', Tera type' : ''} and ${m.sp.length ? 'spread' : 'nature'}. It starts with the most common of each.</span></div>
+        <pre id="upaste"></pre>
+        <div class="uact"><div class="uadd"><button type="button" class="block" id="uadd" aria-haspopup="true" aria-expanded="false">Add set to Teambuilder ▾</button><div class="umenu" id="umenu" hidden></div></div><button type="button" class="sm" id="ucopy">Copy as Showdown text</button><button type="button" class="sm" id="ureset">Reset to most common</button><span class="soft" id="umsg"></span></div>
       </div>
       <div class="ugrid">
         ${m.st ? card('Base stats', 'c-bs', '', m.st.map((v: number, i: number) => `<div class="urow bsr"><span class="bl">${STATN[i]}</span><span class="bb">${bar(v)}</span><span class="bv">${v}</span></div>`).concat(`<div class="urow bsr tot"><span class="bl">Total</span><span class="bb"></span><span class="bv">${m.st.reduce((x: number, y: number) => x + y, 0)}</span></div>`)) : ''}
-        ${card('Moves', 'c-mv', '', m.mv.map(([n, t, c, p, u]: any) => row(`${u ? `<a href="${u}">${esc(n)}</a>` : esc(n)}<span class="tg">${chip(t)}${cat(c)}</span>`, p)))}
-        ${card('Teammates', 'c-mt', '', m.mt.map(([n, k, src, ty, p, fb]: any) => row(`${ic(src, fb)}${byK.has(k) ? `<a class="pk" href="#${k}">${esc(n)}</a>` : esc(n)}`, p)))}
-        ${card('Items', 'c-it', '', m.it.map(([n, src, p, u]: any) => row(`${src ? `<img src="${src}" alt="" width="24" height="24" loading="lazy" />` : ''}${u ? `<a href="${u}">${esc(n)}</a>` : esc(n)}`, p)))}
+        ${card('Moves', 'c-mv', '', m.mv.map(([n, t, c, p]: any, i: number) => row(`<span class="nm">${esc(n)}</span><span class="tg">${chip(t).replace('<a ', '<span ').replace('</a>', '</span>')}${cat(c)}</span>`, p, 'mv', i)))}
+        ${card('Teammates', 'c-mt', '', m.mt.map(([n, k, art, p]: any) => row(`${art ? ic(`${SPR}/pokemon/versions/generation-vii/icons/${art}.png`, `${SPR}/pokemon/${art}.png`) : ''}${byK.has(k) ? `<a class="pk" href="#${k}">${esc(n)}</a>` : esc(n)}`, p)))}
+        ${card('Items', 'c-it', '', m.it.map(([n, icon, p]: any, i: number) => row(`${icon ? `<img src="${SPR}/items/${icon}.png" alt="" width="24" height="24" loading="lazy" />` : ''}<span class="nm">${esc(n)}</span>`, p, 'it', i)))}
         <div class="ustack">
-          ${card('Abilities', 'c-ab', '', m.ab.map(([n, p, u]: any) => row(`<a href="${u}">${esc(n)}</a>`, p)))}
-          ${m.te.length ? card('Tera types', 'c-te', '', m.te.map(([t, p]: any) => row(chip(t), p))) : `<div class="ucard c-te"><h3>Tera types</h3><p class="unone">${D.tera === 'none' ? 'No Terastallization in this format.' : 'No Tera data for this period.'}</p></div>`}
+          ${card('Abilities', 'c-ab', '', m.ab.map(([n, p]: any, i: number) => row(`<span class="nm">${esc(n)}</span>`, p, 'ab', i)))}
+          ${m.te.length ? card('Tera types', 'c-te', '', m.te.map(([t, p]: any, i: number) => row(chip(t).replace('<a ', '<span ').replace('</a>', '</span>'), p, 'te', i))) : `<div class="ucard c-te"><h3>Tera types</h3><p class="unone">${D.tera === 'none' ? 'No Terastallization in this format.' : 'No Tera data for this period.'}</p></div>`}
         </div>
         ${m.sp.length
-          ? card(D.champ ? 'Spreads (Stat Points)' : 'EV spreads', 'c-sp', spreadHead, m.sp.map(([nat, v, p]: any) => row(`<span class="nat">${nat}</span>${v.map((x: number) => `<span class="sv${x ? '' : ' z'}">${x}</span>`).join('')}`, p)))
-          : card('Natures', 'c-sp', '', m.na.map(([n, p]: any) => row(esc(n), p)))}
+          ? card(D.champ ? 'Spreads (Stat Points)' : 'EV spreads', 'c-sp', spreadHead, m.sp.map(([nat, v, p]: any, i: number) => row(`<span class="nat">${nat}</span>${v.map((x: number) => `<span class="sv${x ? '' : ' z'}">${x}</span>`).join('')}`, p, 'sp', i)))
+          : card('Natures', 'c-sp', '', m.na.map(([n, p]: any, i: number) => row(esc(n), p, 'na', i)))}
       </div>`;
     // pick which saved team gets the set (teams live in this browser, same as the Teambuilder)
     const addBtn = document.getElementById('uadd')!, menu = document.getElementById('umenu')!;
@@ -156,14 +189,38 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
       if (!menu.hidden) { menu.hidden = true; addBtn.setAttribute('aria-expanded', 'false'); return; }
       let teams: any[] = []; try { teams = JSON.parse(localStorage.getItem('ardex-teams') ?? '[]'); } catch {}
       const last = +(localStorage.getItem('ardex-cur') ?? 0);
-      const base = `/team/?add=${encodeURIComponent(b64)}`;
+      const base = `/team/?add=${encodeURIComponent(btoa(unescape(encodeURIComponent(pasteOf()))))}`;
       menu.innerHTML = `<div class="umh">Add ${esc(m.n)} to…</div>` + teams.map((t, i) => {
         const n = (t.mons ?? []).filter((x: any) => x.sp).length;
         return `<a class="segchip" href="${base}&to=${i}">${esc(t.name || 'Untitled team')}<small>${n}/6${i === last ? ' · last opened' : ''}</small></a>`;
       }).join('') + `<a class="segchip new" href="${base}&to=new">+ New team</a>`;
       menu.hidden = false; addBtn.setAttribute('aria-expanded', 'true');
     });
-    document.getElementById('ucopy')!.addEventListener('click', (e) => { const b = e.currentTarget as HTMLButtonElement; navigator.clipboard?.writeText(m.paste).then(() => { b.textContent = 'Copied'; setTimeout(() => (b.textContent = 'Copy as Showdown text'), 1500); }); });
+    document.getElementById('ucopy')!.addEventListener('click', (e) => { const b = e.currentTarget as HTMLButtonElement; navigator.clipboard?.writeText(pasteOf()).then(() => { b.textContent = 'Copied'; setTimeout(() => (b.textContent = 'Copy as Showdown text'), 1500); }); });
+    const msg = document.getElementById('umsg')!;
+    const sync = () => {
+      document.getElementById('upaste')!.textContent = pasteOf();
+      panel.querySelectorAll<HTMLElement>('.pickable').forEach((r) => {
+        const k = r.dataset.kind!, i = +r.dataset.i!;
+        const on = k === 'mv' ? P.mv.includes(i) : P[k] === i;
+        r.classList.toggle('sel', on); r.setAttribute('aria-pressed', String(on));
+      });
+    };
+    const choose = (r: HTMLElement) => {
+      const k = r.dataset.kind!, i = +r.dataset.i!; msg.textContent = '';
+      if (k === 'mv') {
+        if (P.mv.includes(i)) P.mv = P.mv.filter((x: number) => x !== i);
+        else if (P.mv.length < 4) P.mv.push(i);
+        else { msg.textContent = 'Four moves picked. Click one of them to remove it first.'; return; }
+      } else P[k] = P[k] === i ? -1 : i;
+      sync();
+    };
+    panel.querySelectorAll<HTMLElement>('.pickable').forEach((r) => {
+      r.addEventListener('click', () => choose(r));
+      r.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose(r); } });
+    });
+    document.getElementById('ureset')!.addEventListener('click', () => { P.mv = m.mv.slice(0, 4).map((_: any, i: number) => i); P.it = m.it.length ? 0 : -1; P.ab = m.ab.length ? 0 : -1; P.te = m.te.length ? 0 : -1; P.sp = m.sp.length ? 0 : -1; P.na = m.na.length ? 0 : -1; msg.textContent = ''; sync(); });
+    sync();
     document.title = `${m.n}: ${baseTitle}`;
     if (scroll && matchMedia('(max-width: 900px)').matches) panel.scrollIntoView({ block: 'start' });
   };
@@ -192,6 +249,8 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   .usrc a.on, .ubo a.on { background: #2f6db5; border-color: #24579a; color: #fff !important; position: relative; }
   .usrc a:not(.on):hover, .ubo a:not(.on):hover { background: rgb(74 144 217 / .12); }
   .usel { display: inline-flex; align-items: center; gap: .35rem; font-size: .88rem; } .usel select { min-width: 0; }
+  .usum b { font-weight: 600; }
+  .uevents { margin: .2rem 0 .6rem; } .uevents summary { cursor: pointer; color: var(--link); font-size: .9rem; } .uevents table { margin-top: .4rem; max-width: 900px; }
   .ubo.solo { font-size: .8rem; color: var(--ink-soft); }
   .upick { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
   .upick select { min-width: 15rem; max-width: 100%; }
@@ -225,6 +284,20 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   .upanel :global(.umenu a:hover) { background: rgb(74 144 217 / .12); }
   .upanel :global(.umenu a small) { color: var(--ink-soft); font-size: .75rem; }
   .upanel :global(.umenu a.new) { border-top: 1px solid var(--line); }
+  .upanel :global(.uset) { margin-top: .7rem; border: 1px solid var(--line-2); border-radius: 4px; background: var(--card); padding: .5rem .7rem; }
+  .upanel :global(.ush) { display: flex; gap: .4rem 1rem; flex-wrap: wrap; align-items: baseline; font-size: .85rem; }
+  .upanel :global(#upaste) { margin: .4rem 0 .5rem; padding: .4rem .6rem; background: rgb(0 0 0 / .035); border: 1px solid var(--line); border-radius: 3px; font: .82rem/1.45 ui-monospace, Consolas, monospace; white-space: pre-wrap; }
+  .upanel :global(#umsg) { font-size: .82rem; align-self: center; }
+  .upanel :global(.pickable) { cursor: pointer; }
+  .upanel :global(.pickable:hover) { background: rgb(74 144 217 / .08); }
+  .upanel :global(.pickable.sel) { background: #dfe9f6; }
+  :global(html[data-theme='dark']) .upanel :global(.pickable.sel) { background: #2f353d; }
+  .upanel :global(.tick) { flex: none; width: 14px; height: 14px; border: 1px solid var(--line-2); border-radius: 2px; background: var(--card); display: inline-block; position: relative; }
+  .upanel :global(.tick.ghost) { visibility: hidden; }
+  .upanel :global(.pickable.sel .tick) { background: #2f6db5; border-color: #24579a; }
+  .upanel :global(.pickable.sel .tick)::after { content: ''; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  .upanel :global(.c-mv .urow .tg) { margin-left: .2rem; }
+  .upanel :global(.urow .nm) { overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
   .upanel :global(.ugrid) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8rem; margin-top: .8rem; align-items: start; }
   .upanel :global(.ucard) { border: 1px solid var(--line-2); border-radius: 4px; background: var(--card); min-width: 0; }
   .upanel :global(.ucard h3) { margin: 0; padding: .4rem .6rem; font-size: .9rem; border-bottom: 1px solid var(--line-2); }
@@ -259,7 +332,19 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
     .upick select { flex: 1; min-width: 0; }
     .uside { position: static; }
     .ulist { max-height: 34vh; }
-    .upanel :global(.ugrid) { grid-template-columns: 1fr; }
+    .upanel :global(.uset) { margin-top: .7rem; border: 1px solid var(--line-2); border-radius: 4px; background: var(--card); padding: .5rem .7rem; }
+  .upanel :global(.ush) { display: flex; gap: .4rem 1rem; flex-wrap: wrap; align-items: baseline; font-size: .85rem; }
+  .upanel :global(#upaste) { margin: .4rem 0 .5rem; padding: .4rem .6rem; background: rgb(0 0 0 / .035); border: 1px solid var(--line); border-radius: 3px; font: .82rem/1.45 ui-monospace, Consolas, monospace; white-space: pre-wrap; }
+  .upanel :global(#umsg) { font-size: .82rem; align-self: center; }
+  .upanel :global(.pickable) { cursor: pointer; }
+  .upanel :global(.pickable:hover) { background: rgb(74 144 217 / .08); }
+  .upanel :global(.pickable.sel) { background: #dfe9f6; }
+  :global(html[data-theme='dark']) .upanel :global(.pickable.sel) { background: #2f353d; }
+  .upanel :global(.tick) { flex: none; width: 14px; height: 14px; border: 1px solid var(--line-2); border-radius: 2px; background: var(--card); display: inline-block; position: relative; }
+  .upanel :global(.pickable.sel .tick) { background: #2f6db5; border-color: #24579a; }
+  .upanel :global(.pickable.sel .tick)::after { content: ''; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  .upanel :global(.urow .nm) { overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
+  .upanel :global(.ugrid) { grid-template-columns: 1fr; }
     .upanel :global(.unums) { margin-left: 0; }
     .upanel :global(.ubody) { max-height: 260px; }
   }

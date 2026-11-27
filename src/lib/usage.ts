@@ -60,13 +60,16 @@ export const GROUPS = [
   { key: 'pd', label: 'Official majors', note: 'Regionals, Internationals and Worlds, Masters division (RK9 team lists)' },
 ];
 export const formats = (idx.formats as any[])
-  .filter((f) => !/custom/i.test(f.label) && (f.total ?? 0) >= 100)
+  .filter((f) => !/custom/i.test(f.label) && (f.total ?? 0) >= (f.event ? 32 : 100))
   .map((f) => ({ ...f, name: formatName(f), group: f.id.slice(0, 2) }))
   .map((f) => ({ ...f, current: f.group !== 'sd' || f.current !== false }))
   .sort((a, b) => GROUPS.findIndex((g) => g.key === a.group) - GROUPS.findIndex((g) => g.key === b.group) || Number(b.current) - Number(a.current) || (a.group === 'pd' ? b.id.localeCompare(a.id) : b.period.localeCompare(a.period)) || b.total - a.total);
 // Picker parts: which game/season a format belongs to, a short name inside that group, and its Bo3 twin.
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-export const monthName = (p: string) => (/^\d{4}-\d{2}$/.test(p) ? `${MON[+p.slice(5) - 1]} ${p.slice(0, 4)}` : p);
+// dates are written DDMmmYYYY (26Nov2026), or MmmYYYY (Apr2024) when there's no day
+export const fmtDate = (p: string) => { const m = String(p ?? '').match(/^(\d{4})-(\d{2})(?:-(\d{2}))?/); return m ? `${m[3] ? +m[3] : ''}${MON[+m[2] - 1]}${m[1]}` : p; };
+export const monthName = fmtDate;
+export const fmtRange = (p: string) => String(p ?? '').replace(/(\d{4}-\d{2}-\d{2}) to (\d{4}-\d{2}-\d{2})/, (_, a, b) => `${fmtDate(a)} – ${fmtDate(b)}`);
 for (const f of formats as any[]) {
   f.base ??= f.id; f.def ??= true;
   if (f.group === 'sd') {

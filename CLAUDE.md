@@ -30,11 +30,12 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Pokémon tables and cards use the small box icons (PokemonDB style).
 - Name is "ARdex" (header, tab titles, footer). "arDB" rebrand is undecided; don't change it.
 - Top bar on every page (blue in light mode, dark in dark mode): Pokémon ▾, Tools ▾, light/dark toggle, Aeron Region link, search. NO Home tab; the logo links home.
+- Dates are written DDMmmYYYY (26Nov2026), or MmmYYYY (Apr2024) without a day (fmtDate in src/lib/usage.ts).
 - Page titles get a small muted italic label: "Dragon (type)", "Rock Slide (move)", etc.
 
 ### Homepage
 - Heading: "Welcome to ARdex" (no "the Aeron Region Pokédex").
-- No logo image on ARdex (it stays on aeronregion.net only); the header shows the "ARdex" text with the tagline "All data and tools in one place" (hidden on phones).
+- No logo image on ARdex (it stays on aeronregion.net only); the header shows the "ARdex" text with the tagline "Data & tools in one place" (hidden on phones).
 - Background: Trick Room battle image, darkened.
 - Pokémon of the day: shows abilities (hidden marked), EV yield, Cobbleverse spawn, stats.
   The card is NOT one big link; the Pokémon name and each ability link separately.
@@ -65,6 +66,9 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Tera types card is shown for every format; formats without Tera say "No Terastallization in this format", SV formats without data say "No Tera data for this period".
 - Format picker grouped by source (Showdown ladder, Limitless tournaments, official majors), current formats first, then past formats (every VGC format since gen 8, each from its last full month on the ladder).
 - Format picker: source tabs (Showdown ladder / Tournaments / Official majors), one dropdown grouped by game and year (Champions, Scarlet & Violet 2026, 2025, 2024…), Bo1/Bo3 as a toggle beside it (never separate list entries).
+- Set builder: rows in Moves (up to 4), Items, Abilities, Tera types and Spreads/Natures are click-to-select (checkbox + highlight); "Your set" shows the Showdown text live, starting from the most common pick of each; "Reset to most common". Move type label sits right after the move name (doesn't need to line up).
+- Showdown formats: every month with a real ladder at 1500+ and 1760+ (Month dropdown + rating toggle); the default view is the last full month at 1760+ (matches Pikalytics).
+- Tournaments and majors show how much data is behind them (events, team sheets, battles), an "Event" dropdown (all events, or one), and an "Events in this data" table sorted by battles. Each Pokémon shows its team count.
 - "Add set to Teambuilder ▾" opens a list of your saved teams (plus "+ New team") and adds the set to the one you pick; "Copy as Showdown text".
 - Data refreshes weekly via GitHub Actions (.github/workflows/usage.yml). No Smogon analyses or Pikalytics scraping.
 

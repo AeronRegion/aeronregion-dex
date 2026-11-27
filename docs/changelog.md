@@ -32,3 +32,5 @@
 - 2026-11-26: VGC usage redesigned Pikalytics-style (list on the left, full data on the right: base stats, moves, teammates, items, abilities, Tera, nature+EV spreads in one row); past formats since gen 8 (e.g. SV Reg F 2024); wide container; Tera card on every format
 - 2026-11-26: VGC usage: finished formats use their last full month on the ladder (matches Pikalytics), not their busiest month
 - 2026-11-26: VGC usage: format picker reorganized (source tabs, one dropdown grouped by game and year, Bo1/Bo3 toggle); "Add set to Teambuilder" lets you pick which saved team (or a new one); teammates list shows names without type labels
+- 2026-11-26: VGC usage: set builder (click moves/item/ability/Tera/spread to choose; live Showdown text), every month at 1500+/1760+ with month and rating pickers (Reg F now matches Pikalytics: Apr2024 1760+), per-event data with players/team sheets/battles and an events table, team counts per Pokémon, Tera types capitalized with colors (incl. Stellar), move type next to the name; dates shown as DDMmmYYYY site-wide
+- 2026-11-26: Header tagline changed to "Data & tools in one place"
