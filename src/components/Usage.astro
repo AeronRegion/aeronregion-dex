@@ -340,6 +340,25 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   .upanel :global(.c-sp .sv.z) { color: var(--ink-soft); opacity: .55; }
   .upanel :global(.sphead) { font-size: .72rem; color: var(--ink-soft); min-height: 22px; }
   .upanel :global(.sphead .nat) { font-weight: 400; }
+  /* larger cards, closer to Pikalytics: fixed-height boxes, taller rows, bigger text */
+  .upanel :global(.ugrid) { gap: 1rem; }
+  .upanel :global(.ucard) { display: flex; flex-direction: column; height: 460px; }
+  .upanel :global(.ucard h3) { font-size: 1.05rem; padding: .6rem .8rem; }
+  .upanel :global(.ubody) { flex: 1; max-height: none; overflow-y: auto; }
+  .upanel :global(.urow) { min-height: 42px; font-size: .95rem; padding: 0 .8rem; }
+  .upanel :global(.urow .p) { width: 4.2rem; }
+  .upanel :global(.urow .sprite) { width: 40px !important; height: 30px !important; }
+  .upanel :global(.ubody img:not(.sprite)) { width: 28px; height: 28px; }
+  .upanel :global(.bsr) { grid-template-columns: 4.8rem minmax(0, 1fr) 2.6rem; min-height: 50px; }
+  .upanel :global(.bsr .bl) { font-size: .9rem; }
+  .upanel :global(.bsr .bb i) { height: 16px; }
+  .upanel :global(.ustack) { height: 460px; grid-template-rows: auto minmax(0, 1fr); }
+  .upanel :global(.ustack .ucard) { height: auto; min-height: 0; }
+  .upanel :global(.c-ab .ubody), .upanel :global(.c-te .ubody) { max-height: none; }
+  .upanel :global(.c-sp .urow) { font-size: .9rem; }
+  .upanel :global(.c-sp .nat) { width: 5rem; }
+  .upanel :global(.c-sp .sv) { width: 1.9rem; }
+  .upanel :global(.sphead) { min-height: 28px; font-size: .78rem; }
   @media (max-width: 1250px) { .upanel :global(.ugrid) { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 900px) {
     .uwrap { grid-template-columns: 1fr; }
@@ -363,6 +382,8 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   .upanel :global(.urow .nm) { overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
   .upanel :global(.ugrid) { grid-template-columns: 1fr; }
     .upanel :global(.unums) { margin-left: 0; }
-    .upanel :global(.ubody) { max-height: 260px; }
+    .upanel :global(.ucard), .upanel :global(.ustack) { height: auto; }
+    .upanel :global(.ubody) { max-height: 340px; }
+    .upanel :global(.urow) { min-height: 36px; font-size: .9rem; }
   }
 </style>

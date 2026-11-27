@@ -35,3 +35,4 @@
 - 2026-11-26: VGC usage: set builder (click moves/item/ability/Tera/spread to choose; live Showdown text), every month at 1500+/1760+ with month and rating pickers (Reg F now matches Pikalytics: Apr2024 1760+), per-event data with players/team sheets/battles and an events table, team counts per Pokémon, Tera types capitalized with colors (incl. Stellar), move type next to the name; dates shown as DDMmmYYYY site-wide
 - 2026-11-26: Header tagline changed to "Data & tools in one place"
 - 2026-11-26: VGC usage: set builder is now opt-in ("Build a set from this data"), with Clear and Close; dates shown as 07 NOV 2026 / APR 2024
+- 2026-11-26: VGC usage: larger cards closer to Pikalytics (fixed-height boxes, taller rows, bigger text and icons)

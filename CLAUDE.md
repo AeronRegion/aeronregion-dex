@@ -61,7 +61,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Moveset search: pick up to 4 moves, Cobbleverse movepool by default, results sortable by stat.
 
 ### VGC usage
-- Under Tools ("VGC usage", /usage/). Pikalytics-style layout: Pokémon list with usage on the left (sticky, searchable), the selected Pokémon on the right: base stats, moves (type + category), teammates (icon + name; no type labels, they'd squeeze the names), items, abilities, Tera types, spreads. Wide container.
+- Under Tools ("VGC usage", /usage/). Pikalytics-style layout: Pokémon list with usage on the left (sticky, searchable), the selected Pokémon on the right: base stats, moves (type + category), teammates (icon + name; no type labels, they'd squeeze the names), items, abilities, Tera types, spreads. Wide container. Cards are large like Pikalytics: fixed 460px boxes in a 3-column grid, 42px rows, ~.95rem text, each box scrolls on its own (phones: auto height).
 - Spreads always show nature and EVs/Stat Points together in one row (Nature | HP Atk Def SpA SpD Spe | %), never split.
 - Tera types card is shown for every format; formats without Tera say "No Terastallization in this format", SV formats without data say "No Tera data for this period".
 - Format picker grouped by source (Showdown ladder, Limitless tournaments, official majors), current formats first, then past formats (every VGC format since gen 8, each from its last full month on the ladder).
