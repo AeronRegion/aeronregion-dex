@@ -1,0 +1,69 @@
+{
+ "updated": "2026-11-27",
+ "formats": [
+  {
+   "id": "sd-gen9championsvgc2026regmc",
+   "label": "gen9championsvgc2026regmc",
+   "source": "Showdown ladder",
+   "period": "2026-10",
+   "cutoff": 1760,
+   "total": 1649648
+  },
+  {
+   "id": "sd-gen9championsvgc2026regmcbo3",
+   "label": "gen9championsvgc2026regmcbo3",
+   "source": "Showdown ladder",
+   "period": "2026-10",
+   "cutoff": 1760,
+   "total": 262609
+  },
+  {
+   "id": "sd-gen9vgc2024regg",
+   "label": "gen9vgc2024regg",
+   "source": "Showdown ladder",
+   "period": "2026-10",
+   "cutoff": 1760,
+   "total": 1864
+  },
+  {
+   "id": "lt-m-c",
+   "label": "Reg M-C",
+   "source": "Limitless tournaments",
+   "period": "2026-11-10 to 2026-11-26",
+   "tours": 91,
+   "total": 4299
+  },
+  {
+   "id": "lt-svi",
+   "label": "Reg SVI",
+   "source": "Limitless tournaments",
+   "period": "2026-11-22 to 2026-11-22",
+   "tours": 1,
+   "total": 60
+  },
+  {
+   "id": "lt-custom",
+   "label": "Reg CUSTOM",
+   "source": "Limitless tournaments",
+   "period": "2026-11-13 to 2026-11-21",
+   "tours": 3,
+   "total": 87
+  },
+  {
+   "id": "pd-2027",
+   "label": "2027 season majors",
+   "source": "Official majors (RK9 team lists via Pokedata)",
+   "period": "Latin America International Championships, Fall Pokémon Professor VGC Online Cup, Gdansk Regional Championships, Puebla Regional Championships, Nice Regional Championships, Louisville Regional Championships, Recife Regional Championships, Brisbane Regional Championships, Frankfurt Regional Championships, Baltimore Regional Championships",
+   "tours": 10,
+   "total": 6418
+  },
+  {
+   "id": "pd-2026",
+   "label": "2026 season majors",
+   "source": "Official majors (RK9 team lists via Pokedata)",
+   "period": "Pokémon VGC World Championship, North America International Championships, Turin Special Championships, Indianapolis Regional Championships, Melbourne Regional Championships, Campinas Regional Championships, Utrecht Regional Championships, Los Angeles Regional Championships, Prague Regional Championships, Querétaro Regional Championships, Orlando Regional Championships, Seville Special Championships, Houston Regional Championships, Curitiba Regional Championships, Seattle Regional Championships, Europe International Championships, Santiago Regional Championships, Sydney Regional Championships, Mérida Regional Championships, Birmingham Regional Championships, Toronto Regional Championships, Stuttgart Regional Championships, Latin America International Championships, Las Vegas Regional Championships, Gdańsk Regional Championships, Brisbane Regional Championships, Lille Regional Championships, Belo Horizonte Regional Championships, Milwaukee Regional Championships, Pittsburgh Regional Championships, Monterrey Regional Championships, Frankfurt Regional Championships",
+   "tours": 32,
+   "total": 18089
+  }
+ ]
+}
