@@ -483,7 +483,8 @@ html[data-theme='dark'] #ed.sd .detbox, html[data-theme='dark'] #ed.sd .c-sum, h
 @media (max-width: 640px) { #ed .mlist.inline { width: 100%; margin: .2rem 0 .4rem !important; } #ed .mlist.inline .mbody { max-height: 38vh !important; } }
 @media (max-width: 640px) { #ed .mlist.inline .mr { padding-top: .15rem !important; padding-bottom: .15rem !important; } #ed .mlist.inline .mr .d { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } }
 /* multi-hit moves show their hit count next to the power, e.g. 25 ×2–5 */
-table.data small.hx { display: block; font-size: .68rem; font-weight: 600; color: var(--ink-soft); line-height: 1; white-space: nowrap; }
+table.data small.hx { display: inline; margin-left: .2rem; font-size: .68rem; font-weight: 600; color: var(--ink-soft); line-height: 1; white-space: nowrap; }
+table.data td:has(> small.hx) { white-space: nowrap; }
 /* phones: PP is dropped so Priority fits */
 @media (max-width: 640px) {
   table.data .col-pp { display: none !important; }

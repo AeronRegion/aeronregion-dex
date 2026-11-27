@@ -17,6 +17,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - After every change: add a line to docs/changelog.md, and if it was a design decision, add it below.
 - Before pushing any visual change: `npm run build && npm run check:mobile`. It opens the main pages at iPhone size (390px) and fails if anything runs off the screen or needs sideways scrolling; look at the screenshots it saves in .cache/mobile/ too. Don't push until it passes. New pages go in its PAGES list.
 - Verify on the live site after deploy (hard refresh: Ctrl+Shift+R).
+- Table rows keep one height: extra info (multi-hit ×2–5, notes) goes inline on the same line, never stacked under a value.
 - Review every new or changed page for alignment before pushing: numbers right-aligned with tabular figures, columns lined up row to row (fixed widths, not content-sized), labels and values on the same baseline, no bars or chips that shift per row. Look at the screenshot at desktop width and at 390px.
 - Click every button and link you add (in the local build) and confirm it does what its label says before pushing. A button that only toggles a row or opens a tab without showing anything new is a bug.
 - Pages that are mostly data (tables, usage) may use the wide container (1500px); everything else stays 1180px.
@@ -31,6 +32,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Name is "ARdex" (header, tab titles, footer). "arDB" rebrand is undecided; don't change it.
 - Top bar on every page (blue in light mode, dark in dark mode): Pokémon ▾, Tools ▾, light/dark toggle, Aeron Region link, search. NO Home tab; the logo links home.
 - Dates are written "07 NOV 2026" (two-digit day, capital month, spaces), or "APR 2024" without a day (fmtDate in src/lib/usage.ts).
+- Every Pokémon, move, item, ability and type name shown on the site links to its own page (tools included, e.g. VGC usage cards). Only exception: the Teambuilder's editor and pick list, where the data is already shown and a link would pull you off your team.
 - Page titles get a small muted italic label: "Dragon (type)", "Rock Slide (move)", etc.
 
 ### Homepage
@@ -66,7 +68,8 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Tera types card is shown for every format; formats without Tera say "No Terastallization in this format", SV formats without data say "No Tera data for this period".
 - Format picker grouped by source (Showdown ladder, Limitless tournaments, official majors), current formats first, then past formats (every VGC format since gen 8, each from its last full month on the ladder).
 - Format picker: source tabs (Showdown ladder / Tournaments / Official majors), one dropdown grouped by game and year (Champions, Scarlet & Violet 2026, 2025, 2024…), Bo1/Bo3 as a toggle beside it (never separate list entries).
-- Set builder is opt-in: browsing shows plain data; "Build a set from this data" opens it (stays open while you switch Pokémon; "Close set builder" hides it). While open, rows in Moves (up to 4), Items, Abilities, Tera types and Spreads/Natures are click-to-select (checkbox + highlight); "Your set" shows the Showdown text live, starting from the most common pick of each; "Reset to most common". Move type label sits right after the move name (doesn't need to line up).
+- Set builder is opt-in: browsing shows plain data; "Build a set from this data" opens it (stays open while you switch Pokémon; "Close set builder" hides it). While open, rows in Moves (up to 4), Items, Abilities, Tera types and Spreads/Natures are click-to-select (checkbox + highlight); "Your set" shows the Showdown text live, starting from the most common pick of each; "Reset to most common". Move type label sits right after the move name (doesn't need to line up); no Physical/Special/Status icon in usage cards. While the builder is open, clicking a name selects the row instead of following its link.
+- Pickers show a small battle count in each option ("· 250k battles"): formats, months and events.
 - Showdown formats: every month with a real ladder at 1500+ and 1760+ (Month dropdown + rating toggle); the default view is the last full month at 1760+ (matches Pikalytics).
 - Tournaments and majors show how much data is behind them (events, team sheets, battles), an "Event" dropdown (all events, or one), and an "Events in this data" table sorted by battles. Each Pokémon shows its team count.
 - "Add set to Teambuilder ▾" opens a list of your saved teams (plus "+ New team") and adds the set to the one you pick; "Copy as Showdown text".

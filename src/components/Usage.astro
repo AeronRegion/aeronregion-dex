@@ -44,6 +44,7 @@ const mons = d.mons.map((m: any, k: number) => {
 const svFormat = /^Scarlet & Violet/.test(f.name) || (f.group === 'pd' && +f.id.slice(3) >= 2023 && +f.id.slice(3) <= 2026) || (f.group === 'lt' && /^Scarlet/.test(f.name));
 const DATA = { sheets, champ, mons, colors: { ...typeColors, Stellar: '#40a3c5' }, tera: svFormat ? 'nodata' : 'none' };
 const fmtNum = (n: number) => (n ?? 0).toLocaleString('en-US');
+const short = (n: number) => !n ? '' : n >= 1e6 ? `${+(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${Math.round(n / 1e3)}k` : String(n);
 // tournaments and majors: the whole set, or one event of it
 const parent: any = f.group === 'sd' ? null : f.def ? f : formats.find((x) => x.id === f.base);
 const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
@@ -55,7 +56,7 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   <div class="upick">
     <select class="field" id="ufmt" aria-label="Format">
       {pickerGroups(f.group).map((g) => (
-        <optgroup label={g.game}>{g.items.map((x: any) => <option value={`/usage/${x.id}/`} selected={x.fam === f.fam || x.id === f.base}>{x.short}{x.group === 'sd' ? (x.current ? ' (current)' : ` · ${monthName(x.period)}`) : x.group === 'lt' ? ` · ${fmtRange(x.period)}` : ''}</option>)}</optgroup>
+        <optgroup label={g.game}>{g.items.map((x: any) => <option value={`/usage/${x.id}/`} selected={x.fam === f.fam || x.id === f.base}>{x.short}{x.group === 'sd' ? (x.current ? ' (current)' : ` · ${monthName(x.period)}`) : x.group === 'lt' ? ` · ${fmtRange(x.period)}` : ''}{` · ${short(x.group === 'sd' ? x.total : x.battles || x.total)} ${x.group === 'sd' || x.battles ? 'battles' : 'teams'}`}</option>)}</optgroup>
       ))}
     </select>
     {f.group === 'sd' && (twin(f)
@@ -67,7 +68,7 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
       const cuts = [...new Set(vs.filter((x: any) => x.period === f.period).map((x: any) => x.cutoff))].sort();
       const pick = (month: string, cut: number) => vs.find((x: any) => x.period === month && x.cutoff === cut) ?? vs.find((x: any) => x.period === month);
       return <>
-        {months.length > 1 && <label class="usel">Month <select class="field ujump">{months.map((mo) => <option value={`/usage/${pick(mo, f.cutoff).id}/`} selected={mo === f.period}>{monthName(mo)}{vs.find((x: any) => x.period === mo && x.def) ? ' (default)' : ''}</option>)}</select></label>}
+        {months.length > 1 && <label class="usel">Month <select class="field ujump">{months.map((mo) => <option value={`/usage/${pick(mo, f.cutoff).id}/`} selected={mo === f.period}>{monthName(mo)}{vs.find((x: any) => x.period === mo && x.def) ? ' (default)' : ''} · {short(pick(mo, f.cutoff)?.total)} battles</option>)}</select></label>}
         {cuts.length > 1
           ? <span class="ubo" role="group" aria-label="Rating">{cuts.map((c) => <a href={`/usage/${pick(f.period, c)!.id}/`} class:list={['segchip', { on: c === f.cutoff }]} title={`Games where players were rated ${c}+`}>{c}+</a>)}</span>
           : <span class="ubo solo">Rated {f.cutoff}+</span>}
@@ -76,7 +77,7 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
     {parent?.events?.length > 0 && (
       <label class="usel">Event <select class="field ujump">
         <option value={`/usage/${parent.id}/`} selected={f.def}>All events ({parent.tours})</option>
-        {parent.events.map((e: any) => <option value={`/usage/${e.id}/`} selected={e.id === f.id}>{e.name} · {fmtDate(e.date)} · {fmtNum(e.players)} players</option>)}
+        {parent.events.map((e: any) => <option value={`/usage/${e.id}/`} selected={e.id === f.id}>{e.name} · {fmtDate(e.date)} · {fmtNum(e.players)} players · {short(e.battles)} battles</option>)}
       </select></label>
     )}
   </div>
@@ -122,6 +123,8 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   import { CAT_SVG } from '../lib/ac';
   const D = JSON.parse(document.getElementById('udata')!.textContent!);
   const SPR = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites';
+  // same slugs as the site's pages (lib/data slug)
+  const slug = (n: string) => n.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/♀/g, '-f').replace(/♂/g, '-m').replace(/['’.:%]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const sel = document.getElementById('ufmt') as HTMLSelectElement;
   sel.addEventListener('change', () => { location.href = sel.value; });
   document.querySelectorAll<HTMLSelectElement>('.ujump').forEach((x) => x.addEventListener('change', () => { location.href = x.value; }));
@@ -174,11 +177,11 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
       </div>
       <div class="ugrid">
         ${m.st ? card('Base stats', 'c-bs', '', m.st.map((v: number, i: number) => `<div class="urow bsr"><span class="bl">${STATN[i]}</span><span class="bb">${bar(v)}</span><span class="bv">${v}</span></div>`).concat(`<div class="urow bsr tot"><span class="bl">Total</span><span class="bb"></span><span class="bv">${m.st.reduce((x: number, y: number) => x + y, 0)}</span></div>`)) : ''}
-        ${card('Moves', 'c-mv', '', m.mv.map(([n, t, c, p]: any, i: number) => row(`<span class="nm">${esc(n)}</span><span class="tg">${chip(t).replace('<a ', '<span ').replace('</a>', '</span>')}${cat(c)}</span>`, p, 'mv', i)))}
+        ${card('Moves', 'c-mv', '', m.mv.map(([n, t, c, p]: any, i: number) => row(`<a class="nm" href="/moves/${slug(n)}/">${esc(n)}</a><span class="tg">${chip(t).replace('<a ', '<span ').replace('</a>', '</span>')}</span>`, p, 'mv', i)))}
         ${card('Teammates', 'c-mt', '', m.mt.map(([n, k, art, p]: any) => row(`${art ? ic(`${SPR}/pokemon/versions/generation-vii/icons/${art}.png`, `${SPR}/pokemon/${art}.png`) : ''}${byK.has(k) ? `<a class="pk" href="#${k}">${esc(n)}</a>` : esc(n)}`, p)))}
-        ${card('Items', 'c-it', '', m.it.map(([n, icon, p]: any, i: number) => row(`${icon ? `<img src="${SPR}/items/${icon}.png" alt="" width="24" height="24" loading="lazy" />` : ''}<span class="nm">${esc(n)}</span>`, p, 'it', i)))}
+        ${card('Items', 'c-it', '', m.it.map(([n, icon, p]: any, i: number) => row(`${icon ? `<img src="${SPR}/items/${icon}.png" alt="" width="24" height="24" loading="lazy" />` : ''}<a class="nm" href="/items/${slug(n)}/">${esc(n)}</a>`, p, 'it', i)))}
         <div class="ustack">
-          ${card('Abilities', 'c-ab', '', m.ab.map(([n, p]: any, i: number) => row(`<span class="nm">${esc(n)}</span>`, p, 'ab', i)))}
+          ${card('Abilities', 'c-ab', '', m.ab.map(([n, p]: any, i: number) => row(`<a class="nm" href="/abilities/${slug(n)}/">${esc(n)}</a>`, p, 'ab', i)))}
           ${m.te.length ? card('Tera types', 'c-te', '', m.te.map(([t, p]: any, i: number) => row(chip(t).replace('<a ', '<span ').replace('</a>', '</span>'), p, 'te', i))) : `<div class="ucard c-te"><h3>Tera types</h3><p class="unone">${D.tera === 'none' ? 'No Terastallization in this format.' : 'No Tera data for this period.'}</p></div>`}
         </div>
         ${m.sp.length
@@ -220,7 +223,7 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
       sync();
     };
     panel.querySelectorAll<HTMLElement>('.pickable').forEach((r) => {
-      r.addEventListener('click', () => choose(r));
+      r.addEventListener('click', (e) => { if (building) { e.preventDefault(); choose(r); } });
       r.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose(r); } });
     });
     document.getElementById('ureset')!.addEventListener('click', () => { P.mv = m.mv.slice(0, 4).map((_: any, i: number) => i); P.it = m.it.length ? 0 : -1; P.ab = m.ab.length ? 0 : -1; P.te = m.te.length ? 0 : -1; P.sp = m.sp.length ? 0 : -1; P.na = m.na.length ? 0 : -1; msg.textContent = ''; sync(); });
@@ -312,7 +315,8 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   .upanel :global(.pickable.sel .tick) { background: #2f6db5; border-color: #24579a; }
   .upanel :global(.pickable.sel .tick)::after { content: ''; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
   .upanel :global(.c-mv .urow .tg) { margin-left: .2rem; }
-  .upanel :global(.urow .nm) { overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
+  .upanel :global(.urow .nm) { overflow: hidden; text-overflow: ellipsis; }
+  .upanel.building :global(.urow a.nm) { color: var(--ink) !important; text-decoration: none !important; pointer-events: none; }
   .upanel :global(.ugrid) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8rem; margin-top: .8rem; align-items: start; }
   .upanel :global(.ucard) { border: 1px solid var(--line-2); border-radius: 4px; background: var(--card); min-width: 0; }
   .upanel :global(.ucard h3) { margin: 0; padding: .4rem .6rem; font-size: .9rem; border-bottom: 1px solid var(--line-2); }
@@ -379,7 +383,8 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   .upanel :global(.tick) { flex: none; width: 14px; height: 14px; border: 1px solid var(--line-2); border-radius: 2px; background: var(--card); display: inline-block; position: relative; }
   .upanel :global(.pickable.sel .tick) { background: #2f6db5; border-color: #24579a; }
   .upanel :global(.pickable.sel .tick)::after { content: ''; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
-  .upanel :global(.urow .nm) { overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
+  .upanel :global(.urow .nm) { overflow: hidden; text-overflow: ellipsis; }
+  .upanel.building :global(.urow a.nm) { color: var(--ink) !important; text-decoration: none !important; pointer-events: none; }
   .upanel :global(.ugrid) { grid-template-columns: 1fr; }
     .upanel :global(.unums) { margin-left: 0; }
     .upanel :global(.ucard), .upanel :global(.ustack) { height: auto; }

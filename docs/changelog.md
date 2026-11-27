@@ -36,3 +36,5 @@
 - 2026-11-26: Header tagline changed to "Data & tools in one place"
 - 2026-11-26: VGC usage: set builder is now opt-in ("Build a set from this data"), with Clear and Close; dates shown as 07 NOV 2026 / APR 2024
 - 2026-11-26: VGC usage: larger cards closer to Pikalytics (fixed-height boxes, taller rows, bigger text and icons)
+- 2026-11-26: VGC usage: battle counts shown in the format/month/event dropdowns; move, item and ability names link to their pages again; no category icon in the moves card; rule added: every name links to its page except in the Teambuilder
+- 2026-11-26: Move tables: multi-hit count (×2–5) sits on the same line as the power so rows keep one height
