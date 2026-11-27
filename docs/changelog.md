@@ -25,3 +25,4 @@
 - 2026-11-26: Teambuilder: removed the stat summary box (top right of the set card); the EV table below already shows the stats
 - 2026-11-26: Teambuilder: when the move list is narrow (side by side with the EVs), each move's description shows as a second line instead of being hidden
 - 2026-11-26: Moves list: tag filter now includes every tag in the data (Let's Go exclusive, Z-Move, Max Move, G-Max Move), so tag links on move pages filter correctly
+- 2026-11-26: Type pages: removed the color square before the type name in the title
