@@ -26,6 +26,9 @@ export function autocomplete(input: HTMLInputElement, getItems: () => Promise<Ac
     // move lists get Showdown-style detail columns, so they need more room (kept inside the window)
     const room = document.documentElement.clientWidth - input.getBoundingClientRect().left - 8;
     box.style.width = (rich ? Math.max(input.offsetWidth, Math.min(640, room)) : Math.max(input.offsetWidth, 260)) + 'px';
+    // a short box near the right edge (the header search): open the list leftwards so it stays on screen
+    const w = box.offsetWidth || parseFloat(box.style.width);
+    if (w > input.offsetWidth && (input.id === 'find' || room < w)) box.style.left = (input.offsetLeft + input.offsetWidth - w) + 'px';
   };
   const render = () => {
     box.innerHTML = shown.map((it, i) => `<div class="ac-row${i === active ? ' on' : ''}" role="option" data-i="${i}">` +

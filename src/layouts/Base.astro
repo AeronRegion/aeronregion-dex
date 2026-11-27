@@ -56,7 +56,7 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
         </nav>
         <button type="button" class="mode" id="mode" aria-label="Switch to dark mode" title="Dark mode"><span class="moon" aria-hidden="true">☾</span><span class="sun" aria-hidden="true">☀</span></button>
         <a class="ar" href="https://aeronregion.net"><span class="arl">Aeron Region</span> <span aria-hidden="true">↗</span></a>
-        <form class="find" action="/pokedex/" role="search"><input id="find" placeholder="Search Pokémon, moves, abilities…" autocomplete="off" aria-label="Search" /></form>
+        <form class="find" action="/pokedex/" role="search"><input id="find" placeholder="Search…" autocomplete="off" aria-label="Search" /></form>
       </div>
     </header>
     <main class="wrap"><slot /></main>
@@ -164,7 +164,7 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
   .mode .sun { display: none; }
   :global(html[data-theme='dark']) .mode .sun { display: inline; }
   :global(html[data-theme='dark']) .mode .moon { display: none; }
-  .find { width: 300px; position: relative; }
+  .find { width: 190px; position: relative; }
   .find input { width: 100%; font: inherit; font-size: .9rem; padding: .38rem .7rem; border: 2px solid var(--brick); background: var(--card); color: var(--ink); }
   @media (max-width: 700px) {
     .bar { flex-wrap: wrap; height: auto; gap: 0 .9rem; padding-top: .3rem; row-gap: 0; }

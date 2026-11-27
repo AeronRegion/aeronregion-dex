@@ -556,3 +556,7 @@ html[data-theme='dark'] .card .chip[data-type] { color: color-mix(in srgb, var(-
 main .controls { justify-content: center; }
 main .controls > input.field, main .controls > label > input.field { flex: 0 1 17rem !important; width: 17rem; min-width: 0 !important; max-width: 17rem; }
 main input.field.mfilter, main input#lf { min-width: 0 !important; width: 15rem; flex: 0 1 15rem !important; }
+/* Fixed-size grids and charts sit centered in the page column, not stuck to the left */
+main .pick { justify-content: center; }
+main table.tchart, main table.nat { margin-left: auto !important; margin-right: auto !important; }
+main .scroll:has(> table.tchart), main .scroll:has(> table.nat) { display: flex; justify-content: center; }

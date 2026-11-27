@@ -23,6 +23,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Click every button and link you add (in the local build) and confirm it does what its label says before pushing. A button that only toggles a row or opens a tab without showing anything new is a bug.
 - Desktop scale (≥1100px): every page is drawn 1.3x (CSS `zoom` on body) so sizes never change between tabs and ARdex at any browser zoom looks like PokemonDB at the same zoom (Grant browses at 75%). The header bar is the same 940px on every page; content is 940px, the Teambuilder 1180px, VGC usage 1500px. Phones are unchanged. Media queries still see the real window width. After visual changes, click through several tabs and check the header and text size don't change.
 - Review every page in dark mode too before pushing.
+- Fixed-size grids and charts (type tiles, type chart, nature chart) are centered in the page column, never stuck to the left.
 - Matching sections side by side (e.g. Defense and Moveset coverage) start at the same height: notes go under tables, not between heading and table.
 
 ## Locked decisions
@@ -33,7 +34,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Type labels: the rounded Scarlet & Violet type icons from PokeAPI (sprites/types/generation-ix/scarlet-violet/<id>.png, type symbol + name), 80x16 everywhere, via `data-type` on .chip/.tchip/.ac-t (CSS in global.css). Every new type label must carry data-type. Pokémon cards show types as colored text ("#0131 / Water · Ice").
 - Pokémon tables and cards use the small box icons (PokemonDB style).
 - Name is "ARdex" (header, tab titles, footer). "arDB" rebrand is undecided; don't change it.
-- Top bar on every page (blue in light mode, dark in dark mode): Pokémon ▾, Tools ▾, light/dark toggle, Aeron Region link, search. NO Home tab; the logo links home.
+- Top bar on every page (blue in light mode, dark in dark mode): Pokémon ▾, Tools ▾, light/dark toggle, Aeron Region link, search (short box, 190px, "Search…"; its suggestion list opens leftwards when there's no room). NO Home tab; the logo links home.
 - Dates are written "07 NOV 2026" (two-digit day, capital month, spaces), or "APR 2024" without a day (fmtDate in src/lib/usage.ts).
 - Every Pokémon, move, item, ability and type name shown on the site links to its own page (tools included, e.g. VGC usage cards). Only exception: the Teambuilder's editor and pick list, where the data is already shown and a link would pull you off your team.
 - Page titles get a small muted italic label: "Dragon (type)", "Rock Slide (move)", etc.
