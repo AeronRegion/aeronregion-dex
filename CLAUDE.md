@@ -59,7 +59,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Evolution: the stage you're on is a plain box, not a link.
 - Damage taken includes abilities (e.g. Levitate shows Ground 0, "Includes Levitate").
   Multiple relevant abilities get toggle buttons. No "Before abilities" note.
-- "VGC usage" section on the Overview (before Where to find), only when the Pokémon appears in usage data: Format | Source | When | Usage | Rank, current formats first, 6 rows + "Show all formats"; each format links to that Pokémon on the usage page. Pokémon with no data show "Not used in any recorded VGC format."
+- "Usage" section on the Overview (before Where to find; VGC formats and Smogon tiers): Format | Source | When | Usage | Rank, current formats first, 6 rows + "Show all formats"; each format links to that Pokémon on the usage page. Pokémon with no data show "Not used in any recorded VGC format or Smogon tier."
 - Move category icons are PokemonDB-style (CAT_SVG in src/lib/ac.ts): Physical red-outlined white burst, Special blue tilted rings, Status grey tilted pill with a dark left half.
 - Moves tab: one list sorted Physical > Special > Status, with a "How" column
   (Lv / TM / Egg / Tutor). "By how it learns" view: one table per method, each sortable on its own by clicking a heading (level up starts sorted by level). Priority is a column (green +, red -).
@@ -83,6 +83,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Tournaments and majors show how much data is behind them (events, team sheets, battles). No event dropdown. Official majors have an "Events in this data" table sorted by battles (each event links to its own page); Limitless tournaments are never listed or given pages by name (grassroots names look like spam). Each Pokémon shows its team count.
 - "Add set to Teambuilder ▾" opens a list of your saved teams (plus "+ New team") and adds the set to the one you pick; "Copy as Showdown text".
 - Remembers your spot (localStorage): /usage/ and the Tools link reopen the last format, month, rating and Pokémon; switching format, month or rating keeps the same Pokémon; the set builder stays open or closed as you left it.
+- Smogon tiers tab (sm- files, same Showdown stats source): gen 9 and gen 8 Ubers, OU, UU, RU, NU, PU, LC, Monotype, Doubles OU; last 12 months (gen 9) / 6 months (gen 8) at 1500+ and the top cutoff (1825+ for OU/DOU). Sets copy at Level 100 (LC 5).
 - Data refreshes weekly via GitHub Actions (.github/workflows/usage.yml). No Smogon analyses or Pikalytics scraping.
 
 ## Docs index

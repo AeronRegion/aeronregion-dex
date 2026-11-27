@@ -9,8 +9,10 @@ import Dropdown from './Dropdown.astro';
 const { id } = Astro.props as { id: string };
 const f = formats.find((x) => x.id === id)!;
 const d = loadFormat(id);
-const sheets = f.group !== 'sd';
+const sheets = !f.ladder;
 const champ = f.name.startsWith('Champions');
+// Smogon tiers play at Level 100 (Little Cup at 5); VGC at 50
+const lvl = f.group === 'sm' ? (/lc$/.test(f.label) ? 5 : 100) : 50;
 const toID = (s: string) => String(s ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
 const keyOf = (name: string, s: any) => toID(s?.name ?? name);
 const STAT = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'];
@@ -24,7 +26,7 @@ const mons = d.mons.map((m: any, k: number) => {
   const paste = [
     `${s?.name ?? m.name}${m.items[0] ? ` @ ${itemName(m.items[0][0])}` : ''}`,
     m.abilities[0] ? `Ability: ${abilityName(m.abilities[0][0])}` : '',
-    'Level: 50',
+    `Level: ${lvl}`,
     m.tera?.[0] ? `Tera Type: ${m.tera[0][0]}` : '',
     sp[0] ? `EVs: ${sp[0][1].map((x: number, i: number) => (x ? `${x} ${STAT[i]}` : '')).filter(Boolean).join(' / ')}` : '',
     nat ? `${nat} Nature` : '',
@@ -45,30 +47,30 @@ const mons = d.mons.map((m: any, k: number) => {
 });
 // Tera exists only in Scarlet & Violet formats; Showdown only started recording it in Sept 2024
 const svFormat = /^Scarlet & Violet/.test(f.name) || (f.group === 'pd' && +f.id.slice(3) >= 2023 && +f.id.slice(3) <= 2026) || (f.group === 'lt' && /^Scarlet/.test(f.name));
-const DATA = { sheets, champ, mons, colors: { ...typeColors, Stellar: '#40a3c5' }, tera: svFormat ? 'nodata' : 'none' };
+const DATA = { sheets, champ, lvl, mons, colors: { ...typeColors, Stellar: '#40a3c5' }, tera: svFormat ? 'nodata' : 'none' };
 const fmtNum = (n: number) => (n ?? 0).toLocaleString('en-US');
 // a Showdown regulation's battles over every recorded month (one rating cutoff, so games aren't counted twice)
 const regTotal = (x: any) => variants(x).filter((v: any) => v.cutoff === x.cutoff).reduce((a: number, v: any) => a + (v.total ?? 0), 0);
 const regRange = (x: any) => { const ms = [...new Set(variants(x).map((v: any) => v.period))].sort(); return ms.length > 1 ? `${monthName(ms[0])} – ${monthName(ms.at(-1))}` : monthName(ms[0]); };
 const short = (n: number) => !n ? '' : n >= 1e6 ? `${+(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${Math.round(n / 1e3)}k` : String(n);
 // tournaments and majors: the whole set, or one event of it
-const parent: any = f.group === 'sd' ? null : f.def ? f : formats.find((x) => x.id === f.base);
+const parent: any = f.ladder ? null : f.def ? f : formats.find((x) => x.id === f.base);
 const pct = (p: number) => (p ?? 0).toFixed(2) + '%';
 ---
 <div class="ufmt">
   <nav class="usrc" aria-label="Data source">
-    {GROUPS.map((g) => { const first = pickerGroups(g.key)[0]?.items[0]; return first && <a href={`/usage/${first.id}/`} class:list={['segchip', { on: g.key === f.group }]} aria-current={g.key === f.group ? 'page' : undefined}>{({ sd: 'Showdown ladder', lt: 'Tournaments', pd: 'Official majors' } as any)[g.key]}</a>; })}
+    {GROUPS.map((g) => { const first = pickerGroups(g.key)[0]?.items[0]; return first && <a href={`/usage/${first.id}/`} class:list={['segchip', { on: g.key === f.group }]} aria-current={g.key === f.group ? 'page' : undefined}>{({ sd: 'Showdown ladder', lt: 'Tournaments', pd: 'Official majors', sm: 'Smogon tiers' } as any)[g.key]}</a>; })}
   </nav>
   <div class="upick">
     <Dropdown label="Format" minWidth="19rem" groups={pickerGroups(f.group).map((g) => ({ label: g.game, items: g.items.map((x: any) => ({
       href: `/usage/${x.id}/`, on: x.fam === f.fam || x.id === f.base, a: x.short,
-      b: x.group === 'sd' ? regRange(x) + (x.current ? ' · current' : '') : x.group === 'lt' ? fmtRange(x.period) : '',
-      c: `${short(x.group === 'sd' ? regTotal(x) : x.battles || x.total)} ${x.group === 'sd' || x.battles ? 'battles' : 'teams'}`,
+      b: x.ladder ? regRange(x) + (x.current ? ' · current' : '') : x.group === 'lt' ? fmtRange(x.period) : '',
+      c: `${short(x.ladder ? regTotal(x) : x.battles || x.total)} ${x.ladder || x.battles ? 'battles' : 'teams'}`,
     })) }))} />
-    {f.group === 'sd' && (twin(f)
+    {f.ladder && (twin(f)
       ? <span class="ubo" role="group" aria-label="Best of">{[false, true].map((b) => { const x = b === f.bo3 ? f : twin(f); return <a href={`/usage/${x.id}/`} class:list={['segchip', { on: b === f.bo3 }]}>{b ? 'Bo3' : 'Bo1'}</a>; })}</span>
       : <span class="ubo solo">{f.bo3 ? 'Bo3 only' : 'Bo1 only'}</span>)}
-    {f.group === 'sd' && (() => {
+    {f.ladder && (() => {
       const vs = variants(f);
       const months = [...new Set(vs.map((x: any) => x.period))].sort().reverse();
       const cuts = [...new Set(vs.filter((x: any) => x.period === f.period).map((x: any) => x.cutoff))].sort();
@@ -83,8 +85,8 @@ const pct = (p: number) => (p ?? 0).toFixed(2) + '%';
   </div>
 </div>
 <p class="note usum">
-  {f.group === 'sd'
-    ? <>Showdown ladder, {monthName(f.period)}: <b>{fmtNum(f.total)}</b> battles, weighted toward players rated {f.cutoff}+ (whole regulation: <b>{fmtNum(regTotal(f))}</b> battles over {new Set(variants(f).map((v: any) => v.period)).size} months).{!f.current && f.def && ' This format has ended; this is its last full month on the ladder.'}</>
+  {f.ladder
+    ? <>Showdown ladder{f.group === 'sm' ? ' (Smogon tier)' : ''}, {monthName(f.period)}: <b>{fmtNum(f.total)}</b> battles, weighted toward players rated {f.cutoff}+ (whole {f.group === 'sm' ? 'format' : 'regulation'}: <b>{fmtNum(regTotal(f))}</b> battles over {new Set(variants(f).map((v: any) => v.period)).size} months).{!f.current && f.def && ' This format has ended; this is its last full month on the ladder.'}</>
     : f.event
       ? <>{f.source.replace(/ \(.*$/, '')}, {fmtDate(f.period)}: <b>{fmtNum(f.players)}</b> players, <b>{fmtNum(f.total)}</b> team sheets, <b>{fmtNum(f.battles)}</b> battles.</>
       : <>{f.group === 'lt' ? `Limitless tournaments, ${fmtRange(f.period)}` : 'Official majors, Masters division'}: <b>{fmtNum(f.tours)}</b> events, <b>{fmtNum(f.total)}</b> team sheets{f.battles ? <>, <b>{fmtNum(f.battles)}</b> battles</> : ''}.</>}
@@ -152,7 +154,7 @@ const pct = (p: number) => (p ?? 0).toFixed(2) + '%';
       const sp = P.sp >= 0 ? m.sp[P.sp] : null, nat = sp ? sp[0] : P.na >= 0 ? m.na[P.na][0] : '';
       return [
         `${m.n}${P.it >= 0 ? ` @ ${m.it[P.it][0]}` : ''}`,
-        P.ab >= 0 ? `Ability: ${m.ab[P.ab][0]}` : '', 'Level: 50',
+        P.ab >= 0 ? `Ability: ${m.ab[P.ab][0]}` : '', `Level: ${D.lvl}`,
         P.te >= 0 ? `Tera Type: ${m.te[P.te][0]}` : '',
         sp ? `EVs: ${sp[1].map((x: number, i: number) => (x ? `${x} ${STAT[i]}` : '')).filter(Boolean).join(' / ')}` : '',
         nat ? `${nat} Nature` : '',

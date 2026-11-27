@@ -80,6 +80,9 @@ const sheetMons = (F) => [...F.mons].map(([name, M]) => ({
 // downloaded once: if the saved file already has that month, it's kept.
 try {
   const SD = 'https://www.smogon.com/stats';
+  // Smogon tiers (singles + Doubles OU), gen 9 and gen 8. They get their own picker tab (sm- files) and less history:
+  // the last 12 months of a gen 9 ladder, the last 6 of a gen 8 one.
+  const TIER_RE = /^gen[89](ubers|ou|uu|ru|nu|pu|lc|monotype|doublesou)$/;
   const root = await get(`${SD}/`, 'text');
   const months = [...root.matchAll(/href="(\d{4}-\d{2})\/"/g)].map((m) => m[1]).filter((m) => m >= '2019-11').sort();
   const latest = months.at(-1);
@@ -87,7 +90,7 @@ try {
   for (const month of months) {
     let list; try { list = await get(`${SD}/${month}/chaos/`, 'text'); } catch { continue; }
     const files = [...list.matchAll(/href="([a-z0-9]+)-(\d+)\.json">[^<]*<\/a>\s+\S+\s+\S+\s+(\d+)/g)].map((m) => ({ fmt: m[1], cut: +m[2], size: +m[3] }))
-      .filter((f) => /^gen[89].*vgc|^gen9champions.*vgc/.test(f.fmt));
+      .filter((f) => /^gen[89].*vgc|^gen9champions.*vgc/.test(f.fmt) || TIER_RE.test(f.fmt));
     const hi = new Map();
     for (const f of files) if (!hi.has(f.fmt) || f.cut > hi.get(f.fmt).cut) hi.set(f.fmt, f);
     for (const [fmt, f] of hi) {
@@ -100,7 +103,6 @@ try {
   // (1500+ and the top one, 1760+). The default view is the last of those months at the top cutoff.
   // Files: sd-<fmt>.json (default) and sd-<fmt>_<month>_<cutoff>.json (the rest). Finished months are
   // only downloaded once; the current month is refreshed every run.
-  const CUTS = [1500, 1760];
   const parse = (fmt, d) => Object.entries(d.data).map(([name, x]) => {
     const total = Object.values(x.Abilities ?? {}).reduce((a, b) => a + b, 0) || 1;
     return {
@@ -111,14 +113,15 @@ try {
   }).filter((m) => m.usage >= 0.5).sort((a, b) => b.usage - a.usage);
   for (const [fmt, ms] of seen) {
     const max = Math.max(...ms.map((x) => x.size));
-    const keep = ms.filter((x) => x.size >= max * 0.1);
+    const tier = TIER_RE.test(fmt), pre = tier ? 'sm' : 'sd';
+    const keep = ms.filter((x) => x.size >= max * 0.1).slice(tier ? (fmt.startsWith('gen9') ? -12 : -6) : 0);
     const def = keep.at(-1);
     const current = def.current && def.size >= max * 0.25;
-    for (const c of keep) for (const cut of CUTS) {
-      if (cut > c.cut) continue;
-      const isDef = c === def && cut === Math.min(1760, def.cut);
-      const id = isDef ? `sd-${fmt}` : `sd-${fmt}_${c.month}_${cut}`;
-      const meta0 = { id, base: `sd-${fmt}`, label: fmt, source: 'Showdown ladder', period: c.month, cutoff: cut, current, def: isDef };
+    // two rating cutoffs: 1500+ and the month's top one (1760+, or 1825+ for OU / Doubles OU)
+    for (const c of keep) for (const cut of [...new Set([1500, c.cut])]) {
+      const isDef = c === def && cut === def.cut;
+      const id = isDef ? `${pre}-${fmt}` : `${pre}-${fmt}_${c.month}_${cut}`;
+      const meta0 = { id, base: `${pre}-${fmt}`, label: fmt, source: 'Showdown ladder', period: c.month, cutoff: cut, current, def: isDef };
       const file = `${OUT}/${id}.json`;
       const prev = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : null;
       if (prev && prev.period === c.month && prev.cutoff === cut && !c.current) { index.push({ ...meta0, total: prev.total }); continue; }
@@ -211,5 +214,7 @@ try {
   }
 } catch (e) { console.error('majors failed:', e.message); }
 
+// Smogon tier months that fell out of the window: remove their files
+if (index.some((f) => f.id.startsWith('sm-'))) { const ids = new Set(index.map((f) => f.id)); for (const n of fs.readdirSync(OUT)) if (n.startsWith('sm-') && !ids.has(n.slice(0, -5))) fs.unlinkSync(`${OUT}/${n}`); }
 if (index.length) fs.writeFileSync(`${OUT}/index.json`, JSON.stringify({ updated: new Date().toISOString().slice(0, 10), formats: index }, null, 1));
 else { console.error('no usage data fetched; keeping the old files'); process.exitCode = 1; }

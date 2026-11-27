@@ -37,6 +37,8 @@ export const abilityName = (x: string) => abBy.get(toID(x)) ?? x;
 // readable format names
 const regLabel = (r: string) => (r.length === 2 ? `${r[0]}-${r[1]}` : r).toUpperCase();
 const GAME: Record<string, string> = { '8': 'Sword & Shield', '9': 'Scarlet & Violet' };
+const TIER: Record<string, string> = { ubers: 'Ubers', ou: 'OU', uu: 'UU', ru: 'RU', nu: 'NU', pu: 'PU', lc: 'LC', monotype: 'Monotype', doublesou: 'Doubles OU' };
+const TIER_ORDER = Object.keys(TIER);
 export const formatName = (f: any) => {
   if (f.id.startsWith('sd-')) {
     const m = f.label.match(/^gen(\d)(champions)?vgc(\d{4})(.*?)(bo3)?$/);
@@ -52,17 +54,19 @@ export const formatName = (f: any) => {
     const sv = code.match(/^SV([A-Z])$/);
     return sv ? `Scarlet & Violet Reg ${sv[1]}` : `Champions Reg ${code}`;
   }
+  if (f.id.startsWith('sm-')) { const m = f.label.match(/^gen(\d)(.+)$/); return m ? `${GAME[m[1]] ?? 'Gen ' + m[1]} ${TIER[m[2]] ?? m[2]}` : f.label; }
   return f.label.replace(/^(\d{4}) season majors$/, '$1 season (official majors)');
 };
 export const GROUPS = [
   { key: 'sd', label: 'Showdown ladder', note: 'Monthly ladder stats, top-rated games only' },
   { key: 'lt', label: 'Online tournaments (Limitless)', note: 'Open team sheets from the last 45 days' },
   { key: 'pd', label: 'Official majors', note: 'Regionals, Internationals and Worlds, Masters division (RK9 team lists)' },
+  { key: 'sm', label: 'Smogon tiers', note: 'Monthly Showdown ladder stats for Smogon singles tiers and Doubles OU' },
 ];
 export const formats = (idx.formats as any[])
   .filter((f) => !/custom/i.test(f.label) && (f.total ?? 0) >= (f.event ? 32 : 100))
-  .map((f) => ({ ...f, name: formatName(f), group: f.id.slice(0, 2) }))
-  .map((f) => ({ ...f, current: f.group !== 'sd' || f.current !== false }))
+  .map((f) => ({ ...f, name: formatName(f), group: f.id.slice(0, 2), ladder: /^s[dm]-/.test(f.id) }))
+  .map((f) => ({ ...f, current: !f.ladder || f.current !== false }))
   .sort((a, b) => GROUPS.findIndex((g) => g.key === a.group) - GROUPS.findIndex((g) => g.key === b.group) || Number(b.current) - Number(a.current) || (a.group === 'pd' ? b.id.localeCompare(a.id) : b.period.localeCompare(a.period)) || b.total - a.total);
 // Picker parts: which game/season a format belongs to, a short name inside that group, and its Bo3 twin.
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -78,6 +82,9 @@ for (const f of formats as any[]) {
     f.game = m?.[2] ? 'Champions' : m ? `${GAME[m[1]] ?? 'Gen ' + m[1]} ${m[3]}` : 'Other';
     f.short = f.name.replace(/ \(Bo3\)$/, '').replace(/^(Champions|Scarlet & Violet|Sword & Shield)( \d{4})? /, '').replace(/^VGC \d{4} (Series)/, '$1');
     f.order = m?.[2] ? 9999 : m ? +m[3] : 0;
+  } else if (f.group === 'sm') {
+    const m = f.label.match(/^gen(\d)(.+)$/);
+    f.bo3 = false; f.fam = f.base; f.game = GAME[m?.[1]] ?? 'Other'; f.short = TIER[m?.[2]] ?? f.label; f.order = +(m?.[1] ?? 0); f.tord = TIER_ORDER.indexOf(m?.[2]);
   } else {
     f.bo3 = false; f.fam = f.id; f.game = f.group === 'pd' ? 'Official majors' : f.name.startsWith('Champions') ? 'Champions' : 'Scarlet & Violet';
     f.short = f.group === 'pd' ? f.name.replace(' (official majors)', '') : f.name.replace(/^(Champions|Scarlet & Violet) /, '');
@@ -90,7 +97,7 @@ export const variants = (f: any) => (formats as any[]).filter((x) => x.base === 
 export const pickerGroups = (src: string) => {
   const list = (formats as any[]).filter((f) => f.def && f.group === src && (!f.bo3 || !twin(f)));
   const games = [...new Set(list.map((f) => f.game))].sort((a, b) => (list.find((f) => f.game === b)!.order - list.find((f) => f.game === a)!.order));
-  return games.map((g) => ({ game: g, items: list.filter((f) => f.game === g).sort((a, b) => b.period.localeCompare(a.period)) }));
+  return games.map((g) => ({ game: g, items: list.filter((f) => f.game === g).sort((a, b) => (a.tord ?? 0) - (b.tord ?? 0) || b.period.localeCompare(a.period)) }));
 };
 export const updated = idx.updated as string;
 export const loadFormat = (id: string) => get(id);

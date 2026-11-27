@@ -54,3 +54,4 @@
 - 2026-11-27: Pokémon pages: VGC usage section says so when a Pokémon has no recorded usage (instead of disappearing)
 - 2026-11-27: Usage page title label uses the date format (JAN 2024)
 - 2026-11-27: Usage: 'Usage in every format' link under the selected Pokémon; searching a Pokémon not in the format says where to look
+- 2026-11-27: Usage: Smogon tiers tab (gen 9 + gen 8 Ubers/OU/UU/RU/NU/PU/LC/Monotype/Doubles OU) from the Showdown ladder stats; Pokémon page section renamed Usage
