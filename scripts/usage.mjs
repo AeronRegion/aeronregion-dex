@@ -28,35 +28,50 @@ const addTeam = (F, team, w, l) => {
 };
 const sheetMons = (F) => [...F.mons].map(([name, M]) => ({
   name, usage: round((M.n / F.teams) * 100), n: M.n, wr: M.w + M.l ? round((M.w / (M.w + M.l)) * 100) : null,
-  moves: top(M.moves, M.n, 12), items: top(M.items, M.n, 8), abilities: top(M.abilities, M.n, 3),
-  tera: top(M.tera, M.n, 6), natures: top(M.natures, M.n, 6), spreads: [], mates: top(M.mates, M.n, 10, 1),
+  moves: top(M.moves, M.n, 30, 0.3), items: top(M.items, M.n, 20, 0.3), abilities: top(M.abilities, M.n, 5, 0.3),
+  tera: top(M.tera, M.n, 18, 0.3), natures: top(M.natures, M.n, 12, 0.3), spreads: [], mates: top(M.mates, M.n, 30, 0.5),
 })).filter((m) => m.usage >= 0.5).sort((a, b) => b.usage - a.usage);
 
-// ---------- 1. Showdown ----------
+// ---------- 1. Showdown ladder: every VGC format from gen 8 on ----------
+// Current formats (in the latest month) use the latest month. Finished formats use their busiest month
+// (largest file), and are only downloaded once: if the saved file already has that month, it's kept.
 try {
-  const root = await get('https://www.smogon.com/stats/', 'text');
-  const months = [...root.matchAll(/href="(\d{4}-\d{2}(?:-[A-Za-z0-9]+)?)\/"/g)].map((m) => m[1]).filter((m) => /^\d{4}-\d{2}$/.test(m)).sort();
-  const month = months.at(-1);
-  const list = await get(`https://www.smogon.com/stats/${month}/chaos/`, 'text');
-  const files = [...list.matchAll(/href="([a-z0-9]+)-(\d+)\.json"/g)].map((m) => ({ fmt: m[1], cut: +m[2] })).filter((f) => f.fmt.includes('vgc'));
-  const best = new Map();
-  for (const f of files) if (!best.has(f.fmt) || f.cut > best.get(f.fmt)) best.set(f.fmt, f.cut);
-  for (const [fmt, cut] of best) {
-    const d = await get(`https://www.smogon.com/stats/${month}/chaos/${fmt}-${cut}.json`);
+  const SD = 'https://www.smogon.com/stats';
+  const root = await get(`${SD}/`, 'text');
+  const months = [...root.matchAll(/href="(\d{4}-\d{2})\/"/g)].map((m) => m[1]).filter((m) => m >= '2019-11').sort();
+  const latest = months.at(-1);
+  const seen = new Map(); // fmt -> { month, cut, size, current }
+  for (const month of months) {
+    let list; try { list = await get(`${SD}/${month}/chaos/`, 'text'); } catch { continue; }
+    const files = [...list.matchAll(/href="([a-z0-9]+)-(\d+)\.json">[^<]*<\/a>\s+\S+\s+\S+\s+(\d+)/g)].map((m) => ({ fmt: m[1], cut: +m[2], size: +m[3] }))
+      .filter((f) => /^gen[89].*vgc|^gen9champions.*vgc/.test(f.fmt));
+    const hi = new Map();
+    for (const f of files) if (!hi.has(f.fmt) || f.cut > hi.get(f.fmt).cut) hi.set(f.fmt, f);
+    for (const [fmt, f] of hi) {
+      const cur = month === latest;
+      const old = seen.get(fmt);
+      if (cur || !old || (!old.current && f.size > old.size)) seen.set(fmt, { month, cut: f.cut, size: f.size, current: cur });
+    }
+  }
+  for (const [fmt, c] of seen) {
+    const id = `sd-${fmt}`;
+    const prev = fs.existsSync(`${OUT}/${id}.json`) ? JSON.parse(fs.readFileSync(`${OUT}/${id}.json`, 'utf8')) : null;
+    if (prev && prev.period === c.month && prev.cutoff === c.cut && !c.current) { const { mons, ...meta } = prev; index.push({ ...meta, current: false }); continue; }
+    let d; try { d = await get(`${SD}/${c.month}/chaos/${fmt}-${c.cut}.json`); } catch (e) { console.error(e.message); if (prev) { const { mons, ...meta } = prev; index.push(meta); } continue; }
     const battles = d.info?.['number of battles'] ?? 0;
     if (battles < 500) continue; // too few games to mean anything
     const mons = Object.entries(d.data).map(([name, x]) => {
       const total = Object.values(x.Abilities ?? {}).reduce((a, b) => a + b, 0) || 1;
       return {
         name, usage: round((x.usage ?? 0) * 100), n: x['Raw count'] ?? 0,
-        moves: top(x.Moves, total, 12), items: top(x.Items, total, 8), abilities: top(x.Abilities, total, 3),
-        tera: top(x['Tera Types'], total, 6), spreads: top(x.Spreads, total, 8, 1), mates: top(x.Teammates, total, 10, 1),
+        moves: top(x.Moves, total, 30, 0.3), items: top(x.Items, total, 20, 0.3), abilities: top(x.Abilities, total, 5, 0.3),
+        tera: top(x['Tera Types'], total, 18, 0.3), spreads: top(x.Spreads, total, 30, 0.3), mates: top(x.Teammates, total, 30, 0.5),
       };
     }).filter((m) => m.usage >= 0.5).sort((a, b) => b.usage - a.usage);
-    const id = `sd-${fmt}`;
-    fs.writeFileSync(`${OUT}/${id}.json`, JSON.stringify({ id, label: fmt, source: 'Showdown ladder', period: month, cutoff: cut, total: battles, mons }));
-    index.push({ id, label: fmt, source: 'Showdown ladder', period: month, cutoff: cut, total: battles });
-    console.log('showdown', fmt, cut, battles, mons.length);
+    const meta = { id, label: fmt, source: 'Showdown ladder', period: c.month, cutoff: c.cut, total: battles, current: c.current };
+    fs.writeFileSync(`${OUT}/${id}.json`, JSON.stringify({ ...meta, mons }));
+    index.push(meta);
+    console.log('showdown', fmt, c.month, c.cut, battles, mons.length);
   }
 } catch (e) { console.error('showdown failed:', e.message); }
 
