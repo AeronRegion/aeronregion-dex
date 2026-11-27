@@ -4,10 +4,10 @@ import { TYPES, CHART, dbTypeColors as typeColors, effLabel, effColor } from '..
 ---
 <Base title="Types and type chart" description="Pokémon types and the type effectiveness chart.">
   <h1 id="pick">Types</h1>
-  <p class="note">Pick a type to see its Pokémon, its moves and its matchups.</p>
-  <div class="pick">{TYPES.map((t) => <a href={`/types/${t.toLowerCase()}/`} data-base={`/types/${t.toLowerCase()}/`} style={`background:${typeColors[t]}`}>{t}</a>)}</div>
+  <p class="note">Click a type to see its Pokémon, its moves and its matchups.</p>
+  <div class="pick">{TYPES.map((t) => <a href={`/types/${t.toLowerCase()}/`} data-base={`/types/${t.toLowerCase()}/`} style={`background:${typeColors[t]}`} title={t}><span class="ab3">{t.slice(0, 3).toUpperCase()}</span><span class="full">{t}</span></a>)}</div>
   <h2 class="sec" id="chart">Type chart</h2>
-  <p class="note">Attacking type down the side, defending type across the top. Blank = 1×. Click a type to see every Pokémon and move of that type.</p>
+  <p class="note">Attacking type down the side, defending type across the top. Blank = 1×. Click a type label to see every Pokémon and move of that type.</p>
   <div class="scroll">
     <table class="tchart">
       <tr><th class="corner">ATK ↓<br />DEF →</th>{TYPES.map((t) => <th id={t.toLowerCase()}><a href={`/types/${t.toLowerCase()}/`} style={`background:${typeColors[t]}`} title={t}>{t.slice(0, 3).toUpperCase()}</a></th>)}</tr>
@@ -20,14 +20,32 @@ import { TYPES, CHART, dbTypeColors as typeColors, effLabel, effColor } from '..
   </div>
 </Base>
 <style>
-  .pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: .4rem; margin: .6rem 0 2rem; }
-  .pick a { display: block; text-align: center; padding: .45rem 0; color: #fff; font-weight: 800; text-decoration: none; text-shadow: 1px 1px 1px rgb(0 0 0 / .55); border: 2px solid var(--ink); }
-  .pick a:hover { filter: brightness(1.1); }
+  /* Square boxes in the same style as a Pokémon's type defenses: small 3-letter colored labels, 32px squares */
+  .pick { display: grid; grid-template-columns: repeat(9, 64px); gap: 4px; margin: .6rem 0 2rem; }
+  .pick a { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #fff; text-decoration: none !important; text-shadow: 1px 1px 1px rgb(0 0 0 / .6); border: 1px solid rgb(0 0 0 / .2); border-radius: 0; transition: filter .12s, box-shadow .12s; }
+  .pick a .ab3 { font-size: .95rem; font-weight: 700; line-height: 1; }
+  .pick a .full { font-size: .55rem; font-weight: 600; opacity: .95; line-height: 1; }
+  .pick a:hover { filter: brightness(1.12); box-shadow: 0 0 0 2px var(--ink) inset; }
+  .pick a:active { filter: brightness(.95); }
+  .pick a:focus-visible { outline: 2px solid var(--link); outline-offset: 1px; }
   .scroll { overflow-x: auto; margin-top: 1rem; }
-  .tchart { border-collapse: separate; border-spacing: 2px; width: auto; margin: 0 auto; }
-  .tchart td, .tchart th { width: 54px; height: 34px; text-align: center; font-weight: 700; font-size: .82rem; padding: 0; }
-  .tchart th a { display: block; color: #fff; text-decoration: none; padding: .45rem 0; text-shadow: 0 1px 0 rgb(0 0 0 / .4); }
-  .tchart td { background: var(--card); border: 1px solid var(--line); }
+  .tchart { border-collapse: separate; border-spacing: 1px; width: auto; margin: 0; }
+  .tchart td { width: 32px; min-width: 32px; max-width: 32px; height: 32px; padding: 0; text-align: center; font-weight: 700; font-size: .8rem; background: var(--card); border: 1px solid var(--line); box-sizing: border-box; }
+  .tchart th { padding: 0; font-weight: 700; }
+  .tchart tr:first-child th:not(.corner) { width: 32px; vertical-align: bottom; }
+  .tchart th a { display: block; color: #fff; text-decoration: none !important; font-size: .6rem; text-shadow: 1px 1px 1px rgb(0 0 0 / .6); border: 1px solid rgb(0 0 0 / .2); }
+  .tchart tr:first-child th a { height: 17px; line-height: 16px; }
+  .tchart tr th:first-child a { width: 32px; height: 32px; line-height: 31px; }
+  .tchart th a:hover { filter: brightness(1.12); }
   .tchart tr:hover td { outline: 1px solid var(--ink-soft); }
-  .corner { font-size: .68rem !important; color: var(--ink-soft); line-height: 1.15; }
+  .corner { font-size: .55rem !important; color: var(--ink-soft); line-height: 1.15; font-weight: 600 !important; }
+  @media (max-width: 640px) {
+    .pick { grid-template-columns: repeat(6, 1fr); }
+    .tchart { padding: 2px !important; }
+    .tchart td { width: 16px !important; min-width: 16px !important; max-width: 16px !important; height: 16px !important; font-size: .5rem !important; }
+    .tchart tr th:first-child a { width: 24px; height: 16px; line-height: 15px; font-size: .45rem; }
+    .tchart tr:first-child th:not(.corner) { width: 16px; }
+    .tchart tr:first-child th a { font-size: .4rem; height: 14px; line-height: 13px; letter-spacing: -.02em; overflow: hidden; }
+    .corner { font-size: .35rem !important; }
+  }
 </style>

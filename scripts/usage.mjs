@@ -129,8 +129,7 @@ try {
       const w = p.record?.wins ?? 0, l = p.record?.losses ?? 0, g = w + l + (p.record?.ties ?? 0);
       addTeam(F, team, w, l); addTeam(E, team, w, l); F.games += g; E.games += g;
     }
-    // big tournaments (64+ players) also get their own page
-    if ((t.players ?? 0) >= 64 && E.teams >= 32) F.events.push({ E, meta: { key: t.id.slice(-8), name: t.name, date: t.date.slice(0, 10), players: t.players, source: 'Limitless tournaments' } });
+    // (no per-tournament pages for Limitless: grassroots event names aren't useful to browse)
     await new Promise((r) => setTimeout(r, 250)); // be gentle with their API
   }
   for (const [fmt, F] of byFmt) {

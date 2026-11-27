@@ -540,12 +540,17 @@ html[data-theme='dark'] .card .chip[data-type] { color: color-mix(in srgb, var(-
 .block:active { box-shadow: inset 0 1px 3px rgb(0 0 0 / .3) !important; }
 .sm[aria-expanded='true'], .ddbtn[aria-expanded='true'] { border-color: var(--link) !important; }
 /* ===== Desktop scale: ARdex at a given browser zoom matches PokemonDB at the same zoom (Grant browses at 75%).
-   Everything (text, icons, header) is drawn 1.3x larger while the content column stays about the same width on
-   screen (940 CSS px x 1.3 = ~1220px, PokemonDB's width). Pages that need the whole screen (VGC usage, Teambuilder)
-   are left at 1x. Media queries still see the real window width. ===== */
+   Every page is drawn 1.3x larger (text, icons, header) so the size never changes between tabs. Normal pages use a
+   940px column (~1220px on screen, PokemonDB's width); the Teambuilder gets 1180px and VGC usage the full width.
+   Media queries still see the real window width. Full-bleed sections divide vw by --z (vw isn't zoomed). ===== */
 @media (min-width: 1100px) {
-  html:not(:has(.uwrap)):not(:has(#ed)) { --z: 1.3; }
-  html:not(:has(.uwrap)):not(:has(#ed)) body { zoom: 1.3; }
-  /* full-bleed sections divide vw by --z (vw isn't zoomed) */
-  html:not(:has(.uwrap)):not(:has(#ed)) .wrap { width: min(100% - 2.5rem, 940px); }
+  html { --z: 1.3; }
+  body { zoom: 1.3; }
+  .wrap, header .wrap.bar { width: min(100% - 2.5rem, 940px) !important; }
+  html:has(#ed) main.wrap { width: min(100% - 2.5rem, 1180px) !important; }
+  html:has(.uwrap) main.wrap { width: min(100% - 2rem, 1500px) !important; }
 }
+/* Page filters: compact and centered (PokemonDB style), so the mouse doesn't have to travel to the far left */
+main .controls { justify-content: center; }
+main .controls > input.field, main .controls > label > input.field { flex: 0 1 17rem !important; width: 17rem; min-width: 0 !important; max-width: 17rem; }
+main input.field.mfilter, main input#lf { min-width: 0 !important; width: 15rem; flex: 0 1 15rem !important; }

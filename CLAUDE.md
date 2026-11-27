@@ -21,7 +21,9 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Review every new or changed page for alignment before pushing: numbers right-aligned with tabular figures, columns lined up row to row (fixed widths, not content-sized), labels and values on the same baseline, no bars or chips that shift per row. Look at the screenshot at desktop width and at 390px.
 - Every clickable box (buttons, dropdowns, toggles, selectable rows) must show interaction: hover (border/background change), press (inset), and keyboard focus (blue outline). Check each new control by hovering and clicking it before pushing; a button that looks the same on hover is a bug.
 - Click every button and link you add (in the local build) and confirm it does what its label says before pushing. A button that only toggles a row or opens a tab without showing anything new is a bug.
-- Desktop scale (≥1100px): pages are drawn 1.3x (CSS `zoom` on body) in a 940px column, so ARdex at any browser zoom looks like PokemonDB at the same zoom (Grant browses at 75%). VGC usage and the Teambuilder are excluded and stay 1x (they need the whole screen; usage uses the 1500px wide container). Phones are unchanged. Media queries still see the real window width, so check zoomed pages at 1280 and 1920 wide.
+- Desktop scale (≥1100px): every page is drawn 1.3x (CSS `zoom` on body) so sizes never change between tabs and ARdex at any browser zoom looks like PokemonDB at the same zoom (Grant browses at 75%). The header bar is the same 940px on every page; content is 940px, the Teambuilder 1180px, VGC usage 1500px. Phones are unchanged. Media queries still see the real window width. After visual changes, click through several tabs and check the header and text size don't change.
+- Review every page in dark mode too before pushing.
+- Matching sections side by side (e.g. Defense and Moveset coverage) start at the same height: notes go under tables, not between heading and table.
 
 ## Locked decisions
 ### Global
@@ -45,6 +47,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
   Float animation is subtle, not big movement.
 
 ### Pokédex list
+- Page filters (search boxes on list pages) are compact (17rem) and centered with their dropdowns, PokemonDB style.
 - "Show forms" is unchecked by default (one row per species).
 
 ### Pokémon pages
@@ -61,7 +64,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Move pages: PokemonDB-style data table, effect text from Showdown, target diagram
   (Foe/Foe/User/Ally), "Learnt by" as one grid. No "In doubles" box for now.
 - Abilities have their own pages with descriptions, linked from every Pokémon.
-- Types page: type picker tiles, then the 18x18 chart (no toggles or combo checker). The chart sits on a light panel in both modes; neutral cells stay light in dark mode.
+- Types page: "Click a type…"; 18 square picker tiles (3-letter label + name, 2 rows of 9), then the 18x18 chart with 32px square cells and small 3-letter headers, same style as a Pokémon's type defenses (no toggles or combo checker). The chart sits on a light panel in both modes; neutral cells stay light in dark mode.
 - Moveset search: pick up to 4 moves, Cobbleverse movepool by default, results sortable by stat.
 
 ### VGC usage
@@ -71,9 +74,9 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Format picker grouped by source (Showdown ladder, Limitless tournaments, official majors), current formats first, then past formats (every VGC format since gen 8, each from its last full month on the ladder).
 - Format picker: source tabs (Showdown ladder / Tournaments / Official majors), one dropdown grouped by game and year (Champions, Scarlet & Violet 2026, 2025, 2024…), Bo1/Bo3 as a toggle beside it (never separate list entries).
 - Set builder is opt-in: browsing shows plain data; "Build a set from this data" opens it (stays open while you switch Pokémon; "Close set builder" hides it). While open, rows in Moves (up to 4), Items, Abilities, Tera types and Spreads/Natures are click-to-select (checkbox + highlight); "Your set" shows the Showdown text live, starting from the most common pick of each; "Reset to most common". Move type label sits right after the move name (doesn't need to line up); no Physical/Special/Status icon in usage cards. While the builder is open, clicking a name selects the row instead of following its link.
-- Pickers show a small battle count in each option ("· 250k battles"): formats, months and events.
+- Pickers show battle counts in each option (light italic, right column): a regulation shows its total over every recorded month and its month range; the Month dropdown shows each month's own count; events show their own count.
 - Showdown formats: every month with a real ladder at 1500+ and 1760+ (Month dropdown + rating toggle); the default view is the last full month at 1760+ (matches Pikalytics).
-- Tournaments and majors show how much data is behind them (events, team sheets, battles), an "Event" dropdown (all events, or one), and an "Events in this data" table sorted by battles. Each Pokémon shows its team count.
+- Tournaments and majors show how much data is behind them (events, team sheets, battles). No event dropdown. Official majors have an "Events in this data" table sorted by battles (each event links to its own page); Limitless tournaments are never listed or given pages by name (grassroots names look like spam). Each Pokémon shows its team count.
 - "Add set to Teambuilder ▾" opens a list of your saved teams (plus "+ New team") and adds the set to the one you pick; "Copy as Showdown text".
 - Data refreshes weekly via GitHub Actions (.github/workflows/usage.yml). No Smogon analyses or Pikalytics scraping.
 

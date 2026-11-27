@@ -3654,266 +3654,6 @@
    "total": 262609
   },
   {
-   "id": "lt-m-c_f5b91f07",
-   "base": "lt-m-c",
-   "label": "🍋Sitrus-Series🍋|Champions-MC|#84",
-   "source": "Limitless tournaments",
-   "period": "2026-11-25",
-   "tours": 1,
-   "total": 89,
-   "players": 89,
-   "battles": 233,
-   "def": false,
-   "event": true
-  },
-  {
-   "id": "lt-m-c_3a5a907e",
-   "base": "lt-m-c",
-   "label": "Alpensee Tour (Reg M-C) #85",
-   "source": "Limitless tournaments",
-   "period": "2026-11-25",
-   "tours": 1,
-   "total": 128,
-   "players": 128,
-   "battles": 373,
-   "def": false,
-   "event": true
-  },
-  {
-   "id": "lt-m-c_914773e1",
-   "base": "lt-m-c",
-   "label": "Beaniest Path to Stuttgart! #5 M-C Shiny Prizes",
-   "source": "Limitless tournaments",
-   "period": "2026-11-24",
-   "tours": 1,
-   "total": 76,
-   "players": 76,
-   "battles": 190,
-   "def": false,
-   "event": true
-  },
-  {
-   "id": "lt-m-c_272d46ea",
-   "base": "lt-m-c",
-   "label": "Amyverse VGC Champions Arena #20 ❤️ Cash Prize!",
-   "source": "Limitless tournaments",
-   "period": "2026-11-23",
-   "tours": 1,
-   "total": 70,
-   "players": 70,
-   "battles": 183,
-   "def": false,
-   "event": true
-  },
-  {
-   "id": "lt-m-c_2c27fa42",
-   "base": "lt-m-c",
-   "label": "VGC Gemeinde Stuttgart Prep 🇩🇪",
-   "source": "Limitless tournaments",
-   "period": "2026-11-22",
-   "tours": 1,
-   "total": 77,
-   "players": 77,
-   "battles": 200,
-   "def": false,
-   "event": true
-  },
-  {
-   "id": "lt-m-c_78d967ee",
-   "base": "lt-m-c",
-   "label": "⚔️Torre Lotta Cup #4⚔️ 🏆50€ Amazon Gift Cards🏆",
-   "source": "Limitless tournaments",
-   "period": "2026-11-21",
-   "tours": 1,
-   "total": 91,
-   "players": 91,
-   "battles": 253,
-   "def": false,
-   "event": true
-  },
-  {
-   "id": "lt-m-c_272d1cb8",
-   "base": "lt-m-c",
-   "label": "Friday Fight Night 82! $50 Prize & Team Report",
-   "source": "Limitless tournaments",
-   "period": "2026-11-20",
-   "tours": 1,
-   "total": 109,
-   "players": 109,
-   "battles": 284,
-   "def": false,
-   "event": true
-  },
-  {
-   "id": "lt-m-c_7e3f0b99",
-   "base": "lt-m-c",
-   "label": "Talon's FIGHT CLUB #111 POKEMON CHAMPIONS REG M-C",
-   "source": "Limitless tournaments",
-   "period": "2026-11-20",
-   "tours": 1,
-   "total": 88,
-   "players": 88,
-   "battles": 226,
-   "def": false,
-   "event": true
-  },
-  {
-   "id": "lt-m-c_f304bd58",
-   "base": "lt-m-c",
-   "label": "🍋Sitrus-Series🍋|Champions-MC|#83",
-   "source": "Limitless tournaments",
-   "period": "2026-11-18",
-   "tours": 1,
-   "total": 72,
-   "players": 72,
-   "battles": 168,
-   "def": false,
-   "event": true
-  },
-  {
-   "id": "lt-m-c_7e3f0c26",
-   "base": "lt-m-c",
-   "label": "Alpensee Tour (Reg M-C) #84",
-   "source": "Limitless tournaments",
-   "period": "2026-11-18",
-   "tours": 1,
-   "total": 100,
-   "players": 100,
-   "battles": 300,
-   "def": false,
-   "event": true
-  },
-  {
-   "id": "lt-m-c_a75e5895",
-   "base": "lt-m-c",
-   "label": "Amyverse VGC Champions Arena #19 ❤️ Cash Prize!",
-   "source": "Limitless tournaments",
-   "period": "2026-11-16",
-   "tours": 1,
-   "total": 81,
-   "players": 81,
-   "battles": 188,
-   "def": false,
-   "event": true
-  },
-  {
-   "id": "lt-m-c_f5b9293e",
-   "base": "lt-m-c",
-   "label": "Open Champions League #6 (20 USD to 1st)",
-   "source": "Limitless tournaments",
-   "period": "2026-11-15",
-   "tours": 1,
-   "total": 102,
-   "players": 102,
-   "battles": 244,
-   "def": false,
-   "event": true
-  },
-  {
-   "id": "lt-m-c_78d957f8",
-   "base": "lt-m-c",
-   "label": "Team Philippines @ VRWC 2026: Tryouts #1 🇵🇭 ONLY",
-   "source": "Limitless tournaments",
-   "period": "2026-11-15",
-   "tours": 1,
-   "total": 73,
-   "players": 73,
-   "battles": 191,
-   "def": false,
-   "event": true
-  },
-  {
-   "id": "lt-m-c_91473645",
-   "base": "lt-m-c",
-   "label": "⛩️Chadweezy95 $60 VGC Champions Tourny Ep 37!⛩️",
-   "source": "Limitless tournaments",
-   "period": "2026-11-14",
-   "tours": 1,
-   "total": 121,
-   "players": 121,
-   "battles": 324,
-   "def": false,
-   "event": true
-  },
-  {
-   "id": "lt-m-c_a75e23c6",
-   "base": "lt-m-c",
-   "label": "VGC Indigo League #7 (Prize: Shiny Heatran)",
-   "source": "Limitless tournaments",
-   "period": "2026-11-14",
-   "tours": 1,
-   "total": 84,
-   "players": 84,
-   "battles": 210,
-   "def": false,
-   "event": true
-  },
-  {
-   "id": "lt-m-c_78d95882",
-   "base": "lt-m-c",
-   "label": "Friday Fight Night 81! $50 Prize & Team Report",
-   "source": "Limitless tournaments",
-   "period": "2026-11-13",
-   "tours": 1,
-   "total": 101,
-   "players": 101,
-   "battles": 240,
-   "def": false,
-   "event": true
-  },
-  {
-   "id": "lt-m-c_3a5a0104",
-   "base": "lt-m-c",
-   "label": "NEW SEASON START❗|👑CROWN FIGHT Bo3 TOUR #91👑",
-   "source": "Limitless tournaments",
-   "period": "2026-11-13",
-   "tours": 1,
-   "total": 90,
-   "players": 90,
-   "battles": 217,
-   "def": false,
-   "event": true
-  },
-  {
-   "id": "lt-m-c_a75e4b36",
-   "base": "lt-m-c",
-   "label": "MetaVGC Arena #5 | Reg M-C | $10 Prize + Shinies",
-   "source": "Limitless tournaments",
-   "period": "2026-11-12",
-   "tours": 1,
-   "total": 74,
-   "players": 74,
-   "battles": 198,
-   "def": false,
-   "event": true
-  },
-  {
-   "id": "lt-m-c_40740695",
-   "base": "lt-m-c",
-   "label": "🍋Sitrus-Series🍋|Champions-MC|#82",
-   "source": "Limitless tournaments",
-   "period": "2026-11-11",
-   "tours": 1,
-   "total": 92,
-   "players": 92,
-   "battles": 227,
-   "def": false,
-   "event": true
-  },
-  {
-   "id": "lt-m-c_08d1ff13",
-   "base": "lt-m-c",
-   "label": "Tuesday Throwdowns #3 (Top Cut, $50 for 1st)",
-   "source": "Limitless tournaments",
-   "period": "2026-11-11",
-   "tours": 1,
-   "total": 92,
-   "players": 92,
-   "battles": 210,
-   "def": false,
-   "event": true
-  },
-  {
    "id": "lt-m-c",
    "base": "lt-m-c",
    "def": true,
@@ -3923,168 +3663,7 @@
    "tours": 91,
    "total": 4434,
    "battles": 10858,
-   "events": [
-    {
-     "id": "lt-m-c_3a5a907e",
-     "name": "Alpensee Tour (Reg M-C) #85",
-     "date": "2026-11-25",
-     "players": 128,
-     "teams": 128,
-     "battles": 373
-    },
-    {
-     "id": "lt-m-c_91473645",
-     "name": "⛩️Chadweezy95 $60 VGC Champions Tourny Ep 37!⛩️",
-     "date": "2026-11-14",
-     "players": 121,
-     "teams": 121,
-     "battles": 324
-    },
-    {
-     "id": "lt-m-c_272d1cb8",
-     "name": "Friday Fight Night 82! $50 Prize & Team Report",
-     "date": "2026-11-20",
-     "players": 109,
-     "teams": 109,
-     "battles": 284
-    },
-    {
-     "id": "lt-m-c_f5b9293e",
-     "name": "Open Champions League #6 (20 USD to 1st)",
-     "date": "2026-11-15",
-     "players": 102,
-     "teams": 102,
-     "battles": 244
-    },
-    {
-     "id": "lt-m-c_78d95882",
-     "name": "Friday Fight Night 81! $50 Prize & Team Report",
-     "date": "2026-11-13",
-     "players": 101,
-     "teams": 101,
-     "battles": 240
-    },
-    {
-     "id": "lt-m-c_7e3f0c26",
-     "name": "Alpensee Tour (Reg M-C) #84",
-     "date": "2026-11-18",
-     "players": 100,
-     "teams": 100,
-     "battles": 300
-    },
-    {
-     "id": "lt-m-c_40740695",
-     "name": "🍋Sitrus-Series🍋|Champions-MC|#82",
-     "date": "2026-11-11",
-     "players": 92,
-     "teams": 92,
-     "battles": 227
-    },
-    {
-     "id": "lt-m-c_08d1ff13",
-     "name": "Tuesday Throwdowns #3 (Top Cut, $50 for 1st)",
-     "date": "2026-11-11",
-     "players": 92,
-     "teams": 92,
-     "battles": 210
-    },
-    {
-     "id": "lt-m-c_78d967ee",
-     "name": "⚔️Torre Lotta Cup #4⚔️ 🏆50€ Amazon Gift Cards🏆",
-     "date": "2026-11-21",
-     "players": 91,
-     "teams": 91,
-     "battles": 253
-    },
-    {
-     "id": "lt-m-c_3a5a0104",
-     "name": "NEW SEASON START❗|👑CROWN FIGHT Bo3 TOUR #91👑",
-     "date": "2026-11-13",
-     "players": 90,
-     "teams": 90,
-     "battles": 217
-    },
-    {
-     "id": "lt-m-c_f5b91f07",
-     "name": "🍋Sitrus-Series🍋|Champions-MC|#84",
-     "date": "2026-11-25",
-     "players": 89,
-     "teams": 89,
-     "battles": 233
-    },
-    {
-     "id": "lt-m-c_7e3f0b99",
-     "name": "Talon's FIGHT CLUB #111 POKEMON CHAMPIONS REG M-C",
-     "date": "2026-11-20",
-     "players": 88,
-     "teams": 88,
-     "battles": 226
-    },
-    {
-     "id": "lt-m-c_a75e23c6",
-     "name": "VGC Indigo League #7 (Prize: Shiny Heatran)",
-     "date": "2026-11-14",
-     "players": 84,
-     "teams": 84,
-     "battles": 210
-    },
-    {
-     "id": "lt-m-c_a75e5895",
-     "name": "Amyverse VGC Champions Arena #19 ❤️ Cash Prize!",
-     "date": "2026-11-16",
-     "players": 81,
-     "teams": 81,
-     "battles": 188
-    },
-    {
-     "id": "lt-m-c_2c27fa42",
-     "name": "VGC Gemeinde Stuttgart Prep 🇩🇪",
-     "date": "2026-11-22",
-     "players": 77,
-     "teams": 77,
-     "battles": 200
-    },
-    {
-     "id": "lt-m-c_914773e1",
-     "name": "Beaniest Path to Stuttgart! #5 M-C Shiny Prizes",
-     "date": "2026-11-24",
-     "players": 76,
-     "teams": 76,
-     "battles": 190
-    },
-    {
-     "id": "lt-m-c_a75e4b36",
-     "name": "MetaVGC Arena #5 | Reg M-C | $10 Prize + Shinies",
-     "date": "2026-11-12",
-     "players": 74,
-     "teams": 74,
-     "battles": 198
-    },
-    {
-     "id": "lt-m-c_78d957f8",
-     "name": "Team Philippines @ VRWC 2026: Tryouts #1 🇵🇭 ONLY",
-     "date": "2026-11-15",
-     "players": 73,
-     "teams": 73,
-     "battles": 191
-    },
-    {
-     "id": "lt-m-c_f304bd58",
-     "name": "🍋Sitrus-Series🍋|Champions-MC|#83",
-     "date": "2026-11-18",
-     "players": 72,
-     "teams": 72,
-     "battles": 168
-    },
-    {
-     "id": "lt-m-c_272d46ea",
-     "name": "Amyverse VGC Champions Arena #20 ❤️ Cash Prize!",
-     "date": "2026-11-23",
-     "players": 70,
-     "teams": 70,
-     "battles": 183
-    }
-   ]
+   "events": []
   },
   {
    "id": "lt-svi",
@@ -4126,7 +3705,7 @@
   {
    "id": "pd-2027_1000081",
    "base": "pd-2027",
-   "label": "Fall Pokémon Professor VGC Online Cup",
+   "label": "Fall Pok\u00e9mon Professor VGC Online Cup",
    "source": "Official majors (RK9 team lists via Pokedata)",
    "period": "2026-11-07",
    "tours": 1,
@@ -4246,7 +3825,7 @@
    "def": true,
    "label": "2027 season majors",
    "source": "Official majors (RK9 team lists via Pokedata)",
-   "period": "Frankfurt Regional Championships, Baltimore Regional Championships, Louisville Regional Championships, Nice Regional Championships, Gdansk Regional Championships, Latin America International Championships, Puebla Regional Championships, Brisbane Regional Championships, Recife Regional Championships, Fall Pokémon Professor VGC Online Cup",
+   "period": "Frankfurt Regional Championships, Baltimore Regional Championships, Louisville Regional Championships, Nice Regional Championships, Gdansk Regional Championships, Latin America International Championships, Puebla Regional Championships, Brisbane Regional Championships, Recife Regional Championships, Fall Pok\u00e9mon Professor VGC Online Cup",
    "tours": 10,
    "total": 6418,
    "battles": 26073,
@@ -4325,7 +3904,7 @@
     },
     {
      "id": "pd-2027_1000081",
-     "name": "Fall Pokémon Professor VGC Online Cup",
+     "name": "Fall Pok\u00e9mon Professor VGC Online Cup",
      "date": "2026-11-07",
      "players": 43,
      "teams": 43,
@@ -4336,7 +3915,7 @@
   {
    "id": "pd-2026_1000035",
    "base": "pd-2026",
-   "label": "Pokémon VGC World Championship",
+   "label": "Pok\u00e9mon VGC World Championship",
    "source": "Official majors (RK9 team lists via Pokedata)",
    "period": "2026-08-28",
    "tours": 1,
@@ -4453,7 +4032,7 @@
   {
    "id": "pd-2026_1000044",
    "base": "pd-2026",
-   "label": "Querétaro Regional Championships",
+   "label": "Quer\u00e9taro Regional Championships",
    "source": "Official majors (RK9 team lists via Pokedata)",
    "period": "2026-04-04",
    "tours": 1,
@@ -4570,7 +4149,7 @@
   {
    "id": "pd-2026_1000053",
    "base": "pd-2026",
-   "label": "Mérida Regional Championships",
+   "label": "M\u00e9rida Regional Championships",
    "source": "Official majors (RK9 team lists via Pokedata)",
    "period": "2026-01-24",
    "tours": 1,
@@ -4648,7 +4227,7 @@
   {
    "id": "pd-2026_1000059",
    "base": "pd-2026",
-   "label": "Gdańsk Regional Championships",
+   "label": "Gda\u0144sk Regional Championships",
    "source": "Official majors (RK9 team lists via Pokedata)",
    "period": "2025-11-01",
    "tours": 1,
@@ -4755,7 +4334,7 @@
    "def": true,
    "label": "2026 season majors",
    "source": "Official majors (RK9 team lists via Pokedata)",
-   "period": "Europe International Championships, North America International Championships, Indianapolis Regional Championships, Turin Special Championships, Seattle Regional Championships, Toronto Regional Championships, Pittsburgh Regional Championships, Frankfurt Regional Championships, Milwaukee Regional Championships, Las Vegas Regional Championships, Birmingham Regional Championships, Lille Regional Championships, Orlando Regional Championships, Stuttgart Regional Championships, Houston Regional Championships, Seville Special Championships, Prague Regional Championships, Los Angeles Regional Championships, Latin America International Championships, Gdańsk Regional Championships, Utrecht Regional Championships, Pokémon VGC World Championship, Melbourne Regional Championships, Monterrey Regional Championships, Sydney Regional Championships, Querétaro Regional Championships, Mérida Regional Championships, Campinas Regional Championships, Santiago Regional Championships, Brisbane Regional Championships, Belo Horizonte Regional Championships, Curitiba Regional Championships",
+   "period": "Europe International Championships, North America International Championships, Indianapolis Regional Championships, Turin Special Championships, Seattle Regional Championships, Toronto Regional Championships, Pittsburgh Regional Championships, Frankfurt Regional Championships, Milwaukee Regional Championships, Las Vegas Regional Championships, Birmingham Regional Championships, Lille Regional Championships, Orlando Regional Championships, Stuttgart Regional Championships, Houston Regional Championships, Seville Special Championships, Prague Regional Championships, Los Angeles Regional Championships, Latin America International Championships, Gda\u0144sk Regional Championships, Utrecht Regional Championships, Pok\u00e9mon VGC World Championship, Melbourne Regional Championships, Monterrey Regional Championships, Sydney Regional Championships, Quer\u00e9taro Regional Championships, M\u00e9rida Regional Championships, Campinas Regional Championships, Santiago Regional Championships, Brisbane Regional Championships, Belo Horizonte Regional Championships, Curitiba Regional Championships",
    "tours": 32,
    "total": 18089,
    "battles": 72652,
@@ -4914,7 +4493,7 @@
     },
     {
      "id": "pd-2026_1000059",
-     "name": "Gdańsk Regional Championships",
+     "name": "Gda\u0144sk Regional Championships",
      "date": "2025-11-01",
      "players": 418,
      "teams": 417,
@@ -4930,7 +4509,7 @@
     },
     {
      "id": "pd-2026_1000035",
-     "name": "Pokémon VGC World Championship",
+     "name": "Pok\u00e9mon VGC World Championship",
      "date": "2026-08-28",
      "players": 395,
      "teams": 395,
@@ -4962,7 +4541,7 @@
     },
     {
      "id": "pd-2026_1000044",
-     "name": "Querétaro Regional Championships",
+     "name": "Quer\u00e9taro Regional Championships",
      "date": "2026-04-04",
      "players": 270,
      "teams": 269,
@@ -4970,7 +4549,7 @@
     },
     {
      "id": "pd-2026_1000053",
-     "name": "Mérida Regional Championships",
+     "name": "M\u00e9rida Regional Championships",
      "date": "2026-01-24",
      "players": 234,
      "teams": 234,

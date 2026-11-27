@@ -45,6 +45,9 @@ const mons = d.mons.map((m: any, k: number) => {
 const svFormat = /^Scarlet & Violet/.test(f.name) || (f.group === 'pd' && +f.id.slice(3) >= 2023 && +f.id.slice(3) <= 2026) || (f.group === 'lt' && /^Scarlet/.test(f.name));
 const DATA = { sheets, champ, mons, colors: { ...typeColors, Stellar: '#40a3c5' }, tera: svFormat ? 'nodata' : 'none' };
 const fmtNum = (n: number) => (n ?? 0).toLocaleString('en-US');
+// a Showdown regulation's battles over every recorded month (one rating cutoff, so games aren't counted twice)
+const regTotal = (x: any) => variants(x).filter((v: any) => v.cutoff === x.cutoff).reduce((a: number, v: any) => a + (v.total ?? 0), 0);
+const regRange = (x: any) => { const ms = [...new Set(variants(x).map((v: any) => v.period))].sort(); return ms.length > 1 ? `${monthName(ms[0])} – ${monthName(ms.at(-1))}` : monthName(ms[0]); };
 const short = (n: number) => !n ? '' : n >= 1e6 ? `${+(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${Math.round(n / 1e3)}k` : String(n);
 // tournaments and majors: the whole set, or one event of it
 const parent: any = f.group === 'sd' ? null : f.def ? f : formats.find((x) => x.id === f.base);
@@ -57,8 +60,8 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   <div class="upick">
     <Dropdown label="Format" minWidth="19rem" groups={pickerGroups(f.group).map((g) => ({ label: g.game, items: g.items.map((x: any) => ({
       href: `/usage/${x.id}/`, on: x.fam === f.fam || x.id === f.base, a: x.short,
-      b: x.group === 'sd' ? (x.current ? 'current' : monthName(x.period)) : x.group === 'lt' ? fmtRange(x.period) : '',
-      c: `${short(x.group === 'sd' ? x.total : x.battles || x.total)} ${x.group === 'sd' || x.battles ? 'battles' : 'teams'}`,
+      b: x.group === 'sd' ? regRange(x) + (x.current ? ' · current' : '') : x.group === 'lt' ? fmtRange(x.period) : '',
+      c: `${short(x.group === 'sd' ? regTotal(x) : x.battles || x.total)} ${x.group === 'sd' || x.battles ? 'battles' : 'teams'}`,
     })) }))} />
     {f.group === 'sd' && (twin(f)
       ? <span class="ubo" role="group" aria-label="Best of">{[false, true].map((b) => { const x = b === f.bo3 ? f : twin(f); return <a href={`/usage/${x.id}/`} class:list={['segchip', { on: b === f.bo3 }]}>{b ? 'Bo3' : 'Bo1'}</a>; })}</span>
@@ -75,22 +78,19 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
           : <span class="ubo solo">Rated {f.cutoff}+</span>}
       </>;
     })()}
-    {parent?.events?.length > 0 && (
-      <span class="usel">Event <Dropdown label="Event" minWidth="22rem" groups={[{ items: [{ href: `/usage/${parent.id}/`, on: !!f.def, a: `All events (${parent.tours})`, b: '', c: `${short(parent.battles || parent.total)} ${parent.battles ? 'battles' : 'teams'}` }] }, { label: 'By size', items: parent.events.map((e: any) => ({ href: `/usage/${e.id}/`, on: e.id === f.id, a: e.name, b: `${fmtDate(e.date)} · ${fmtNum(e.players)} players`, c: `${short(e.battles)} battles` })) }]} /></span>
-    )}
   </div>
 </div>
 <p class="note usum">
   {f.group === 'sd'
-    ? <>Showdown ladder, {monthName(f.period)}: <b>{fmtNum(f.total)}</b> battles, weighted toward players rated {f.cutoff}+.{!f.current && f.def && ' This format has ended; this is its last full month on the ladder.'}</>
+    ? <>Showdown ladder, {monthName(f.period)}: <b>{fmtNum(f.total)}</b> battles, weighted toward players rated {f.cutoff}+ (whole regulation: <b>{fmtNum(regTotal(f))}</b> battles over {new Set(variants(f).map((v: any) => v.period)).size} months).{!f.current && f.def && ' This format has ended; this is its last full month on the ladder.'}</>
     : f.event
       ? <>{f.source.replace(/ \(.*$/, '')}, {fmtDate(f.period)}: <b>{fmtNum(f.players)}</b> players, <b>{fmtNum(f.total)}</b> team sheets, <b>{fmtNum(f.battles)}</b> battles.</>
       : <>{f.group === 'lt' ? `Limitless tournaments, ${fmtRange(f.period)}` : 'Official majors, Masters division'}: <b>{fmtNum(f.tours)}</b> events, <b>{fmtNum(f.total)}</b> team sheets{f.battles ? <>, <b>{fmtNum(f.battles)}</b> battles</> : ''}.</>}
   {' '}Updated weekly (last {fmtDate(updated)}).
 </p>
-{parent?.events?.length > 0 && (
+{f.group === 'pd' && parent?.events?.length > 0 && (
   <details class="uevents">
-    <summary>Events in this data, by size ({parent.events.length}{f.group === 'lt' ? ', 64+ players' : ''})</summary>
+    <summary>Events in this data, by size ({parent.events.length})</summary>
     <table class="data">
       <thead><tr><th>Event</th><th>Date</th><th class="n">Players</th><th class="n">Team sheets</th><th class="n">Battles</th></tr></thead>
       <tbody>{[...parent.events].sort((a: any, b: any) => b.battles - a.battles).map((e: any) => <tr><td><a href={`/usage/${e.id}/`}>{e.name}</a></td><td>{fmtDate(e.date)}</td><td class="n">{fmtNum(e.players)}</td><td class="n">{fmtNum(e.teams)}</td><td class="n">{fmtNum(e.battles)}</td></tr>)}</tbody>
@@ -251,7 +251,7 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   draw(location.hash.slice(1));
 </script>
 <style>
-  :global(body:has(.uwrap) .wrap) { width: min(100% - 2.5rem, 1500px); }
+  :global(body:has(.uwrap) main.wrap) { width: min(100% - 2.5rem, 1500px); }
   .ufmt { display: flex; gap: .5rem 1.2rem; align-items: center; flex-wrap: wrap; margin: .4rem 0; }
   .usrc, .ubo { display: inline-flex; }
   .usrc a, .ubo a { display: inline-block; padding: .3rem .75rem; border: 1px solid var(--line-2); background: var(--card); color: var(--link) !important; text-decoration: none !important; font-size: .88rem; margin-left: -1px; }

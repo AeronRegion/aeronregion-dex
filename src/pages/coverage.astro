@@ -43,8 +43,8 @@ import { GAMES, meta } from '../lib/data';
       </div>
       <div>
         <h3 class="sec">Moveset coverage</h3>
-        <p class="note" id="offnote"></p>
         <div class="mx-wrap"><table class="mx" id="off"></table></div>
+        <p class="note" id="offnote"></p>
       </div>
     </div>
   </div>
@@ -142,8 +142,8 @@ import { GAMES, meta } from '../lib/data';
       $('offnote').innerHTML = !anyMoves ? 'Add attacking moves to see what the team hits super effectively.'
         : none.length ? `Members with a super-effective move against each type. <b class="neg">No answer to ${none.join(', ')}.</b>`
         : `Members with a super-effective move against each type. <b class="pos">Every type is covered.</b>`;
-      $('off').innerHTML = head(d, '<th class="tot">Hit 2×</th><th class="gap"></th>') + `</tr></thead><tbody>` +
-        offRows.map((r) => `<tr><th>${chip(r.def)}</th><td class="tot ${r.se ? 'res' : 'neg'}">${r.se}</td><td class="gap"></td>${r.best.map((x) => x.b < 0 ? '<td class="none"></td>' : cell(x.b, `${x.by}: ${txt(x.b) || '1'}×`)).join('')}</tr>`).join('') + '</tbody>';
+      $('off').innerHTML = head(d) + '<th class="gap"></th><th class="tot">Hit 2×</th></tr></thead><tbody>' +
+        offRows.map((r) => `<tr><th>${chip(r.def)}</th>${r.best.map((x) => x.b < 0 ? '<td class="none"></td>' : cell(x.b, `${x.by}: ${txt(x.b) || '1'}×`)).join('')}<td class="gap"></td><td class="tot ${r.se ? 'res' : 'neg'}">${r.se}</td></tr>`).join('') + '</tbody>';
     };
 
     const cards = () => {
@@ -303,5 +303,12 @@ import { GAMES, meta } from '../lib/data';
   .mx :global(td.tot.zero) { color: var(--ink-soft); background: var(--card); border-color: var(--line); font-weight: 500; }
   .mx :global(tr.worst td.weak) { background: #a40000; color: #fff; }
   .mx :global(tr.hole td.cov) { background: #a40000; border-color: #a40000; color: #fff; font-weight: 800; }
+  /* dark mode: all cells stay light (same as the type chart) so both tables match */
+  :global(html[data-theme='dark']) .mx :global(td:not(.gap)) { background-color: #eef1f4; border-color: #c5ccd4; color: #1c2733; }
+  :global(html[data-theme='dark']) .mx :global(td.res) { color: #2f6b06; border-color: #4e9a06; background: #e3f1d6; }
+  :global(html[data-theme='dark']) .mx :global(td.weak), :global(html[data-theme='dark']) .mx :global(td.tot.wk) { color: #a40000; border-color: #a40000; background: #f7dede; }
+  :global(html[data-theme='dark']) .mx :global(td.neg), :global(html[data-theme='dark']) .mx :global(tr.worst td.weak) { color: #fff; background: #a40000; border-color: #a40000; }
+  :global(html[data-theme='dark']) .mx :global(td[style*='background']) { color: #ffdd57; }
+  :global(html[data-theme='dark']) .mx :global(td.none) { background: repeating-linear-gradient(45deg, #d5dbe2 0 4px, #eef1f4 4px 8px); }
   :global(.tchip) { display: inline-block; font-weight: 700; font-size: .68rem; padding: 0 .35rem; margin-right: .2rem; color: #fff; text-shadow: 1px 1px 1px rgb(0 0 0 / .5); border: 1px solid rgb(0 0 0 / .25); }
 </style>
