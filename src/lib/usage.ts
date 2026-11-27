@@ -66,8 +66,8 @@ export const formats = (idx.formats as any[])
   .sort((a, b) => GROUPS.findIndex((g) => g.key === a.group) - GROUPS.findIndex((g) => g.key === b.group) || Number(b.current) - Number(a.current) || (a.group === 'pd' ? b.id.localeCompare(a.id) : b.period.localeCompare(a.period)) || b.total - a.total);
 // Picker parts: which game/season a format belongs to, a short name inside that group, and its Bo3 twin.
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-// dates are written DDMmmYYYY (26Nov2026), or MmmYYYY (Apr2024) when there's no day
-export const fmtDate = (p: string) => { const m = String(p ?? '').match(/^(\d{4})-(\d{2})(?:-(\d{2}))?/); return m ? `${m[3] ? +m[3] : ''}${MON[+m[2] - 1]}${m[1]}` : p; };
+// dates are written 07 NOV 2026, or APR 2024 when there's no day
+export const fmtDate = (p: string) => { const m = String(p ?? '').match(/^(\d{4})-(\d{2})(?:-(\d{2}))?/); return m ? `${m[3] ? m[3] + ' ' : ''}${MON[+m[2] - 1].toUpperCase()} ${m[1]}` : p; };
 export const monthName = fmtDate;
 export const fmtRange = (p: string) => String(p ?? '').replace(/(\d{4}-\d{2}-\d{2}) to (\d{4}-\d{2}-\d{2})/, (_, a, b) => `${fmtDate(a)} – ${fmtDate(b)}`);
 for (const f of formats as any[]) {

@@ -137,6 +137,8 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   const byK = new Map(D.mons.map((m: any) => [m.k, m]));
   const panel = document.getElementById('upanel')!, list = document.getElementById('ulist')!;
   const baseTitle = document.title;
+  // the set builder is opt-in: browsing never selects anything until you open it
+  let building = false;
   const draw = (k: string, scroll = false) => {
     const m: any = byK.get(k) ?? D.mons[0]; if (!m) { panel.innerHTML = '<p>No data.</p>'; return; }
     list.querySelectorAll('a.on').forEach((a) => a.classList.remove('on'));
@@ -164,10 +166,11 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
         </div>
         <dl class="unums"><div><dt>Usage</dt><dd>${pct(m.u)}</dd></div><div><dt>Rank</dt><dd>#${m.r}</dd></div><div><dt title="${D.sheets ? 'Team sheets with this Pokémon' : 'Teams with this Pokémon in the sampled battles'}">Teams</dt><dd>${(m.cnt ?? 0).toLocaleString('en-US')}</dd></div>${D.sheets && m.wr != null ? `<div><dt title="Game win rate of teams with this Pokémon">Win rate</dt><dd>${pct(m.wr)}</dd></div>` : ''}</dl>
       </div>
-      <div class="uset">
+      <div class="ubuild"${building ? ' hidden' : ''}><button type="button" class="sm" id="ubuild">Build a set from this data</button></div>
+      <div class="uset"${building ? '' : ' hidden'}>
         <div class="ush"><b>Your set</b><span class="soft">Click rows below to choose the moves (up to 4), item, ability${m.te.length ? ', Tera type' : ''} and ${m.sp.length ? 'spread' : 'nature'}. It starts with the most common of each.</span></div>
         <pre id="upaste"></pre>
-        <div class="uact"><div class="uadd"><button type="button" class="block" id="uadd" aria-haspopup="true" aria-expanded="false">Add set to Teambuilder ▾</button><div class="umenu" id="umenu" hidden></div></div><button type="button" class="sm" id="ucopy">Copy as Showdown text</button><button type="button" class="sm" id="ureset">Reset to most common</button><span class="soft" id="umsg"></span></div>
+        <div class="uact"><div class="uadd"><button type="button" class="block" id="uadd" aria-haspopup="true" aria-expanded="false">Add set to Teambuilder ▾</button><div class="umenu" id="umenu" hidden></div></div><button type="button" class="sm" id="ucopy">Copy as Showdown text</button><button type="button" class="sm" id="ureset">Reset to most common</button><button type="button" class="sm" id="uclear">Clear</button><button type="button" class="sm" id="uclose">Close set builder</button><span class="soft" id="umsg"></span></div>
       </div>
       <div class="ugrid">
         ${m.st ? card('Base stats', 'c-bs', '', m.st.map((v: number, i: number) => `<div class="urow bsr"><span class="bl">${STATN[i]}</span><span class="bb">${bar(v)}</span><span class="bv">${v}</span></div>`).concat(`<div class="urow bsr tot"><span class="bl">Total</span><span class="bb"></span><span class="bv">${m.st.reduce((x: number, y: number) => x + y, 0)}</span></div>`)) : ''}
@@ -207,6 +210,7 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
       });
     };
     const choose = (r: HTMLElement) => {
+      if (!building) return;
       const k = r.dataset.kind!, i = +r.dataset.i!; msg.textContent = '';
       if (k === 'mv') {
         if (P.mv.includes(i)) P.mv = P.mv.filter((x: number) => x !== i);
@@ -220,6 +224,15 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
       r.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose(r); } });
     });
     document.getElementById('ureset')!.addEventListener('click', () => { P.mv = m.mv.slice(0, 4).map((_: any, i: number) => i); P.it = m.it.length ? 0 : -1; P.ab = m.ab.length ? 0 : -1; P.te = m.te.length ? 0 : -1; P.sp = m.sp.length ? 0 : -1; P.na = m.na.length ? 0 : -1; msg.textContent = ''; sync(); });
+    const setBuilding = (on: boolean) => {
+      building = on; panel.classList.toggle('building', on);
+      panel.querySelector<HTMLElement>('.uset')!.hidden = !on; panel.querySelector<HTMLElement>('.ubuild')!.hidden = on;
+      panel.querySelectorAll<HTMLElement>('.pickable').forEach((r) => { r.tabIndex = on ? 0 : -1; on ? r.setAttribute('role', 'button') : r.removeAttribute('role'); });
+    };
+    document.getElementById('ubuild')!.addEventListener('click', () => setBuilding(true));
+    document.getElementById('uclose')!.addEventListener('click', () => setBuilding(false));
+    document.getElementById('uclear')!.addEventListener('click', () => { P.mv = []; P.it = P.ab = P.te = P.sp = P.na = -1; msg.textContent = ''; sync(); });
+    setBuilding(building);
     sync();
     document.title = `${m.n}: ${baseTitle}`;
     if (scroll && matchMedia('(max-width: 900px)').matches) panel.scrollIntoView({ block: 'start' });
@@ -288,10 +301,12 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   .upanel :global(.ush) { display: flex; gap: .4rem 1rem; flex-wrap: wrap; align-items: baseline; font-size: .85rem; }
   .upanel :global(#upaste) { margin: .4rem 0 .5rem; padding: .4rem .6rem; background: rgb(0 0 0 / .035); border: 1px solid var(--line); border-radius: 3px; font: .82rem/1.45 ui-monospace, Consolas, monospace; white-space: pre-wrap; }
   .upanel :global(#umsg) { font-size: .82rem; align-self: center; }
-  .upanel :global(.pickable) { cursor: pointer; }
-  .upanel :global(.pickable:hover) { background: rgb(74 144 217 / .08); }
-  .upanel :global(.pickable.sel) { background: #dfe9f6; }
-  :global(html[data-theme='dark']) .upanel :global(.pickable.sel) { background: #2f353d; }
+  .upanel:not(.building) :global(.tick) { display: none; }
+  .upanel.building :global(.pickable) { cursor: pointer; }
+  .upanel.building :global(.pickable:hover) { background: rgb(74 144 217 / .08); }
+  .upanel.building :global(.pickable.sel) { background: #dfe9f6; }
+  :global(html[data-theme='dark']) .upanel.building :global(.pickable.sel) { background: #2f353d; }
+  .upanel :global(.ubuild) { margin-top: .6rem; }
   .upanel :global(.tick) { flex: none; width: 14px; height: 14px; border: 1px solid var(--line-2); border-radius: 2px; background: var(--card); display: inline-block; position: relative; }
   .upanel :global(.tick.ghost) { visibility: hidden; }
   .upanel :global(.pickable.sel .tick) { background: #2f6db5; border-color: #24579a; }
@@ -336,10 +351,12 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   .upanel :global(.ush) { display: flex; gap: .4rem 1rem; flex-wrap: wrap; align-items: baseline; font-size: .85rem; }
   .upanel :global(#upaste) { margin: .4rem 0 .5rem; padding: .4rem .6rem; background: rgb(0 0 0 / .035); border: 1px solid var(--line); border-radius: 3px; font: .82rem/1.45 ui-monospace, Consolas, monospace; white-space: pre-wrap; }
   .upanel :global(#umsg) { font-size: .82rem; align-self: center; }
-  .upanel :global(.pickable) { cursor: pointer; }
-  .upanel :global(.pickable:hover) { background: rgb(74 144 217 / .08); }
-  .upanel :global(.pickable.sel) { background: #dfe9f6; }
-  :global(html[data-theme='dark']) .upanel :global(.pickable.sel) { background: #2f353d; }
+  .upanel:not(.building) :global(.tick) { display: none; }
+  .upanel.building :global(.pickable) { cursor: pointer; }
+  .upanel.building :global(.pickable:hover) { background: rgb(74 144 217 / .08); }
+  .upanel.building :global(.pickable.sel) { background: #dfe9f6; }
+  :global(html[data-theme='dark']) .upanel.building :global(.pickable.sel) { background: #2f353d; }
+  .upanel :global(.ubuild) { margin-top: .6rem; }
   .upanel :global(.tick) { flex: none; width: 14px; height: 14px; border: 1px solid var(--line-2); border-radius: 2px; background: var(--card); display: inline-block; position: relative; }
   .upanel :global(.pickable.sel .tick) { background: #2f6db5; border-color: #24579a; }
   .upanel :global(.pickable.sel .tick)::after { content: ''; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
