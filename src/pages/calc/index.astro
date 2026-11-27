@@ -59,13 +59,15 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
           <label class="g8only"><span>Dynamax</span><span class="chk"><input type="checkbox" data-k="dmax" id={`dmax${p}`} /><label for={`dmax${p}`}>Dynamaxed</label></span></label>
                 </div>
         <table class="stt">
-          <thead><tr><th></th><th class="n">Base</th><th class="n" data-k="ivh">IVs</th><th class="n ev">EVs</th><th class="n">Stat</th><th class="n">Boost</th></tr></thead>
+          <thead><tr><th></th><th class="n">Base</th><th></th><th class="n ev">EVs</th><th class="ev"></th><th class="n" data-k="ivh">IVs</th><th class="n">Stat</th><th class="n">Boost</th></tr></thead>
           <tbody>
             {STATS.map(([k, l]) => (
               <tr data-s={k}>
                 <th>{l}</th><td class="n" data-k={`b-${k}`}></td>
-                <td class="n"><input class="field num" data-k={`iv-${k}`} type="number" min="0" max="31" /></td>
+                <td class="sbar"><i data-k={`bar-${k}`}></i></td>
                 <td class="n ev"><input class="field num" data-k={`ev-${k}`} type="number" min="0" max="252" step="4" /></td>
+                <td class="ev evc"><input type="range" class="evr" data-k={`evr-${k}`} min="0" max="252" step="4" aria-label={`${l} EVs`} /></td>
+                <td class="n"><input class="field num" data-k={`iv-${k}`} type="number" min="0" max="31" /></td>
                 <td class="n tot" data-k={`s-${k}`}></td>
                 <td class="n">{k === 'hp' ? '' : <select class="field bst" data-k={`bo-${k}`}>{[6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6].map((b) => <option value={b} selected={b === 0}>{b > 0 ? `+${b}` : b}</option>)}</select>}</td>
               </tr>
@@ -159,6 +161,8 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
       ivs: Record<SK, number>; evs: Record<SK, number>; bo: Record<SK, number>; hpPct: number; moves: MoveS[]; gender: string; faint: number; boosted: string };
     type SideS = Record<string, boolean | number>;
     type State = { byGen?: Record<number, [Mon, Mon]>; gen: number; gt: 'Singles' | 'Doubles'; mons: [Mon, Mon]; wx: string; ter: string; f: Record<string, boolean>; sides: [SideS, SideS]; sel: [number, number] };
+    // EVs can't go past 510 in total (Gen 3+): a stat gets at most what the others leave
+    const capEv = (m: Mon, s: SK, v: number) => gen.num <= 2 ? 252 : Math.max(0, Math.min(v, 252, 510 - STAT.reduce((a, k) => a + (k === s ? 0 : +m.evs[k] || 0), 0)));
     const six = (v: number) => Object.fromEntries(STAT.map((k) => [k, v])) as Record<SK, number>;
     const emptyMon = (sp: string): Mon => ({ sp, lv: 50, nat: 'Serious', ab: '', abOn: false, it: '', tera: '', teraOn: false, dmax: false, st: '', ivs: six(31), evs: six(0), bo: six(0), hpPct: 100,
       moves: [0, 1, 2, 3].map(() => ({ name: '', crit: false, hits: 0, z: false, bp: null })), gender: '', faint: 0, boosted: '' });
@@ -288,6 +292,10 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
       for (const k of STAT) {
         q(p, `b-${k}`).textContent = (s.baseStats as any)[k] ?? '';
         q(p, `s-${k}`).textContent = st ? (st.raw as any)[k] : '';
+        const v = st ? (st.raw as any)[k] * 100 / (m.lv || 100) : 0, ki = STAT.indexOf(k);
+        q(p, `bar-${k}`).setAttribute('style', `width:${Math.min(59, Math.floor(v * 60 / (ki ? 504 : 704)))}px;background:hsl(${Math.min(360, Math.floor(v * 180 / 714))}, 85%, 45%)`);
+        const r = q(p, `evr-${k}`) as HTMLInputElement; r.value = String(m.evs[k]); r.style.setProperty('--fill', `${(m.evs[k] / 252) * 100}%`);
+        (q(p, `ev-${k}`) as HTMLInputElement).value = String(m.evs[k]);
         const [up, dn] = (() => { const n = gen.natures.get(toID(m.nat) as any); return n ? [n.plus, n.minus] : ['', '']; })();
         q(p, `s-${k}`).className = 'n tot' + (up !== dn && k === up ? ' up' : up !== dn && k === dn ? ' dn' : '');
       }
@@ -462,6 +470,11 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
         Object.assign(S.mons[p].moves[i], { name: it.label === '(none)' ? '' : it.label, bp: null, hits: 0, crit: false, z: false }); drawMove(p, i); compute();
       }, 12, true));
 
+      pan.addEventListener('input', (e) => {
+        const t = e.target as HTMLInputElement; const k = t.dataset.k ?? '';
+        if (!k.startsWith('evr-')) return;
+        const sk = k.slice(4) as SK; S.mons[p].evs[sk] = Math.floor(capEv(S.mons[p], sk, +t.value) / 4) * 4; drawStats(p); compute();
+      });
       pan.addEventListener('change', (e) => {
         const t = e.target as HTMLInputElement, k = t.dataset.k ?? '', m = S.mons[p];
         if (!k) return;
@@ -479,7 +492,7 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
         else if (k === 'cur') { const st = statsOf(m); if (st) m.hpPct = Math.min(100, Math.max(0, (+t.value / st.max) * 100)); }
         else if (k === 'pct') m.hpPct = Math.min(100, Math.max(0, +t.value || 0));
         else if (k.startsWith('iv-')) { const s = k.slice(3) as SK; const v = Math.max(0, +t.value || 0); m.ivs[s] = gen.num <= 2 ? Math.min(15, v) * 2 + 1 : Math.min(31, v); if (gen.num <= 2 && v >= 15) m.ivs[s] = 31; }
-        else if (k.startsWith('ev-')) { const s = k.slice(3) as SK; m.evs[s] = Math.min(252, Math.max(0, Math.floor((+t.value || 0) / 4) * 4)); t.value = String(m.evs[s]); }
+        else if (k.startsWith('ev-')) { const s = k.slice(3) as SK; m.evs[s] = Math.floor(capEv(m, s, +t.value || 0) / 4) * 4; t.value = String(m.evs[s]); }
         else if (k.startsWith('bo-')) m.bo[k.slice(3) as SK] = +t.value;
         else if (/^bp\d$/.test(k)) m.moves[+k[2]].bp = t.value === '' ? null : +t.value;
         else if (/^h\d$/.test(k)) m.moves[+k[1]].hits = +t.value;
@@ -585,7 +598,15 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
   .calc .chk label { cursor: pointer; }
   .calc .chk[hidden] { display: none; }
 
+  /* compact controls (the site's default boxes are sized for forms, too big for a calculator) */
+  .calc .field { font-size: .8rem; padding: .12rem .4rem; border-width: 1px; height: 24px; line-height: 1.2; }
+  .calc select.field { padding-right: 1.4rem; background-position: calc(100% - 12px) 55%, calc(100% - 7px) 55%; font-weight: 400; }
+  .calc .pn .sp { height: 26px; font-size: .9rem; }
+  .calc textarea.field { height: auto; }
   .calc .stt { width: 100%; border-collapse: collapse; margin-top: .5rem; font-size: .8rem; table-layout: fixed; }
+  .calc .stt .sbar { width: 64px; padding-left: 4px; } .calc .stt .sbar i { display: block; height: 9px; }
+  .calc .stt .evc { width: 22%; } .calc .evr { width: 100%; accent-color: #59c4fb; margin: 0; }
+  .calc .stt th:nth-child(2) { width: 2.2rem; } .calc .stt th:nth-child(4), .calc .stt th:nth-child(6) { width: 2.9rem; } .calc .stt th:nth-child(7) { width: 2.4rem; } .calc .stt th:nth-child(8) { width: 3.3rem; }
   .calc .stt th, .calc .stt td { padding: 1px 3px; height: 26px; }
   .calc .stt thead th { font-weight: 600; color: var(--ink-soft); font-size: .72rem; border-bottom: 1px solid var(--line-2); }
   .calc .stt tbody th { text-align: left; font-weight: 600; width: 2.6rem; }
@@ -614,7 +635,9 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
   .calc .more { margin-top: .5rem; }
   .calc .more summary { font-size: .78rem; color: var(--link); cursor: pointer; }
 
-  .calc .fld h3 { margin: 0 0 .4rem; font-size: .9rem; }
+  .calc .fld h3 { margin: 0 0 .4rem; font-size: .9rem; text-align: center; }
+  /* the field column is centered, like Showdown's */
+  .calc .fld .fr { text-align: center; } .calc .fld .fr .seg { display: inline-flex; flex-wrap: wrap; justify-content: center; } .calc .fld .more summary { text-align: center; }
   .calc .fr { margin-bottom: .45rem; }
   .calc .fr .lab { display: block; margin-bottom: .15rem; }
   .calc .fr[hidden] { display: none; }
@@ -641,5 +664,6 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
     .calc .g2 { grid-template-columns: 1fr; }
     .calc .mv { grid-template-columns: minmax(0, 1fr) 90px 3.8rem 3rem auto; }
     .calc .mv .g7only { display: none; }
+    .calc .stt .evc, .calc .stt thead th:nth-child(5) { display: none; }
   }
 </style>

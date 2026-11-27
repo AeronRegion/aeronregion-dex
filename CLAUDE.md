@@ -96,6 +96,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Tools > "Damage calculator" (/calc/). Math is @smogon/calc (same engine as calc.pokemonshowdown.com); Gen 1-9, Singles/Doubles.
 - Condensed layout: results on top (all 4 moves of both Pokémon as buttons with % ranges; the picked one spelled out with KO chance, rolls behind "Possible damage amounts"), then Pokémon | Field | Pokémon (1180px page). Rare options sit under "More" (gender, fainted allies, boosted stat; Leech Seed, Salt Cure, Battery etc., auras).
 - "Load set ▾": most common set per format from our usage data (/calc/sets-<gen>.json, built from src/data/usage), your Teambuilder teams, or a pasted set.
+- Stats table like the Teambuilder: Base + Showdown stat bar, EVs box + slider, IVs, Stat, Boost; compact 24px boxes. Field column contents are centered.
 - Field column starts with Level 100 / 50 / 5 buttons that set both Pokémon. Results list like Showdown: "<Pokémon>'s moves", one row per move (button + % range), two columns. Panel order like Showdown: Level + Tera, stats table, then Nature, Status, Ability, Item, HP, moves. Clicking the result line copies it.
 - "Damage calc" button on each Teambuilder set and "Send to damage calc" in the usage set builder put that set on the left side (localStorage ardex-calc-in; Stat Points converted to EVs).
 - Remembers everything in localStorage (ardex-calc), with each gen's Pokémon kept separately.
