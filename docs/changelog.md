@@ -53,3 +53,4 @@
 - 2026-11-27: All usage percentages show two decimals; Pokémon usage table hides Source on phones
 - 2026-11-27: Pokémon pages: VGC usage section says so when a Pokémon has no recorded usage (instead of disappearing)
 - 2026-11-27: Usage page title label uses the date format (JAN 2024)
+- 2026-11-27: Usage: 'Usage in every format' link under the selected Pokémon; searching a Pokémon not in the format says where to look

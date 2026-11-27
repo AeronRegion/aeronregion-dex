@@ -131,7 +131,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
     </>}
 
     {usage.length > 0 && <>
-      <h3 class="sec">VGC usage <span class="soft ucount">{usage.length} format{usage.length > 1 ? 's' : ''}</span></h3>
+      <h3 class="sec" id="vgc-usage">VGC usage <span class="soft ucount">{usage.length} format{usage.length > 1 ? 's' : ''}</span></h3>
       <table class="data ustat">
         <thead><tr><th>Format</th><th>Source</th><th>When</th><th class="n">Usage</th><th class="n">Rank</th></tr></thead>
         <tbody>{usage.slice(0, 6).map((u: any) => <tr><td><a href={u.href}>{u.name.replace(' (official majors)', '')}</a></td><td>{SRC[u.group]}</td><td>{u.group === 'sd' ? monthName(u.period) : u.group === 'lt' ? fmtRange(u.period) : `${u.tours} events`}</td><td class="n">{u.usage.toFixed(2)}%</td><td class="n">#{u.rank}</td></tr>)}</tbody>
@@ -139,7 +139,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
       </table>
       {usage.length > 6 && <button type="button" class="sm umorebtn" onclick="const t=this.previousElementSibling.querySelector('.umore');t.hidden=!t.hidden;this.textContent=t.hidden?'Show all formats':'Show fewer'">Show all formats</button>}
     </>}
-    {usage.length === 0 && <><h3 class="sec">VGC usage</h3><p class="soft">Not used in any recorded VGC format.</p></>}
+    {usage.length === 0 && <><h3 class="sec" id="vgc-usage">VGC usage</h3><p class="soft">Not used in any recorded VGC format.</p></>}
 
     <h3 class="sec">Where to find</h3>
     <table class="loc">

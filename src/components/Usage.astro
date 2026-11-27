@@ -104,6 +104,7 @@ const pct = (p: number) => (p ?? 0).toFixed(2) + '%';
   <aside class="uside">
     <input class="field" id="uq" placeholder="Search Pokémon…" autocomplete="off" />
     <div class="uhead"><span>Pokémon</span><span>Usage</span></div>
+    <p class="unone soft" id="unone" hidden>Not in this format. Search it in the top bar: its page lists every format it's used in.</p>
     <ol class="ulist" id="ulist">
       {mons.map((m: any) => (
         <li><a href={`#${m.k}`} data-k={m.k} data-q={m.n.toLowerCase()}>
@@ -164,7 +165,7 @@ const pct = (p: number) => (p ?? 0).toFixed(2) + '%';
         <img class="uart" src="${m.ic}" data-fb="${m.fb}" onerror="if(this.src!==this.dataset.fb)this.src=this.dataset.fb" alt="" width="68" height="51" />
         <div class="ut">
           <h2>${m.url ? `<a class="pk" href="${m.url}">${esc(m.n)}</a>` : esc(m.n)}</h2>
-          <div class="tys">${m.ty.map(chip).join(' ')}</div>
+          <div class="tys">${m.ty.map(chip).join(' ')}</div>${m.url ? `<a class="uall" href="${m.url}#vgc-usage">Usage in every format</a>` : ''}
         </div>
         <dl class="unums"><div><dt>Usage</dt><dd>${pct(m.u)}</dd></div><div><dt>Rank</dt><dd>#${m.r}</dd></div><div><dt title="${D.sheets ? 'Team sheets with this Pokémon' : 'Teams with this Pokémon in the sampled battles'}">Teams</dt><dd>${(m.cnt ?? 0).toLocaleString('en-US')}</dd></div>${D.sheets && m.wr != null ? `<div><dt title="Game win rate of teams with this Pokémon">Win rate</dt><dd>${pct(m.wr)}</dd></div>` : ''}</dl>
       </div>
@@ -255,7 +256,7 @@ const pct = (p: number) => (p ?? 0).toFixed(2) + '%';
     if (li) list.scrollTop = li.offsetTop - list.offsetTop - list.clientHeight / 2;
   });
   const q = document.getElementById('uq') as HTMLInputElement;
-  q.addEventListener('input', () => { const v = q.value.trim().toLowerCase(); list.querySelectorAll<HTMLAnchorElement>('a').forEach((a) => { a.parentElement!.hidden = !!v && !a.dataset.q!.includes(v); }); });
+  q.addEventListener('input', () => { const v = q.value.trim().toLowerCase(); list.querySelectorAll<HTMLAnchorElement>('a').forEach((a) => { a.parentElement!.hidden = !!v && !a.dataset.q!.includes(v); }); document.getElementById('unone')!.hidden = !list.querySelector('li:not([hidden])') ? false : true; });
   q.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const a = list.querySelector<HTMLAnchorElement>('li:not([hidden]) a'); if (a) go(a.dataset.k!, true); } });
   draw(location.hash.slice(1));
 </script>
@@ -278,6 +279,8 @@ const pct = (p: number) => (p ?? 0).toFixed(2) + '%';
   .uwrap { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 1rem; align-items: start; margin-top: .6rem; }
   .uside { position: sticky; top: 70px; border: 1px solid var(--line-2); border-radius: 4px; background: var(--card); padding: .5rem; }
   .uside #uq { width: 100%; }
+  .unone { font-size: .85rem; padding: .6rem .3rem; margin: 0; }
+  .uall { display: inline-block; margin-top: .25rem; font-size: .8rem; }
   .uhead { display: flex; justify-content: space-between; font-size: .75rem; color: var(--ink-soft); padding: .45rem .3rem .2rem; border-bottom: 1px solid var(--line-2); }
   .ulist { list-style: none; margin: 0; padding: 0; max-height: calc(100vh - 210px); overflow-y: auto; position: relative; }
   .ulist a { display: grid; grid-template-columns: 1.6rem 34px minmax(0, 1fr) 3.6rem; align-items: center; gap: .3rem; padding: 2px .3rem; text-decoration: none !important; color: var(--ink); border-bottom: 1px solid var(--line); font-size: .9rem; }
