@@ -3659,10 +3659,10 @@
    "def": true,
    "label": "Reg M-C",
    "source": "Limitless tournaments",
-   "period": "2026-11-11 to 2026-11-26",
+   "period": "2026-11-08 to 2026-11-26",
    "tours": 91,
-   "total": 4434,
-   "battles": 10858,
+   "total": 4440,
+   "battles": 10848,
    "events": []
   },
   {
@@ -3705,7 +3705,7 @@
   {
    "id": "pd-2027_1000081",
    "base": "pd-2027",
-   "label": "Fall Pok\u00e9mon Professor VGC Online Cup",
+   "label": "Fall Pokémon Professor VGC Online Cup",
    "source": "Official majors (RK9 team lists via Pokedata)",
    "period": "2026-11-07",
    "tours": 1,
@@ -3825,7 +3825,7 @@
    "def": true,
    "label": "2027 season majors",
    "source": "Official majors (RK9 team lists via Pokedata)",
-   "period": "Frankfurt Regional Championships, Baltimore Regional Championships, Louisville Regional Championships, Nice Regional Championships, Gdansk Regional Championships, Latin America International Championships, Puebla Regional Championships, Brisbane Regional Championships, Recife Regional Championships, Fall Pok\u00e9mon Professor VGC Online Cup",
+   "period": "Frankfurt Regional Championships, Baltimore Regional Championships, Louisville Regional Championships, Nice Regional Championships, Gdansk Regional Championships, Latin America International Championships, Puebla Regional Championships, Brisbane Regional Championships, Recife Regional Championships, Fall Pokémon Professor VGC Online Cup",
    "tours": 10,
    "total": 6418,
    "battles": 26073,
@@ -3904,7 +3904,7 @@
     },
     {
      "id": "pd-2027_1000081",
-     "name": "Fall Pok\u00e9mon Professor VGC Online Cup",
+     "name": "Fall Pokémon Professor VGC Online Cup",
      "date": "2026-11-07",
      "players": 43,
      "teams": 43,
@@ -3915,7 +3915,7 @@
   {
    "id": "pd-2026_1000035",
    "base": "pd-2026",
-   "label": "Pok\u00e9mon VGC World Championship",
+   "label": "Pokémon VGC World Championship",
    "source": "Official majors (RK9 team lists via Pokedata)",
    "period": "2026-08-28",
    "tours": 1,
@@ -4032,7 +4032,7 @@
   {
    "id": "pd-2026_1000044",
    "base": "pd-2026",
-   "label": "Quer\u00e9taro Regional Championships",
+   "label": "Querétaro Regional Championships",
    "source": "Official majors (RK9 team lists via Pokedata)",
    "period": "2026-04-04",
    "tours": 1,
@@ -4149,7 +4149,7 @@
   {
    "id": "pd-2026_1000053",
    "base": "pd-2026",
-   "label": "M\u00e9rida Regional Championships",
+   "label": "Mérida Regional Championships",
    "source": "Official majors (RK9 team lists via Pokedata)",
    "period": "2026-01-24",
    "tours": 1,
@@ -4227,7 +4227,7 @@
   {
    "id": "pd-2026_1000059",
    "base": "pd-2026",
-   "label": "Gda\u0144sk Regional Championships",
+   "label": "Gdańsk Regional Championships",
    "source": "Official majors (RK9 team lists via Pokedata)",
    "period": "2025-11-01",
    "tours": 1,
@@ -4334,7 +4334,7 @@
    "def": true,
    "label": "2026 season majors",
    "source": "Official majors (RK9 team lists via Pokedata)",
-   "period": "Europe International Championships, North America International Championships, Indianapolis Regional Championships, Turin Special Championships, Seattle Regional Championships, Toronto Regional Championships, Pittsburgh Regional Championships, Frankfurt Regional Championships, Milwaukee Regional Championships, Las Vegas Regional Championships, Birmingham Regional Championships, Lille Regional Championships, Orlando Regional Championships, Stuttgart Regional Championships, Houston Regional Championships, Seville Special Championships, Prague Regional Championships, Los Angeles Regional Championships, Latin America International Championships, Gda\u0144sk Regional Championships, Utrecht Regional Championships, Pok\u00e9mon VGC World Championship, Melbourne Regional Championships, Monterrey Regional Championships, Sydney Regional Championships, Quer\u00e9taro Regional Championships, M\u00e9rida Regional Championships, Campinas Regional Championships, Santiago Regional Championships, Brisbane Regional Championships, Belo Horizonte Regional Championships, Curitiba Regional Championships",
+   "period": "Europe International Championships, North America International Championships, Indianapolis Regional Championships, Turin Special Championships, Seattle Regional Championships, Toronto Regional Championships, Pittsburgh Regional Championships, Frankfurt Regional Championships, Milwaukee Regional Championships, Las Vegas Regional Championships, Birmingham Regional Championships, Lille Regional Championships, Orlando Regional Championships, Stuttgart Regional Championships, Houston Regional Championships, Seville Special Championships, Prague Regional Championships, Los Angeles Regional Championships, Latin America International Championships, Gdańsk Regional Championships, Utrecht Regional Championships, Pokémon VGC World Championship, Melbourne Regional Championships, Monterrey Regional Championships, Sydney Regional Championships, Querétaro Regional Championships, Mérida Regional Championships, Campinas Regional Championships, Santiago Regional Championships, Brisbane Regional Championships, Belo Horizonte Regional Championships, Curitiba Regional Championships",
    "tours": 32,
    "total": 18089,
    "battles": 72652,
@@ -4493,7 +4493,7 @@
     },
     {
      "id": "pd-2026_1000059",
-     "name": "Gda\u0144sk Regional Championships",
+     "name": "Gdańsk Regional Championships",
      "date": "2025-11-01",
      "players": 418,
      "teams": 417,
@@ -4509,7 +4509,7 @@
     },
     {
      "id": "pd-2026_1000035",
-     "name": "Pok\u00e9mon VGC World Championship",
+     "name": "Pokémon VGC World Championship",
      "date": "2026-08-28",
      "players": 395,
      "teams": 395,
@@ -4541,7 +4541,7 @@
     },
     {
      "id": "pd-2026_1000044",
-     "name": "Quer\u00e9taro Regional Championships",
+     "name": "Querétaro Regional Championships",
      "date": "2026-04-04",
      "players": 270,
      "teams": 269,
@@ -4549,7 +4549,7 @@
     },
     {
      "id": "pd-2026_1000053",
-     "name": "M\u00e9rida Regional Championships",
+     "name": "Mérida Regional Championships",
      "date": "2026-01-24",
      "players": 234,
      "teams": 234,
