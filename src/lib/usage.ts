@@ -57,6 +57,6 @@ export const GROUPS = [
 export const formats = (idx.formats as any[])
   .filter((f) => !/custom/i.test(f.label) && (f.total ?? 0) >= 100)
   .map((f) => ({ ...f, name: formatName(f), group: f.id.slice(0, 2) }))
-  .sort((a, b) => GROUPS.findIndex((g) => g.key === a.group) - GROUPS.findIndex((g) => g.key === b.group) || b.period.localeCompare(a.period) || b.total - a.total);
+  .sort((a, b) => GROUPS.findIndex((g) => g.key === a.group) - GROUPS.findIndex((g) => g.key === b.group) || (a.group === 'pd' ? b.id.localeCompare(a.id) : b.period.localeCompare(a.period)) || b.total - a.total);
 export const updated = idx.updated as string;
 export const loadFormat = (id: string) => get(id);

@@ -28,3 +28,4 @@
 - 2026-11-26: Type pages: removed the color square before the type name in the title
 - 2026-11-26: Header: removed the logo image (it stays on aeronregion.net only); added the tagline "All data and tools in one place" under ARdex (hidden on phones)
 - 2026-11-26: New VGC usage tool (Tools > VGC usage): Showdown ladder stats, Limitless tournament teams and official majors, refreshed weekly by GitHub Actions; sets can be added to the Teambuilder (/team/?add=)
+- 2026-11-26: VGC usage: newest season of official majors listed first
