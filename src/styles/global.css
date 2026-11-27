@@ -568,5 +568,6 @@ html[data-theme='dark'] .mx td.dc.r4 { background: #7cc35e !important; color: #1
 html[data-theme='dark'] .mx td.dc.im { background: #3a3f46 !important; color: #fff !important; border-color: #3a3f46 !important; }
 
 /* Header search: dual-typed Pokémon show the two type symbols only (the left, round part of the SV icon), 16px each */
-html body .ac-ts { display: inline-flex; gap: 3px; width: 80px; justify-content: center; }
-html body .ac-t.sym[data-type]:not(.x0):not(.x1):not(.x2):not(.x3) { width: 16px !important; border-radius: 50% !important; background-size: auto 100% !important; background-position: left center !important; }
+html body .ac-ts { display: inline-flex; gap: 4px; width: 80px; justify-content: center; vertical-align: middle; }
+/* the icon is 200x40 with the symbol at x 17-42: at 18px tall it sits 7.7-18.9px in, so shift it left 4.3px to center it in an 18px circle */
+html body .ac-t.sym[data-type]:not(.x0):not(.x1):not(.x2):not(.x3) { width: 18px !important; height: 18px !important; border-radius: 50% !important; background-size: auto 18px !important; background-position: -4.3px center !important; }
