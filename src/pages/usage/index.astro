@@ -1,0 +1,11 @@
+---
+import Base from '../../layouts/Base.astro';
+import Usage from '../../components/Usage.astro';
+import { formats } from '../../lib/usage';
+// default: the biggest current Showdown ladder format
+const def = formats.filter((f) => f.group === 'sd').sort((a, b) => b.period.localeCompare(a.period) || b.total - a.total)[0] ?? formats[0];
+---
+<Base title="VGC usage" description="VGC usage stats: most used Pokémon, moves, items, spreads and teammates from Showdown, online tournaments and official majors.">
+  <h1>VGC usage <em class="kind">(tool)</em></h1>
+  {def ? <Usage id={def.id} /> : <p>No usage data yet.</p>}
+</Base>

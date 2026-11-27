@@ -8,7 +8,7 @@ import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, extname } from 'node:path';
 
-const PAGES = ['/', '/pokedex/', '/pokemon/charizard/', '/pokemon/indeedee-f/', '/moves/', '/moves/crunch/', '/abilities/', '/abilities/intimidate/',
+const PAGES = ['/', '/usage/', '/pokedex/', '/pokemon/charizard/', '/pokemon/indeedee-f/', '/moves/', '/moves/crunch/', '/abilities/', '/abilities/intimidate/',
   '/items/', '/items/leftovers/', '/types/', '/types/fire/', '/natures/', '/egg-groups/', '/ev-yield/', '/regions/', '/search/', '/team/', '/coverage/',
   ...process.argv.slice(2)];
 const W = 390, H = 844, PORT = 4499, DBG = 9399;

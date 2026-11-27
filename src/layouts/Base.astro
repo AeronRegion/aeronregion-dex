@@ -12,8 +12,8 @@ const menus: any[] = [
     { href: '/abilities/', label: 'Abilities' }, { href: '/items/', label: 'Items' }, { href: '/natures/', label: 'Natures' },
     { href: '/egg-groups/', label: 'Egg groups' }, { href: '/ev-yield/', label: 'EV yield' },
   ], quick: [{ href: '/regions/', label: 'Pokémon by generation' }, { href: '/moves/?tag=Multi-hit', label: 'Multi-hit moves' }, { href: '/moves/?tag=Priority', label: 'Priority moves' }, { href: '/moves/?tag=Spread', label: 'Spread moves' }] },
-  { label: 'Tools', icon: 'gear', match: ['/types/', '/search/', '/coverage/', '/team/'], items: [
-    { href: '/types/#chart', label: 'Type chart' }, { href: '/search/', label: 'Moveset search' }, { href: '/team/', label: 'Teambuilder' }, { href: '/coverage/', label: 'Coverage checker' },
+  { label: 'Tools', icon: 'gear', match: ['/types/', '/search/', '/coverage/', '/team/', '/usage/'], items: [
+    { href: '/types/#chart', label: 'Type chart' }, { href: '/search/', label: 'Moveset search' }, { href: '/team/', label: 'Teambuilder' }, { href: '/coverage/', label: 'Coverage checker' }, { href: '/usage/', label: 'VGC usage' },
   ] },
 ];
 const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x));

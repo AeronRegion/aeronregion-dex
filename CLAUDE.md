@@ -56,6 +56,10 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Types page: type picker tiles, then the 18x18 chart (no toggles or combo checker). The chart sits on a light panel in both modes; neutral cells stay light in dark mode.
 - Moveset search: pick up to 4 moves, Cobbleverse movepool by default, results sortable by stat.
 
+### VGC usage
+- Under Tools ("VGC usage", /usage/). Format picker grouped by source (Showdown ladder, Limitless tournaments, official majors); ranked table with "Sets" rows that expand to moves/items/abilities/spreads or natures/Tera/teammates; "Add most common set to Teambuilder".
+- Data refreshes weekly via GitHub Actions (.github/workflows/usage.yml). No Smogon analyses or Pikalytics scraping.
+
 ## Docs index
 - docs/changelog.md: dated list of changes
 - docs/decisions.md: longer reasoning behind decisions

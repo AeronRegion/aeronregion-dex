@@ -37,6 +37,7 @@ Pushing to `main` deploys automatically (Cloudflare Workers Builds). The commit'
   - Stat bars follow Showdown's formula and are sized as at Lv. 100.
   - Sharing: **Copy link** puts the team in the URL (`/team/?team=<base64>&name=`). **Create PokéPaste** posts to pokepast.es. **Check coverage** opens the Coverage checker with the team.
 - **Coverage checker** (`/coverage/`): defense by member and moveset coverage for up to 14 Pokémon. It accepts the same `?team=` links.
+- **VGC usage** (`/usage/`, one page per format at `/usage/<id>/`): Pokémon ranked by usage, and for each one its moves, items, abilities, spreads or natures, Tera types and teammates. **Add most common set to Teambuilder** links to `/team/?add=<base64 Showdown text>`, which adds the set to the last team you had open.
 - **Light/dark mode**: stored in a `theme` cookie on `.aeronregion.net`, so it's shared with the main site, with `localStorage` and the system setting as fallbacks.
 
 ## Data
@@ -51,6 +52,13 @@ Sources:
 - **Pokémon Showdown** (via `@pkmn/dex`): stats, types, abilities, moves (including Let's Go, Z- and Max moves), move text, items, learnsets for every game.
 - **PokéAPI** CSVs: EV yield, catch rate, growth rate, egg cycles, height, Pokédex entries, main-game locations, item text. Sprites and artwork are loaded from PokéAPI's sprite repo on GitHub.
 - **Cobbleverse pack files**: spawns, drops and Cobblemon movepools.
+
+### VGC usage data (automatic)
+`.github/workflows/usage.yml` runs `scripts/usage.mjs` every Monday (and by hand from the repo's Actions tab) and commits `src/data/usage/` if it changed, which redeploys the site. It pulls:
+- **Showdown ladder stats** (smogon.com/stats, "chaos" files): every VGC format in the latest month, highest rating cutoff (1760). Has EV/Stat Point spreads.
+- **Limitless** (play.limitlesstcg.com/api): open team sheets from VGC tournaments with 16+ players in the last 45 days, grouped by format. Has win rates and natures.
+- **Official majors** (pokedata.ovh, RK9 team lists): Regionals/Internationals/Worlds, Masters division, grouped by season.
+Formats with fewer than 100 teams/battles, and Limitless "CUSTOM" formats, are hidden. Names are mapped to the Pokédex in `src/lib/usage.ts`.
 
 ### Updating after a Cobbleverse update
 1. From the Modrinth profile, unzip each of these into its own folder:

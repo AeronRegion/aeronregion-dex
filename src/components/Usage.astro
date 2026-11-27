@@ -1,0 +1,147 @@
+---
+// One VGC usage format: picker, ranked Pokémon, and per-Pokémon sets (moves, items, abilities, spreads, Tera, teammates).
+import Type from './Type.astro';
+import { pokeUrl, boxIconUrl, iconUrl, moveUrl, itemUrl, abilityUrl, itemByName, itemIconUrl } from '../lib/data';
+import { formats, GROUPS, loadFormat, findSpecies, moveName, itemName, abilityName, updated } from '../lib/usage';
+import { TYPES } from '../lib/types';
+const { id } = Astro.props as { id: string };
+const f = formats.find((x) => x.id === id)!;
+const d = loadFormat(id);
+const sheets = f.group !== 'sd';
+const STAT = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'];
+const fmtNum = (n: number) => n.toLocaleString('en-US');
+const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
+const spread = (s: string) => {
+  const [nat, v] = s.split(':'); const n = v.split('/').map(Number);
+  return { nat, txt: n.map((x, k) => (x ? `${x} ${STAT[k]}` : '')).filter(Boolean).join(' / ') || '—', n };
+};
+const rows = d.mons.map((m: any, k: number) => {
+  const s = findSpecies(m.name);
+  const top4 = m.moves.slice(0, 4).map(([x]: [string]) => moveName(x));
+  const sp = m.spreads?.[0] ? spread(m.spreads[0][0]) : null;
+  const nat = sp?.nat ?? m.natures?.[0]?.[0] ?? '';
+  const champ = f.name.startsWith('Champions') || (sp && sp.n.every((x) => x <= 32));
+  const paste = [
+    `${s?.name ?? m.name}${m.items[0] ? ` @ ${itemName(m.items[0][0])}` : ''}`,
+    m.abilities[0] ? `Ability: ${abilityName(m.abilities[0][0])}` : '',
+    champ ? '' : 'Level: 50',
+    m.tera?.[0] ? `Tera Type: ${m.tera[0][0]}` : '',
+    sp ? `EVs: ${sp.n.map((x, i) => (x ? `${x} ${['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'][i]}` : '')).filter(Boolean).join(' / ')}` : '',
+    nat ? `${nat} Nature` : '',
+    ...top4.map((x: string) => `- ${x}`),
+  ].filter(Boolean).join('\n');
+  return { m, s, rank: k + 1, key: (s?.id ?? m.name).replace(/[^a-z0-9]/gi, '').toLowerCase(), paste };
+});
+const byKey = new Map(rows.map((r: any) => [r.m.name, r]));
+const list = (title: string, data: [string, number][], render: (x: string) => any) => ({ title, data, render });
+---
+<div class="ufmt">
+  <label class="lab" for="ufmt">Format</label>
+  <select class="field" id="ufmt">
+    {GROUPS.map((g) => { const fs = formats.filter((x) => x.group === g.key); return fs.length > 0 && (
+      <optgroup label={g.label}>{fs.map((x) => <option value={`/usage/${x.id}/`} selected={x.id === id}>{x.name}{x.group !== 'pd' ? ` · ${x.period}` : ''}</option>)}</optgroup>
+    ); })}
+  </select>
+  <input class="field" id="uq" placeholder="Find a Pokémon…" autocomplete="off" />
+</div>
+<p class="note">
+  {GROUPS.find((g) => g.key === f.group)!.label}: {f.group === 'sd'
+    ? <>{fmtNum(f.total)} battles in {f.period}, players rated {f.cutoff}+.</>
+    : f.group === 'lt'
+      ? <>{fmtNum(f.total)} teams from {f.tours} tournaments, {f.period}.</>
+      : <>{fmtNum(f.total)} teams from {f.tours} events.</>}
+  {' '}Updated weekly (last {updated}).
+  {f.group === 'pd' && <details class="evs"><summary>Events included</summary>{f.period}</details>}
+</p>
+
+<table class="data utab" id="ut">
+  <thead><tr><th class="n">#</th><th></th><th>Pokémon</th><th>Type</th><th class="n">Usage</th>{sheets && <th class="n" title="Game win rate of teams with this Pokémon">Win %</th>}<th></th></tr></thead>
+  <tbody>
+    {rows.map((r: any) => (
+      <>
+        <tr class="ur" id={r.key} data-q={(r.s?.name ?? r.m.name).toLowerCase()}>
+          <td class="n soft">{r.rank}</td>
+          <td><img class="sprite" src={boxIconUrl(r.s?.art)} data-fb={iconUrl(r.s?.art)} onerror="if(this.dataset.fb&&this.src!==this.dataset.fb){this.src=this.dataset.fb;this.classList.add('fb')}" alt="" loading="lazy" width="40" height="30" /></td>
+          <td>{r.s ? <a class="pk" href={pokeUrl(r.s)}>{r.s.name}</a> : r.m.name}</td>
+          <td class="tys">{r.s?.types.map((t: string) => <Type type={t} small />)}</td>
+          <td class="n"><span class="ubar"><i style={`width:${Math.min(100, r.m.usage)}%`}></i></span><b>{pct(r.m.usage)}</b></td>
+          {sheets && <td class="n">{r.m.wr != null ? pct(r.m.wr) : '—'}</td>}
+          <td class="c"><button type="button" class="sm ux" aria-expanded="false">Sets</button></td>
+        </tr>
+        <tr class="ud" hidden>
+          <td colspan={sheets ? 7 : 6}>
+            <div class="ugrid">
+              {[
+                list('Moves', r.m.moves, (x) => <a href={moveUrl({ name: moveName(x) })}>{moveName(x)}</a>),
+                list('Items', r.m.items, (x) => { const it = itemByName.get(itemName(x)); return <>{it?.icon && <img src={itemIconUrl(it.icon)} alt="" width="24" height="24" loading="lazy" />}{it ? <a href={itemUrl(it)}>{it.name}</a> : itemName(x)}</>; }),
+                list('Abilities', r.m.abilities, (x) => <a href={abilityUrl(abilityName(x))}>{abilityName(x)}</a>),
+                r.m.spreads?.length ? list(f.name.startsWith('Champions') ? 'Spreads (Stat Points)' : 'Spreads', r.m.spreads, (x) => { const s = spread(x); return <span class="spr"><b>{s.nat}</b> {s.txt}</span>; }) : list('Natures', r.m.natures ?? [], (x) => x),
+                ...(r.m.tera?.length ? [list('Tera types', r.m.tera, (x) => TYPES.includes(x) ? <Type type={x} small /> : x)] : []),
+                list('Teammates', r.m.mates, (x) => { const o = byKey.get(x) as any; const sp = o?.s ?? findSpecies(x); return <>{sp && <img class="sprite" src={boxIconUrl(sp.art)} data-fb={iconUrl(sp.art)} onerror="if(this.dataset.fb&&this.src!==this.dataset.fb){this.src=this.dataset.fb;this.classList.add('fb')}" alt="" loading="lazy" width="40" height="30" />}{o ? <a class="pk" href={`#${o.key}`} data-jump>{sp?.name ?? x}</a> : sp?.name ?? x}</>; }),
+              ].map((L) => (
+                <div class="ubox">
+                  <h4>{L.title}</h4>
+                  {L.data.length ? <ul>{L.data.map(([x, p]) => <li><span class="ul">{L.render(x)}</span><span class="up">{pct(p)}</span></li>)}</ul> : <p class="soft">No data</p>}
+                </div>
+              ))}
+            </div>
+            <div class="uact">
+              <a class="block" href={`/team/?add=${encodeURIComponent(Buffer.from(r.paste, 'utf8').toString('base64'))}`}>Add most common set to Teambuilder</a>
+              <button type="button" class="sm ucopy" data-paste={r.paste}>Copy as Showdown text</button>
+            </div>
+          </td>
+        </tr>
+      </>
+    ))}
+  </tbody>
+</table>
+<p class="note">Sources: Pokémon Showdown usage stats; Limitless (play.limitlesstcg.com); official event team lists from RK9 Labs via Pokedata. Most common set = top item, ability, nature/spread and four most used moves.</p>
+
+<script>
+  const sel = document.getElementById('ufmt') as HTMLSelectElement;
+  sel.addEventListener('change', () => { location.href = sel.value; });
+  const tab = document.getElementById('ut') as HTMLTableElement;
+  const open = (row: HTMLTableRowElement, on?: boolean) => {
+    const det = row.nextElementSibling as HTMLTableRowElement; const b = row.querySelector('.ux')!;
+    const v = on ?? det.hidden; det.hidden = !v; b.setAttribute('aria-expanded', String(v)); row.classList.toggle('on', v);
+  };
+  tab.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    const jump = t.closest('a[data-jump]') as HTMLAnchorElement | null;
+    if (jump) { e.preventDefault(); const r = document.getElementById(jump.hash.slice(1)) as HTMLTableRowElement | null; if (r) { r.hidden = false; open(r, true); r.scrollIntoView({ block: 'start', behavior: 'smooth' }); history.replaceState(null, '', jump.hash); } return; }
+    const cp = t.closest('.ucopy') as HTMLButtonElement | null;
+    if (cp) { navigator.clipboard?.writeText(cp.dataset.paste!).then(() => { cp.textContent = 'Copied'; setTimeout(() => (cp.textContent = 'Copy as Showdown text'), 1500); }); return; }
+    if (t.closest('a')) return;
+    const row = t.closest('tr.ur') as HTMLTableRowElement | null; if (row) open(row);
+  });
+  const q = document.getElementById('uq') as HTMLInputElement;
+  q.addEventListener('input', () => { const v = q.value.trim().toLowerCase(); for (const r of tab.querySelectorAll<HTMLTableRowElement>('tr.ur')) { const ok = !v || r.dataset.q!.includes(v); r.hidden = !ok; if (!ok) open(r, false); } });
+  if (location.hash) { const r = document.getElementById(location.hash.slice(1)) as HTMLTableRowElement | null; if (r?.classList.contains('ur')) open(r, true); }
+</script>
+<style>
+  .ufmt { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; margin: .4rem 0 .6rem; }
+  .ufmt select { min-width: 0; max-width: 100%; }
+  .ufmt #uq { flex: 1; min-width: 160px; max-width: 280px; }
+  .evs { display: inline; } .evs summary { display: inline; cursor: pointer; color: var(--link, #1f5fbf); } .evs[open] { display: block; margin-top: .3rem; font-size: .85rem; color: var(--ink-soft); }
+  .utab tr.ur { cursor: pointer; } .utab tr.ur.on > td { background: #dfe9f6 !important; color: var(--ink) !important; }
+  :global(html[data-theme='dark']) .utab tr.ur.on > td { background: #2f353d !important; }
+  .utab .tys { white-space: nowrap; }
+  .utab .tys :global(.chip + .chip) { margin-left: 2px; }
+  .ubar { display: inline-block; width: 70px; height: 7px; background: var(--line); margin-right: .45rem; vertical-align: middle; }
+  .ubar i { display: block; height: 100%; background: #4a90d9; }
+  .utab tr.ud > td { display: table-cell !important; }
+  .ud > td { padding: .5rem .6rem .7rem !important; background: var(--card); }
+  .ugrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(175px, 42vw), 1fr)); gap: .5rem .9rem; }
+  .ubox h4 { margin: .1rem 0 .25rem; font-size: .85rem; }
+  .ubox ul { list-style: none; margin: 0; padding: 0; }
+  .ubox li { display: flex; justify-content: space-between; align-items: center; gap: .5rem; font-size: .84rem; padding: 1px 0; border-bottom: 1px solid var(--line); min-height: 24px; }
+  .ubox .ul { display: flex; align-items: center; gap: .3rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ubox .ul img { flex: none; } .ubox .ul img.sprite { width: 32px; height: 24px; object-fit: contain; }
+  .ubox .up { flex: none; width: 3.6rem; text-align: right; font-variant-numeric: tabular-nums; }
+  .spr { white-space: normal; font-size: .8rem; }
+  .uact { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .6rem; }
+  @media (max-width: 640px) {
+    .utab th:nth-child(4), .utab td.tys, .ubar { display: none; }
+    .ufmt select { width: 100%; } .ufmt #uq { max-width: none; }
+  }
+</style>

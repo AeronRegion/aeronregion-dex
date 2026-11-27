@@ -463,7 +463,7 @@ import { GAMES, meta } from '../lib/data';
       const [m] = mons.splice(dragFrom, 1); mons.splice(to, 0, m); sel = mons.indexOf(cur2); dragFrom = -1; save(); drawStrip(); drawEd();
     });
     $('strip').addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest<HTMLElement>('.slotb'); if (b) { sel = +b.dataset.k!; drawStrip(); drawEd(); } });
-    ($('teams') as HTMLSelectElement).addEventListener('change', (e) => { cur = +(e.target as HTMLSelectElement).value; sel = 0; drawAll(); });
+    ($('teams') as HTMLSelectElement).addEventListener('change', (e) => { cur = +(e.target as HTMLSelectElement).value; sel = 0; try { localStorage.setItem('ardex-cur', String(cur)); } catch {} drawAll(); });
     ($('tname') as HTMLInputElement).addEventListener('input', (e) => { team().name = (e.target as HTMLInputElement).value; save(); drawTeams(); });
     $('new').addEventListener('click', () => { teams.push(blank()); cur = teams.length - 1; sel = 0; drawAll(); ($('tname') as HTMLInputElement).select(); });
     // two clicks to delete, instead of a browser dialog
@@ -524,6 +524,24 @@ import { GAMES, meta } from '../lib/data';
           const { out, looksSp } = parseTeam(unb64(shared));
           if (out.length) { teams.push({ ...blank(), name: p.get('name') || 'Shared team', fmt: looksSp ? 'champ' : 'all', mons: out }); cur = teams.length - 1; say(`Loaded a shared team with ${out.length} Pokémon. It's now saved in this browser.`); }
         } catch { say("That team link couldn't be read."); }
+        history.replaceState(null, '', location.pathname);
+      }
+      // ?add=<base64 Showdown text>: from the VGC usage page, add the set to the last team you had open
+      const add = p.get('add');
+      if (add) {
+        try {
+          const { out, looksSp } = parseTeam(unb64(add));
+          if (out.length) {
+            const last = +(localStorage.getItem('ardex-cur') ?? 0);
+            if (!teams.length) teams.push({ ...blank(), fmt: looksSp ? 'champ' : 'all' });
+            cur = teams[last] ? last : 0;
+            const t = teams[cur]; const k = t.mons.findIndex((m) => isEmpty(m));
+            if (k >= 0) t.mons[k] = out[0]; else t.mons.push(out[0]);
+            sel = k >= 0 ? k : t.mons.length - 1;
+            if (looksSp && t.fmt !== 'champ' && t.mons.length === 1) t.fmt = 'champ';
+            say(`Added ${spOf(out[0])[1]} to ${t.name || 'your team'}.`);
+          }
+        } catch { say("That set couldn't be read."); }
         history.replaceState(null, '', location.pathname);
       }
       if (!teams.length) teams.push(blank());
