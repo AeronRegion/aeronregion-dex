@@ -62,3 +62,4 @@
 - 2026-11-27: Homepage: Teambuilder and VGC usage tiles replace Moves and Abilities; rewrote the about text
 - 2026-11-27: Damage calculator (/calc/, Tools menu): @smogon/calc engine, Gen 1-9, both sides' moves at once, field and side conditions, sets from usage data / your teams / paste
 - 2026-11-27: Damage calculator: Level 50 / 100 buttons; click the result line to copy it
+- 2026-11-27: Damage calc: Level 100/50/5 for both Pokémon in the field column, Showdown-style move results, Showdown panel order; Teambuilder 'Damage calc' and usage 'Send to damage calc' buttons

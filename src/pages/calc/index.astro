@@ -26,8 +26,10 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
   </div>
 
   <section class="res" aria-live="polite">
-    <div class="rrow"><span class="rlab" id="rl1"></span><div class="mvb" id="r1"></div></div>
-    <div class="rrow"><span class="rlab" id="rl2"></span><div class="mvb" id="r2"></div></div>
+    <div class="rcols">
+      <div><div class="rlab"><span id="rl1"></span>'s moves</div><div class="mvb" id="r1"></div></div>
+      <div><div class="rlab"><span id="rl2"></span>'s moves</div><div class="mvb" id="r2"></div></div>
+    </div>
     <button type="button" class="main" id="main" title="Click to copy"></button>
     <span class="copied soft" id="copied" hidden>Copied</span>
     <details class="rolls" id="rollsd"><summary>Possible damage amounts</summary><p id="rolls"></p></details>
@@ -52,16 +54,10 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
           <div><button class="sm" data-k="pastego" type="button">Use this set</button> <button class="sm" data-k="pastex" type="button">Cancel</button> <span class="soft" data-k="pastemsg"></span></div>
         </div>
         <div class="g2">
-          <label><span>Level</span><input class="field num lvn" data-k="lv" type="number" min="1" max="100" value="50" /><span class="seg sm2 lvb" data-k="lvb"><button type="button" data-lv="50" aria-pressed="false">50</button><button type="button" data-lv="100" aria-pressed="false">100</button></span></label>
-          <label><span>Nature</span><select class="field" data-k="nat"></select></label>
-          <label class="wide"><span>Ability</span><select class="field" data-k="ab"></select><span class="chk" data-k="abonw"><input type="checkbox" data-k="abon" id={`abon${p}`} /><label for={`abon${p}`}>Active</label></span></label>
-          <label class="wide"><span>Item</span><span class="itw"><img alt="" width="24" height="24" data-k="itimg" /><input class="field" data-k="it" placeholder="(none)" /></span></label>
+          <label><span>Level</span><input class="field num lvn" data-k="lv" type="number" min="1" max="100" value="50" /></label>
           <label class="g9"><span>Tera</span><select class="field" data-k="tera"></select><span class="chk"><input type="checkbox" data-k="teraon" id={`teraon${p}`} /><label for={`teraon${p}`}>On</label></span></label>
           <label class="g8only"><span>Dynamax</span><span class="chk"><input type="checkbox" data-k="dmax" id={`dmax${p}`} /><label for={`dmax${p}`}>Dynamaxed</label></span></label>
-          <label><span>Status</span><select class="field" data-k="st">
-            <option value="">Healthy</option><option value="brn">Burned</option><option value="par">Paralyzed</option><option value="psn">Poisoned</option><option value="tox">Badly poisoned</option><option value="slp">Asleep</option><option value="frz">Frozen</option>
-          </select></label>
-        </div>
+                </div>
         <table class="stt">
           <thead><tr><th></th><th class="n">Base</th><th class="n" data-k="ivh">IVs</th><th class="n ev">EVs</th><th class="n">Stat</th><th class="n">Boost</th></tr></thead>
           <tbody>
@@ -76,6 +72,14 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
             ))}
           </tbody>
         </table>
+        <div class="g2">
+          <label><span>Nature</span><select class="field" data-k="nat"></select></label>
+          <label><span>Status</span><select class="field" data-k="st">
+            <option value="">Healthy</option><option value="brn">Burned</option><option value="par">Paralyzed</option><option value="psn">Poisoned</option><option value="tox">Badly poisoned</option><option value="slp">Asleep</option><option value="frz">Frozen</option>
+          </select></label>
+          <label class="wide"><span>Ability</span><select class="field" data-k="ab"></select><span class="chk" data-k="abonw"><input type="checkbox" data-k="abon" id={`abon${p}`} /><label for={`abon${p}`}>Active</label></span></label>
+          <label class="wide"><span>Item</span><span class="itw"><img alt="" width="24" height="24" data-k="itimg" /><input class="field" data-k="it" placeholder="(none)" /></span></label>
+        </div>
         <div class="hpr">
           <span class="ev soft" data-k="evleft"></span>
           <span class="hpw"><span>HP</span><input class="field num" data-k="cur" type="number" min="0" /><span class="soft" data-k="max"></span><input class="field num pct" data-k="pct" type="number" min="0" max="100" /><span class="soft">%</span></span>
@@ -105,6 +109,7 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
 
     <section class="fld">
       <h3>Field</h3>
+      <div class="fr"><span class="lab">Level (both Pokémon)</span><div class="seg sm2" id="lvall"><button type="button" data-lv="100" aria-pressed="false">Level 100</button><button type="button" data-lv="50" aria-pressed="false">Level 50</button><button type="button" data-lv="5" aria-pressed="false">Level 5</button></div></div>
       <div class="fr"><span class="lab">Weather</span><div class="seg sm2" id="wx"></div></div>
       <div class="fr g5"><span class="lab">Terrain</span><div class="seg sm2" id="ter">
         <button type="button" data-v="" aria-pressed="true">None</button><button type="button" data-v="Electric" aria-pressed="false">Electric</button><button type="button" data-v="Grassy" aria-pressed="false">Grassy</button><button type="button" data-v="Psychic" aria-pressed="false" class="g7">Psychic</button><button type="button" data-v="Misty" aria-pressed="false">Misty</button>
@@ -259,10 +264,10 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
         $('rl' + (a + 1)).textContent = S.mons[a].sp;
         $('r' + (a + 1)).innerHTML = S.mons[a].moves.map((x, i) => {
           const r = results[a][i];
-          if (!x.name) return `<button type="button" class="mb empty" disabled><span>—</span></button>`;
+          if (!x.name) return '';
           const on = S.sel[0] === a && S.sel[1] === i;
-          return `<button type="button" class="mb${on ? ' on' : ''}" data-a="${a}" data-i="${i}" aria-pressed="${on}"><span class="mbn">${esc(x.name)}</span>` +
-            `<span class="mbp">${r && !r.status && r.hi > 0 ? `${pctTxt(r.lo)} – ${pctTxt(r.hi)}%` : r?.status ? 'Status' : '0%'}</span></button>`;
+          return `<div class="mrow"><button type="button" class="mb${on ? ' on' : ''}" data-a="${a}" data-i="${i}" aria-pressed="${on}">${esc(x.name)}</button>` +
+            `<span class="mbp">${r && !r.status && r.hi > 0 ? `${pctTxt(r.lo)} – ${pctTxt(r.hi)}%` : '0 – 0%'}</span></div>`;
         }).join('');
       }
       let [a, i] = S.sel; if (!results[a][i]) { const k = results[0].findIndex(Boolean); S.sel = k >= 0 ? [0, k] : [1, Math.max(0, results[1].findIndex(Boolean))]; [a, i] = S.sel; }
@@ -311,7 +316,7 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
       (q(p, 'pic') as HTMLAnchorElement).href = `/pokemon/${slug(s.baseSpecies ?? s.name)}/`;
       q(p, 'tys').innerHTML = typesOf(m).map(chip).join('');
       q(p, 'lv').value = m.lv;
-      q(p, 'lvb').querySelectorAll('button').forEach((b: HTMLElement) => b.setAttribute('aria-pressed', String(+b.dataset.lv! === m.lv)));
+      document.querySelectorAll<HTMLElement>('#lvall button').forEach((b) => b.setAttribute('aria-pressed', String(S.mons.every((x) => x.lv === +b.dataset.lv!))));
       (q(p, 'nat') as HTMLSelectElement).innerHTML = [...gen.natures].sort((a, b) => a.name.localeCompare(b.name)).map((n) =>
         `<option value="${n.name}"${n.name === m.nat ? ' selected' : ''}>${n.name}${n.plus !== n.minus ? ` +${SN[n.plus]} -${SN[n.minus]}` : ''}</option>`).join('');
       const own = [...new Set(Object.values(s.abilities ?? {}) as string[])];
@@ -484,11 +489,11 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
         drawStats(p); compute();
       });
     });
-    // Level 50 / 100 buttons
-    pans.forEach((_, p) => q(p, 'lvb').addEventListener('click', (e: Event) => {
+    // Level 100 / 50 / 5 in the field: sets both Pokémon
+    $('lvall').addEventListener('click', (e) => {
       const b = (e.target as HTMLElement).closest('button') as HTMLElement | null; if (!b) return;
-      S.mons[p].lv = +b.dataset.lv!; drawPanel(p); compute();
-    }));
+      S.mons.forEach((m) => (m.lv = +b.dataset.lv!)); drawPanel(0); drawPanel(1); compute();
+    });
     // click the result line to copy it
     let copiedT = 0;
     $('main').addEventListener('click', async () => {
@@ -501,6 +506,17 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
 
     S = load() ?? fresh();
     S.sides ??= [{}, {}]; S.f ??= {}; S.sel ??= [0, 0];
+    // a set sent from the Teambuilder or the usage page ("Send to damage calc") goes on the left side
+    try {
+      const inc = JSON.parse(localStorage.getItem('ardex-calc-in') ?? 'null');
+      localStorage.removeItem('ardex-calc-in');
+      if (inc?.text) {
+        if (inc.gen && inc.gen !== S.gen) { S.byGen ??= {}; S.byGen[S.gen] = JSON.parse(JSON.stringify(S.mons)); S.gen = inc.gen; S.mons = S.byGen[inc.gen] ?? S.mons; }
+        gen = Generations.get(S.gen as any);
+        const m = fromText(inc.text);
+        if (m) { if (inc.champ) STAT.forEach((k) => (m.evs[k] = spToEv(m.evs[k]))); S.mons[0] = fixMon(m); S.sel = [0, 0]; }
+      }
+    } catch {}
     drawAll();
   </script>
 </Base>
@@ -517,12 +533,13 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
 
   /* results: every move of both sides, the picked one spelled out below */
   .calc .res { border: 1px solid var(--line-2); border-radius: 4px; background: var(--card); padding: .5rem .6rem; margin-bottom: .8rem; }
-  .calc .rrow { display: grid; grid-template-columns: 9rem 1fr; align-items: center; gap: .5rem; margin-bottom: .35rem; }
-  .calc .rlab { font-weight: 600; font-size: .85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .calc .mvb { display: grid; grid-template-columns: repeat(4, 1fr); gap: .35rem; }
-  .calc .mb { display: flex; justify-content: space-between; gap: .4rem; font: inherit; font-size: .8rem; padding: .3rem .5rem; border: 1px solid var(--line-2); border-radius: 3px; background: var(--card); color: var(--ink); cursor: pointer; min-width: 0; text-align: left; }
+  .calc .rcols { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem 2rem; }
+  .calc .mrow { display: grid; grid-template-columns: 9.5rem auto; align-items: center; gap: .6rem; margin-top: 3px; }
+  .calc .rlab { font-weight: 600; font-size: .82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+
+  .calc .mb { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: inherit; font-size: .8rem; padding: .2rem .5rem; border: 1px solid var(--line-2); border-radius: 3px; background: var(--card); color: var(--ink); cursor: pointer; min-width: 0; text-align: left; }
   .calc .mb .mbn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .calc .mb .mbp { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink-soft); }
+  .calc .mbp { font-size: .85rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .calc .mb:hover { background: var(--petal-deep); }
   .calc .mb:active { box-shadow: inset 0 2px 3px rgb(0 0 0 / .25); }
   .calc .mb.on { border-color: #2b7bd6; background: #dbe9fb; box-shadow: inset 0 0 0 1px #2b7bd6; }
@@ -534,8 +551,7 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
   .calc .main:active { box-shadow: inset 0 2px 3px rgb(0 0 0 / .2); }
   .calc .main:focus-visible { outline: 2px solid #2b7bd6; outline-offset: 1px; }
   .calc .copied { font-size: .78rem; margin-left: .4rem; color: #2e8b3e; }
-  .calc .lvn { flex: 0 1 4rem !important; text-align: right; }
-  .calc .lvb { display: inline-flex; flex: none; }
+
   .calc .rolls summary { font-size: .78rem; color: var(--ink-soft); cursor: pointer; }
   .calc .rolls p { margin: .3rem 0 0; font-size: .78rem; font-variant-numeric: tabular-nums; color: var(--ink-soft); }
 
@@ -621,8 +637,7 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
   @media (max-width: 640px) {
     .calc .cols { grid-template-columns: 1fr; }
     .calc #p2 { order: 3; } .calc .fld { order: 2; }
-    .calc .rrow { grid-template-columns: 1fr; gap: .2rem; }
-    .calc .mvb { grid-template-columns: 1fr; gap: .25rem; }
+    .calc .rcols { grid-template-columns: 1fr; gap: .5rem; }
     .calc .g2 { grid-template-columns: 1fr; }
     .calc .mv { grid-template-columns: minmax(0, 1fr) 90px 3.8rem 3rem auto; }
     .calc .mv .g7only { display: none; }

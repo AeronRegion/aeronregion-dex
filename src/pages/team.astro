@@ -232,7 +232,7 @@ import { GAMES, meta } from '../lib/data';
       // Showdown's compact layout: one set card on top (art, details, names, moves, stat summary), then the stat editor and the pick list side by side
       ed.classList.add('sd');
       ed.innerHTML = `
-        <button type="button" class="edel" id="f-rm" title="Delete this Pokémon from the team">🗑 Delete</button>
+        <button type="button" class="ecalc" id="f-calc" title="Open this Pokémon in the damage calculator">Damage calc</button><button type="button" class="edel" id="f-rm" title="Delete this Pokémon from the team">🗑 Delete</button>
         <div class="setcard">
           <div class="c-art who">${itemIcon(m.item) ? `<img class="whoitem" src="${itemIcon(m.item)}" alt="${esc(m.item)}" title="${esc(m.item)}" width="32" height="32" />` : ''}<img src="${s[3] ? SPR + 'pokemon/other/home/' + (m.shiny ? 'shiny/' : '') + s[3] + '.png' : ''}" data-fb="${s[3] ? SPR + 'pokemon/other/official-artwork/' + (m.shiny ? 'shiny/' : '') + s[3] + '.png' : ''}" onerror="if(this.dataset.fb&&this.src!==this.dataset.fb)this.src=this.dataset.fb" alt="${m.shiny ? 'Shiny ' : ''}${esc(s[1])}" width="104" height="104" />${m.shiny ? '<span class="shinytag" title="Shiny">★</span>' : ''}</div>
           <div class="c-det">
@@ -297,6 +297,7 @@ import { GAMES, meta } from '../lib/data';
         else m.nature = Object.keys(NAT).find((n) => NAT[n][0] === nu && NAT[n][1] === nd)!;
       };
       const shift = (dir: number) => { const to = sel + dir; if (to < 0 || to >= t.mons.length) return; [t.mons[sel], t.mons[to]] = [t.mons[to], t.mons[sel]]; sel = to; save(); drawStrip(); drawEd(); };
+      ed.querySelector('#f-calc')!.addEventListener('click', () => { try { localStorage.setItem('ardex-calc-in', JSON.stringify({ text: monText(t.mons[sel]), gen: 9 })); } catch {} location.href = '/calc/'; });
       ed.querySelector('#f-rm')!.addEventListener('click', () => { t.mons.splice(sel, 1); sel = Math.max(0, sel - 1); save(); drawTeams(); drawStrip(); drawEd(); });
       const i = spIndex.get(m.sp) ?? 0;
       // Showdown-style picker: a list under the editor for whichever box has focus (Pokémon, ability, item or a move).
@@ -656,6 +657,10 @@ import { GAMES, meta } from '../lib/data';
     .ed :global(.mlist[data-kind='ab'] .mr) { grid-template-columns: 1fr; } .ed :global(.mlist[data-kind='item'] .mr .d) { grid-column: 2; }
   }
   .ed :global(.edel) { position: absolute; top: .4rem; right: .5rem; font: inherit; font-size: 11px; background: none; border: 1px solid transparent; color: #b3261e; cursor: pointer; padding: 2px 6px; border-radius: 3px; z-index: 2; }
+  .ed :global(.ecalc) { position: absolute; top: .4rem; right: 5.2rem; font: inherit; font-size: 11px; background: none; border: 1px solid transparent; color: var(--link); cursor: pointer; padding: 2px 6px; border-radius: 3px; z-index: 2; }
+  .ed :global(.ecalc:hover) { border-color: var(--link); background: var(--petal-deep); }
+  .ed :global(.ecalc:active), .ed :global(.edel:active) { box-shadow: inset 0 2px 3px rgb(0 0 0 / .2); }
+  .ed :global(.ecalc:focus-visible) { outline: 2px solid #2b7bd6; }
   .ed :global(.edel:hover) { border-color: #b3261e; background: var(--weak-bg); }
   .ed :global(.danger) { border-color: #a40000; color: #a40000; align-self: flex-start; }
   .ed :global(.stt) { width: 100%; border-collapse: collapse; }

@@ -47,7 +47,7 @@ const mons = d.mons.map((m: any, k: number) => {
 });
 // Tera exists only in Scarlet & Violet formats; Showdown only started recording it in Sept 2024
 const svFormat = /^Scarlet & Violet/.test(f.name) || (f.group === 'pd' && +f.id.slice(3) >= 2023 && +f.id.slice(3) <= 2026) || (f.group === 'lt' && /^Scarlet/.test(f.name));
-const DATA = { sheets, champ, lvl, mons, colors: { ...typeColors, Stellar: '#40a3c5' }, tera: svFormat ? 'nodata' : 'none' };
+const DATA = { sheets, champ, lvl, gen: /gen8/.test(f.label) ? 8 : 9, mons, colors: { ...typeColors, Stellar: '#40a3c5' }, tera: svFormat ? 'nodata' : 'none' };
 const fmtNum = (n: number) => (n ?? 0).toLocaleString('en-US');
 // a Showdown regulation's battles over every recorded month (one rating cutoff, so games aren't counted twice)
 const regTotal = (x: any) => variants(x).filter((v: any) => v.cutoff === x.cutoff).reduce((a: number, v: any) => a + (v.total ?? 0), 0);
@@ -175,7 +175,7 @@ const pct = (p: number) => (p ?? 0).toFixed(2) + '%';
       <div class="uset"${building ? '' : ' hidden'}>
         <div class="ush"><b>Your set</b><span class="soft">Click rows below to choose the moves (up to 4), item, ability${m.te.length ? ', Tera type' : ''} and ${m.sp.length ? 'spread' : 'nature'}. It starts with the most common of each.</span></div>
         <pre id="upaste"></pre>
-        <div class="uact"><div class="uadd"><button type="button" class="block" id="uadd" aria-haspopup="true" aria-expanded="false">Add set to Teambuilder ▾</button><div class="umenu" id="umenu" hidden></div></div><button type="button" class="sm" id="ucopy">Copy as Showdown text</button><button type="button" class="sm" id="ureset">Reset to most common</button><button type="button" class="sm" id="uclear">Clear</button><button type="button" class="sm" id="uclose">Close set builder</button><span class="soft" id="umsg"></span></div>
+        <div class="uact"><div class="uadd"><button type="button" class="block" id="uadd" aria-haspopup="true" aria-expanded="false">Add set to Teambuilder ▾</button><div class="umenu" id="umenu" hidden></div></div><button type="button" class="sm" id="ucopy">Copy as Showdown text</button><button type="button" class="sm" id="ucalc">Send to damage calc</button><button type="button" class="sm" id="ureset">Reset to most common</button><button type="button" class="sm" id="uclear">Clear</button><button type="button" class="sm" id="uclose">Close set builder</button><span class="soft" id="umsg"></span></div>
       </div>
       <div class="ugrid">
         ${m.st ? card('Base stats', 'c-bs', '', m.st.map((v: number, i: number) => `<div class="urow bsr"><span class="bl">${STATN[i]}</span><span class="bb">${bar(v)}</span><span class="bv">${v}</span></div>`).concat(`<div class="urow bsr tot"><span class="bl">Total</span><span class="bb"></span><span class="bv">${m.st.reduce((x: number, y: number) => x + y, 0)}</span></div>`)) : ''}
@@ -204,6 +204,8 @@ const pct = (p: number) => (p ?? 0).toFixed(2) + '%';
       }).join('') + `<a class="segchip new" href="${base}&to=new">+ New team</a>`;
       menu.hidden = false; addBtn.setAttribute('aria-expanded', 'true');
     });
+    // the set as built goes to the left side of the damage calculator (Stat Points are converted to EVs there)
+    document.getElementById('ucalc')!.addEventListener('click', () => { try { localStorage.setItem('ardex-calc-in', JSON.stringify({ text: pasteOf(), gen: D.gen, champ: D.champ })); } catch {} location.href = '/calc/'; });
     document.getElementById('ucopy')!.addEventListener('click', (e) => { const b = e.currentTarget as HTMLButtonElement; navigator.clipboard?.writeText(pasteOf()).then(() => { b.textContent = 'Copied'; setTimeout(() => (b.textContent = 'Copy as Showdown text'), 1500); }); });
     const msg = document.getElementById('umsg')!;
     const sync = () => {
