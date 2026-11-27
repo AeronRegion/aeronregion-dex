@@ -4,6 +4,37 @@
 //   2. Limitless VGC tournaments (play.limitlesstcg.com/api): open team sheets from recent tournaments, with win rates.
 // Each format file: { id, label, source, period, total, mons: [{ name, usage, n, moves, items, abilities, tera, spreads, mates, wr? }] }
 import fs from 'node:fs';
+import { Dex } from '@pkmn/dex';
+
+// Team sheets are typed by players: fix casing, spacing and small typos ("Sword Dance", "Sitrus Barry", "adamant")
+// by matching to the real name; drop placeholders ("no item", "noability"). Unknown names (brand-new items) are kept.
+const toID = (s) => String(s ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
+const lev = (a, b) => { const d = Array.from({ length: b.length + 1 }, (_, i) => i); for (let i = 1; i <= a.length; i++) { let p = d[0]; d[0] = i; for (let j = 1; j <= b.length; j++) { const t = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, p + (a[i - 1] === b[j - 1] ? 0 : 1)); p = t; } } return d[b.length]; };
+const NAMES = {
+  move: new Map(Dex.moves.all().map((x) => [x.id, x.name])),
+  item: new Map(Dex.items.all().map((x) => [x.id, x.name])),
+  ability: new Map(Dex.abilities.all().map((x) => [x.id, x.name])),
+  nature: new Map(Dex.natures.all().map((x) => [x.id, x.name])),
+  type: new Map(Dex.types.all().map((x) => [x.id, x.name]).concat([['stellar', 'Stellar']])),
+};
+const JUNK = new Set(['noitem', 'none', 'noability', 'nothing', 'sn', 'na', '']);
+const canonCache = new Map();
+const canon = (kind, raw) => {
+  const id = toID(raw);
+  if (JUNK.has(id)) return null;
+  const key = kind + ':' + id;
+  if (canonCache.has(key)) return canonCache.get(key);
+  const m = NAMES[kind];
+  let out = m.get(id);
+  if (!out && id.length >= 5) {
+    let best = null, bd = 3;
+    for (const [k, v] of m) { if (Math.abs(k.length - id.length) > 2) continue; const d = lev(id, k); if (d < bd) { bd = d; best = v; } }
+    if (best && bd <= (id.length >= 8 ? 2 : 1)) out = best;
+  }
+  out ??= String(raw).trim().replace(/\s+/g, ' ');
+  canonCache.set(key, out);
+  return out;
+};
 
 const OUT = 'src/data/usage';
 fs.mkdirSync(OUT, { recursive: true });
@@ -21,8 +52,8 @@ const addTeam = (F, team, w, l) => {
     if (!F.mons.has(x.name)) F.mons.set(x.name, { n: 0, w: 0, l: 0, moves: {}, items: {}, abilities: {}, tera: {}, natures: {}, mates: {} });
     const M = F.mons.get(x.name); M.n++; M.w += w; M.l += l;
     const inc = (o, k) => { if (k) o[k] = (o[k] ?? 0) + 1; };
-    for (const a of x.moves ?? []) inc(M.moves, a);
-    inc(M.items, x.item); inc(M.abilities, x.ability); inc(M.tera, x.tera); inc(M.natures, x.nature);
+    for (const a of new Set((x.moves ?? []).map((v) => canon('move', v)))) inc(M.moves, a);
+    inc(M.items, canon('item', x.item)); inc(M.abilities, canon('ability', x.ability)); inc(M.tera, x.tera && canon('type', x.tera)); inc(M.natures, canon('nature', x.nature));
     for (const o of names) if (o !== x.name) inc(M.mates, o);
   }
 };

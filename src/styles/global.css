@@ -200,7 +200,7 @@ main p a:not([class]):hover, main .note a:hover { text-decoration: underline; }
 table.data td a, .mr b, .evo b, .card b, .kv td, .st b, .slotb span, .tabs button, .ed .fl .ll, .tchip, .chip { font-weight: 600 !important; }
 .mr .r, .tc b, h1 .kind { font-weight: 600 !important; }
 /* type matchup grids keep light neutral cells in dark mode, so the colored ones stand out */
-html[data-theme='dark'] .tchart td:not([style*='background']), html[data-theme='dark'] .tc b:not([style*='background']), html[data-theme='dark'] .mx td:not([style*='background']):not(.tot):not(.gap):not(.none) { background: #eef1f4 !important; border-color: #c5ccd4 !important; color: #1c2733 !important; }
+html[data-theme='dark'] .tchart td:not([style*='background']), html[data-theme='dark'] .tc b:not([style*='background']), html[data-theme='dark'] .mx td:not([style*='background']):not(.tot):not(.gap):not(.none):not(.w2):not(.w4):not(.r2):not(.r4):not(.im) { background: #eef1f4 !important; border-color: #c5ccd4 !important; color: #1c2733 !important; }
 html[data-theme='dark'] .mx td.none { background: repeating-linear-gradient(45deg, #d5dbe2 0 4px, #eef1f4 4px 8px) !important; }
 /* any text that links somewhere is link blue (buttons, type labels and tiles keep their own colors) */
 main a:not(.chip):not(.block):not(.tile):not(.sm):not(.evb):not(.card):not(.evo):not(.tc a):not(.tchart a):not(.pick a):not(.hero a):not(.dexl):not([class*='chip']) { color: var(--link) !important; }
@@ -560,3 +560,9 @@ main input.field.mfilter, main input#lf { min-width: 0 !important; width: 15rem;
 main .pick { justify-content: center; }
 main table.tchart, main table.nat { margin-left: auto !important; margin-right: auto !important; }
 main .scroll:has(> table.tchart), main .scroll:has(> table.nat) { display: flex; justify-content: center; }
+/* Dark mode: coverage Defense cells keep their light-mode colors (they were being painted plain) */
+html[data-theme='dark'] .mx td.dc.w2 { background: #f6b8b0 !important; color: #7a1b12 !important; border-color: #e2938a !important; }
+html[data-theme='dark'] .mx td.dc.w4 { background: #d9463a !important; color: #fff !important; border-color: #b8352b !important; }
+html[data-theme='dark'] .mx td.dc.r2 { background: #c9e8b8 !important; color: #24561a !important; border-color: #a6d290 !important; }
+html[data-theme='dark'] .mx td.dc.r4 { background: #7cc35e !important; color: #10300a !important; border-color: #5fa843 !important; }
+html[data-theme='dark'] .mx td.dc.im { background: #3a3f46 !important; color: #fff !important; border-color: #3a3f46 !important; }

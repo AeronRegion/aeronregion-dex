@@ -7,7 +7,8 @@
     "preview": "astro preview",
     "data": "node scripts/prepare.mjs",
     "check:mobile": "node scripts/check-mobile.mjs",
-    "usage": "node scripts/usage.mjs"
+    "usage": "node scripts/usage.mjs",
+    "check:links": "node scripts/check-links.mjs"
   },
   "dependencies": {
     "@fontsource-variable/rubik": "^5.3.0",

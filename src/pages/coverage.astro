@@ -304,7 +304,10 @@ import { GAMES, meta } from '../lib/data';
   .mx :global(tr.worst td.weak) { background: #a40000; color: #fff; }
   .mx :global(tr.hole td.cov) { background: #a40000; border-color: #a40000; color: #fff; font-weight: 800; }
   /* dark mode: all cells stay light (same as the type chart) so both tables match */
-  :global(html[data-theme='dark']) .mx :global(td:not(.gap)) { background-color: #eef1f4; border-color: #c5ccd4; color: #1c2733; }
+  :global(html[data-theme='dark']) .mx :global(td:not(.gap):not(.dc):not(.wk):not(.rs):not(.res):not(.neg):not(.weak)) { background-color: #eef1f4; border-color: #c5ccd4; color: #1c2733; }
+  :global(html[data-theme='dark']) .mx :global(td.tot.cnt) { background: #eef1f4; border-color: #c5ccd4; color: #1c2733; }
+  :global(html[data-theme='dark']) .mx :global(td.tot.cnt.wk) { color: #c0281c; font-weight: 700; }
+  :global(html[data-theme='dark']) .mx :global(td.tot.cnt.rs) { color: #2f7a1f; font-weight: 700; }
   :global(html[data-theme='dark']) .mx :global(td.res) { color: #2f6b06; border-color: #4e9a06; background: #e3f1d6; }
   :global(html[data-theme='dark']) .mx :global(td.weak), :global(html[data-theme='dark']) .mx :global(td.tot.wk) { color: #a40000; border-color: #a40000; background: #f7dede; }
   :global(html[data-theme='dark']) .mx :global(td.neg), :global(html[data-theme='dark']) .mx :global(tr.worst td.weak) { color: #fff; background: #a40000; border-color: #a40000; }

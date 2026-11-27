@@ -2,7 +2,7 @@
 // One VGC usage format: Pokémon list on the left, the selected Pokémon's full data on the right
 // (base stats, moves, teammates, items, abilities + Tera, spreads with nature and EVs together).
 // The page carries the data as JSON; the panel is drawn in the browser.
-import { pokeUrl, boxIconUrl, iconUrl, moveUrl, itemUrl, abilityUrl, itemByName, itemIconUrl, moveById } from '../lib/data';
+import { abilities, pokeUrl, boxIconUrl, iconUrl, moveUrl, itemUrl, abilityUrl, itemByName, itemIconUrl, moveById } from '../lib/data';
 import { formats, GROUPS, loadFormat, findSpecies, moveName, itemName, abilityName, updated, pickerGroups, twin, monthName, variants, fmtDate, fmtRange } from '../lib/usage';
 import { typeColors } from '../lib/types';
 import Dropdown from './Dropdown.astro';
@@ -14,6 +14,8 @@ const champ = f.name.startsWith('Champions');
 const toID = (s: string) => String(s ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
 const keyOf = (name: string, s: any) => toID(s?.name ?? name);
 const STAT = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'];
+// names we have no page for (e.g. brand-new Champions items) are shown as plain text, never as a dead link
+const abSet = new Set(abilities.map((a: any) => a.id));
 const mons = d.mons.map((m: any, k: number) => {
   const s = findSpecies(m.name);
   const sp = (m.spreads ?? []).map(([x, p]: [string, number]) => { const [nat, v] = x.split(':'); return [nat, v.split('/').map(Number), p]; });
@@ -32,9 +34,9 @@ const mons = d.mons.map((m: any, k: number) => {
     k: keyOf(m.name, s), n: s?.name ?? m.name, r: k + 1, u: m.usage, wr: m.wr ?? null, cnt: Math.round(m.n ?? 0),
     url: s ? pokeUrl(s) : null, ic: boxIconUrl(s?.art), fb: iconUrl(s?.art), ty: s?.types ?? [],
     st: s ? [s.stats.hp, s.stats.atk, s.stats.def, s.stats.spa, s.stats.spd, s.stats.spe] : null,
-    mv: m.moves.map(([x, p]: [string, number]) => { const nm = moveName(x); const mm = moveById.get(toID(nm)); return [nm, mm?.type ?? '', mm?.cat ?? '', p]; }),
-    it: m.items.map(([x, p]: [string, number]) => { const it = itemByName.get(itemName(x)); return [it?.name ?? itemName(x), it?.icon ?? '', p]; }),
-    ab: m.abilities.map(([x, p]: [string, number]) => [abilityName(x), p]),
+    mv: m.moves.map(([x, p]: [string, number]) => { const nm = moveName(x); const mm = moveById.get(toID(nm)); return [nm, mm?.type ?? '', mm?.cat ?? '', p, mm ? 1 : 0]; }),
+    it: m.items.map(([x, p]: [string, number]) => { const it = itemByName.get(itemName(x)); return [it?.name ?? itemName(x), it?.icon ?? '', p, it ? 1 : 0]; }),
+    ab: m.abilities.map(([x, p]: [string, number]) => [abilityName(x), p, abSet.has(toID(abilityName(x))) ? 1 : 0]),
     te: (m.tera ?? []).map(([x, p]: [string, number]) => [x.charAt(0).toUpperCase() + x.slice(1), p]),
     sp, na: sp.length ? [] : (m.natures ?? []),
     mt: m.mates.map(([x, p]: [string, number]) => { const o = findSpecies(x); return [o?.name ?? x, keyOf(x, o), o?.art ?? '', p]; }),
@@ -122,6 +124,7 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   const D = JSON.parse(document.getElementById('udata')!.textContent!);
   const SPR = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites';
   // same slugs as the site's pages (lib/data slug)
+  const nm = (n: string, ok: number, dir: string) => ok ? `<a class="nm" href="/${dir}/${slug(n)}/">${esc(n)}</a>` : `<span class="nm">${esc(n)}</span>`;
   const slug = (n: string) => n.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/♀/g, '-f').replace(/♂/g, '-m').replace(/['’.:%]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const STAT = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'], STATN = ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed'];
   const esc = (s: string) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
@@ -172,11 +175,11 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
       </div>
       <div class="ugrid">
         ${m.st ? card('Base stats', 'c-bs', '', m.st.map((v: number, i: number) => `<div class="urow bsr"><span class="bl">${STATN[i]}</span><span class="bb">${bar(v)}</span><span class="bv">${v}</span></div>`).concat(`<div class="urow bsr tot"><span class="bl">Total</span><span class="bb"></span><span class="bv">${m.st.reduce((x: number, y: number) => x + y, 0)}</span></div>`)) : ''}
-        ${card('Moves', 'c-mv', '', m.mv.map(([n, t, c, p]: any, i: number) => row(`<a class="nm" href="/moves/${slug(n)}/">${esc(n)}</a><span class="tg">${chip(t).replace('<a ', '<span ').replace('</a>', '</span>')}</span>`, p, 'mv', i)))}
+        ${card('Moves', 'c-mv', '', m.mv.map(([n, t, c, p, ok]: any, i: number) => row(`${nm(n, ok, 'moves')}<span class="tg">${chip(t).replace('<a ', '<span ').replace('</a>', '</span>')}</span>`, p, 'mv', i)))}
         ${card('Teammates', 'c-mt', '', m.mt.map(([n, k, art, p]: any) => row(`${art ? ic(`${SPR}/pokemon/versions/generation-vii/icons/${art}.png`, `${SPR}/pokemon/${art}.png`) : ''}${byK.has(k) ? `<a class="pk" href="#${k}">${esc(n)}</a>` : esc(n)}`, p)))}
-        ${card('Items', 'c-it', '', m.it.map(([n, icon, p]: any, i: number) => row(`${icon ? `<img src="${SPR}/items/${icon}.png" alt="" width="24" height="24" loading="lazy" />` : ''}<a class="nm" href="/items/${slug(n)}/">${esc(n)}</a>`, p, 'it', i)))}
+        ${card('Items', 'c-it', '', m.it.map(([n, icon, p, ok]: any, i: number) => row(`${icon ? `<img src="${SPR}/items/${icon}.png" alt="" width="24" height="24" loading="lazy" />` : ''}${nm(n, ok, 'items')}`, p, 'it', i)))}
         <div class="ustack">
-          ${card('Abilities', 'c-ab', '', m.ab.map(([n, p]: any, i: number) => row(`<a class="nm" href="/abilities/${slug(n)}/">${esc(n)}</a>`, p, 'ab', i)))}
+          ${card('Abilities', 'c-ab', '', m.ab.map(([n, p, ok]: any, i: number) => row(nm(n, ok, 'abilities'), p, 'ab', i)))}
           ${m.te.length ? card('Tera types', 'c-te', '', m.te.map(([t, p]: any, i: number) => row(chip(t).replace('<a ', '<span ').replace('</a>', '</span>'), p, 'te', i))) : `<div class="ucard c-te"><h3>Tera types</h3><p class="unone">${D.tera === 'none' ? 'No Terastallization in this format.' : 'No Tera data for this period.'}</p></div>`}
         </div>
         ${m.sp.length

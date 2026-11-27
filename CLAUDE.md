@@ -16,6 +16,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Before changing anything visual, check "Locked decisions" below. If a request conflicts with one, ask first.
 - After every change: add a line to docs/changelog.md, and if it was a design decision, add it below.
 - Before pushing any visual change: `npm run build && npm run check:mobile`. It opens the main pages at iPhone size (390px) and fails if anything runs off the screen or needs sideways scrolling; look at the screenshots it saves in .cache/mobile/ too. Don't push until it passes. New pages go in its PAGES list.
+- Also run `npm run check:links` after building: it lists every link to a page that doesn't exist (including usage-page moves/items/abilities). Names we have no page for are shown as plain text, never as a dead link.
 - Verify on the live site after deploy (hard refresh: Ctrl+Shift+R).
 - Table rows keep one height and numbers stay right-aligned: extra info (multi-hit ×2–5) sits at the left edge of the cell, out of the flow (absolute), never stacked under or pushed next to the value.
 - Review every new or changed page for alignment before pushing: numbers right-aligned with tabular figures, columns lined up row to row (fixed widths, not content-sized), labels and values on the same baseline, no bars or chips that shift per row. Look at the screenshot at desktop width and at 390px.

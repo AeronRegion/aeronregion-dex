@@ -24,7 +24,8 @@ export const groups: any[][] = [];
   for (const g of [...byNum.values()].sort((a, b) => a[0].num - b[0].num)) groups.push(g.sort((a, b) => (a.forme ? 1 : 0) - (b.forme ? 1 : 0))); }
 const baseOf = new Map(groups.flatMap((g) => g.map((s) => [s.id, g[0]])));
 export const formSlug = (s: any) => s.forme ? slug(s.forme) : '';
-export const pokeUrl = (s: any) => { const b = baseOf.get(s.id) ?? s; return `/pokemon/${slug(b.name)}/${s.forme && b.id !== s.id ? '#' + formSlug(s) : ''}`; };
+// cosmetic forms without their own entry (Vivillon-Fancy, Maushold-Four…) link to the base species page
+export const pokeUrl = (s: any) => { const b = baseOf.get(s.id) ?? (s.baseSpecies && s.baseSpecies !== s.name ? { name: s.baseSpecies, id: '' } : s); return `/pokemon/${slug(b.name)}/${s.forme && b.id !== s.id ? '#' + formSlug(s) : ''}`; };
 const REGION: Record<string, string> = { Alola: 'Alolan', Galar: 'Galarian', Hisui: 'Hisuian', Paldea: 'Paldean' };
 export const formLabel = (s: any) => {
   if (!s.forme) return s.baseSpecies;

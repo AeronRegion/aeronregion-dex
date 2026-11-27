@@ -45,3 +45,4 @@
 - 2026-11-26: Removed the usage Event dropdown and the Limitless event list/pages (majors keep their events table); page filters are compact and centered
 - 2026-11-26: Category icons redrawn closer to PokemonDB (red-outlined white burst, blue tilted rings, grey/dark tilted pill); multi-hit count sits at the left edge of the Power cell so power numbers line up
 - 2026-11-26: Header search box shortened (190px, "Search…", list opens leftwards); type tiles, type chart and nature chart centered in the page
+- 2026-11-26: Coverage Defense colors restored in dark mode; usage dropdown rows always one line; team-sheet names cleaned (typos, casing, placeholders merged); names without a page shown unlinked; cosmetic-form evolution links (Vivillon-Fancy etc.) go to the base page; new npm run check:links
