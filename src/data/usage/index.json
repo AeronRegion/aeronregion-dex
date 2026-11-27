@@ -131,10 +131,10 @@
    "id": "sd-gen9vgc2024regg",
    "label": "gen9vgc2024regg",
    "source": "Showdown ladder",
-   "period": "2026-10",
+   "period": "2024-04",
    "cutoff": 1760,
-   "total": 1864,
-   "current": true
+   "total": 1356475,
+   "current": false
   },
   {
    "id": "sd-gen9vgc2024reggbo3",
@@ -320,9 +320,9 @@
    "id": "lt-m-c",
    "label": "Reg M-C",
    "source": "Limitless tournaments",
-   "period": "2026-11-11 to 2026-11-26",
+   "period": "2026-11-10 to 2026-11-26",
    "tours": 91,
-   "total": 4435
+   "total": 4319
   },
   {
    "id": "lt-svi",
