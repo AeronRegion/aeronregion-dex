@@ -22,7 +22,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Review every new or changed page for alignment before pushing: numbers right-aligned with tabular figures, columns lined up row to row (fixed widths, not content-sized), labels and values on the same baseline, no bars or chips that shift per row. Look at the screenshot at desktop width and at 390px.
 - Every clickable box (buttons, dropdowns, toggles, selectable rows) must show interaction: hover (border/background change), press (inset), and keyboard focus (blue outline). Check each new control by hovering and clicking it before pushing; a button that looks the same on hover is a bug.
 - Click every button and link you add (in the local build) and confirm it does what its label says before pushing. A button that only toggles a row or opens a tab without showing anything new is a bug.
-- Desktop scale (≥1100px): every page is drawn 1.3x (CSS `zoom` on body) so sizes never change between tabs and ARdex at any browser zoom looks like PokemonDB at the same zoom (Grant browses at 75%). The header bar is the same 940px on every page; content is 940px, the Teambuilder 1180px, VGC usage 1500px. Phones are unchanged. Media queries still see the real window width. After visual changes, click through several tabs and check the header and text size don't change.
+- Desktop scale (≥1100px): every page is drawn 1.3x (CSS `zoom` on body) so sizes never change between tabs and ARdex at any browser zoom looks like PokemonDB at the same zoom (Grant browses at 75%). The header bar is the same 940px on every page; content is 940px, the Teambuilder and damage calculator 1180px, VGC usage 1500px. Phones are unchanged. Media queries still see the real window width. After visual changes, click through several tabs and check the header and text size don't change.
 - Review every page in dark mode too before pushing.
 - Fixed-size grids and charts (type tiles, type chart, nature chart) are centered in the page column, never stuck to the left.
 - Matching sections side by side (e.g. Defense and Moveset coverage) start at the same height: notes go under tables, not between heading and table.
@@ -91,6 +91,12 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 ## Docs index
 - docs/changelog.md: dated list of changes
 - docs/decisions.md: longer reasoning behind decisions
+
+### Damage calculator
+- Tools > "Damage calculator" (/calc/). Math is @smogon/calc (same engine as calc.pokemonshowdown.com); Gen 1-9, Singles/Doubles.
+- Condensed layout: results on top (all 4 moves of both Pokémon as buttons with % ranges; the picked one spelled out with KO chance, rolls behind "Possible damage amounts"), then Pokémon | Field | Pokémon (1180px page). Rare options sit under "More" (gender, fainted allies, boosted stat; Leech Seed, Salt Cure, Battery etc., auras).
+- "Load set ▾": most common set per format from our usage data (/calc/sets-<gen>.json, built from src/data/usage), your Teambuilder teams, or a pasted set.
+- Remembers everything in localStorage (ardex-calc), with each gen's Pokémon kept separately.
 
 ### Teambuilder
 - Layout mirrors Showdown's compact teambuilder: a set card on top (art | details + Pokémon/Item/Ability | moves; no stat summary box), then the EV editor and the pick list side by side. The pick list stays open (move list for the next empty slot by default).

@@ -60,3 +60,4 @@
 - 2026-11-27: Header search: dual-typed Pokémon show both types as small round type symbols
 - 2026-11-27: Header search: small type symbols were cut off on the right; now centered in full 18px circles
 - 2026-11-27: Homepage: Teambuilder and VGC usage tiles replace Moves and Abilities; rewrote the about text
+- 2026-11-27: Damage calculator (/calc/, Tools menu): @smogon/calc engine, Gen 1-9, both sides' moves at once, field and side conditions, sets from usage data / your teams / paste

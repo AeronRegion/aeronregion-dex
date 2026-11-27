@@ -549,7 +549,7 @@ html[data-theme='dark'] .card .chip[data-type] { color: color-mix(in srgb, var(-
   html { --z: 1.3; }
   body { zoom: 1.3; }
   .wrap, header .wrap.bar { width: min(100% - 2.5rem, 940px) !important; }
-  html:has(#ed) main.wrap { width: min(100% - 2.5rem, 1180px) !important; }
+  html:has(#ed) main.wrap, html:has(.cols > .fld) main.wrap { width: min(100% - 2.5rem, 1180px) !important; }
   html:has(.uwrap) main.wrap { width: min(100% - 2rem, 1500px) !important; }
 }
 /* Page filters: compact and centered (PokemonDB style), so the mouse doesn't have to travel to the far left */

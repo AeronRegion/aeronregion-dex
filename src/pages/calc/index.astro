@@ -1,0 +1,609 @@
+---
+// Damage calculator. The math is @smogon/calc, the engine behind calc.pokemonshowdown.com, so results match Showdown.
+// Layout: results on top (every move of both Pokémon at once), the two Pokémon side by side with the field between them.
+// Rarely used options sit under "More" so the default view stays small.
+import Base from '../../layouts/Base.astro';
+import { species, items } from '../../lib/data';
+
+// sprites and page links come from our own data, keyed by Showdown id
+const ART: Record<string, string> = {};
+for (const s of species) if (s.art) ART[s.id] = s.art;
+const ITEM_ICON: Record<string, string> = {};
+for (const i of items) if (i.icon) ITEM_ICON[i.name] = i.icon;
+const GENS = [9, 8, 7, 6, 5, 4, 3, 2, 1];
+const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['spd', 'SpD'], ['spe', 'Spe']];
+---
+<Base title="Damage calculator" description="Pokémon damage calculator with the same math as Showdown's: every move of both Pokémon at once, weather, terrain, screens, hazards and doubles, for every generation.">
+  <div class="calc">
+  <h1>Damage calculator</h1>
+  <div class="cbar">
+    <span class="lab">Gen</span>
+    <div class="seg" id="gen">{GENS.map((g) => <button type="button" data-v={g} aria-pressed={g === 9 ? 'true' : 'false'}>{g}</button>)}</div>
+    <span class="lab">Battle</span>
+    <div class="seg" id="gt"><button type="button" data-v="Singles" aria-pressed="false">Singles</button><button type="button" data-v="Doubles" aria-pressed="true">Doubles</button></div>
+    <button class="sm" id="swap" type="button" title="Swap the two Pokémon">⇄ Swap sides</button>
+    <button class="sm" id="reset" type="button">Reset</button>
+  </div>
+
+  <section class="res" aria-live="polite">
+    <div class="rrow"><span class="rlab" id="rl1"></span><div class="mvb" id="r1"></div></div>
+    <div class="rrow"><span class="rlab" id="rl2"></span><div class="mvb" id="r2"></div></div>
+    <p class="main" id="main"></p>
+    <details class="rolls" id="rollsd"><summary>Possible damage amounts</summary><p id="rolls"></p></details>
+  </section>
+
+  <div class="cols">
+    {[1, 2].map((p) => (
+      <section class="pan" id={`p${p}`} data-p={p}>
+        <div class="phead">
+          <a class="pic" data-k="pic"><img alt="" width="68" height="56" data-k="img" /></a>
+          <div class="pn">
+            <input class="field sp" data-k="sp" placeholder="Pokémon" aria-label={`Pokémon ${p}`} />
+            <div class="tys" data-k="tys"></div>
+          </div>
+          <div class="ld">
+            <button class="sm" data-k="load" type="button" aria-haspopup="true">Load set ▾</button>
+            <div class="menu" data-k="menu" hidden></div>
+          </div>
+        </div>
+        <div class="paste" data-k="pastebox" hidden>
+          <textarea class="field" data-k="pastetxt" rows="8" placeholder="Paste one Pokémon in Showdown format"></textarea>
+          <div><button class="sm" data-k="pastego" type="button">Use this set</button> <button class="sm" data-k="pastex" type="button">Cancel</button> <span class="soft" data-k="pastemsg"></span></div>
+        </div>
+        <div class="g2">
+          <label><span>Level</span><input class="field" data-k="lv" type="number" min="1" max="100" value="50" /></label>
+          <label><span>Nature</span><select class="field" data-k="nat"></select></label>
+          <label class="wide"><span>Ability</span><select class="field" data-k="ab"></select><span class="chk" data-k="abonw"><input type="checkbox" data-k="abon" id={`abon${p}`} /><label for={`abon${p}`}>Active</label></span></label>
+          <label class="wide"><span>Item</span><span class="itw"><img alt="" width="24" height="24" data-k="itimg" /><input class="field" data-k="it" placeholder="(none)" /></span></label>
+          <label class="g9"><span>Tera</span><select class="field" data-k="tera"></select><span class="chk"><input type="checkbox" data-k="teraon" id={`teraon${p}`} /><label for={`teraon${p}`}>On</label></span></label>
+          <label class="g8only"><span>Dynamax</span><span class="chk"><input type="checkbox" data-k="dmax" id={`dmax${p}`} /><label for={`dmax${p}`}>Dynamaxed</label></span></label>
+          <label><span>Status</span><select class="field" data-k="st">
+            <option value="">Healthy</option><option value="brn">Burned</option><option value="par">Paralyzed</option><option value="psn">Poisoned</option><option value="tox">Badly poisoned</option><option value="slp">Asleep</option><option value="frz">Frozen</option>
+          </select></label>
+        </div>
+        <table class="stt">
+          <thead><tr><th></th><th class="n">Base</th><th class="n" data-k="ivh">IVs</th><th class="n ev">EVs</th><th class="n">Stat</th><th class="n">Boost</th></tr></thead>
+          <tbody>
+            {STATS.map(([k, l]) => (
+              <tr data-s={k}>
+                <th>{l}</th><td class="n" data-k={`b-${k}`}></td>
+                <td class="n"><input class="field num" data-k={`iv-${k}`} type="number" min="0" max="31" /></td>
+                <td class="n ev"><input class="field num" data-k={`ev-${k}`} type="number" min="0" max="252" step="4" /></td>
+                <td class="n tot" data-k={`s-${k}`}></td>
+                <td class="n">{k === 'hp' ? '' : <select class="field bst" data-k={`bo-${k}`}>{[6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6].map((b) => <option value={b} selected={b === 0}>{b > 0 ? `+${b}` : b}</option>)}</select>}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div class="hpr">
+          <span class="ev soft" data-k="evleft"></span>
+          <span class="hpw"><span>HP</span><input class="field num" data-k="cur" type="number" min="0" /><span class="soft" data-k="max"></span><input class="field num pct" data-k="pct" type="number" min="0" max="100" /><span class="soft">%</span></span>
+        </div>
+        <div class="mvs">
+          {[0, 1, 2, 3].map((i) => (
+            <div class="mv" data-i={i}>
+              <input class="field mvn" data-k={`m${i}`} placeholder={`Move ${i + 1}`} />
+              <span class="mt" data-k={`mt${i}`}></span>
+              <select class="field hits" data-k={`h${i}`} title="Number of hits" hidden></select>
+              <input class="field num bp" data-k={`bp${i}`} type="number" min="0" title="Base power (change it for moves like Last Respects)" />
+              <span class="chk"><input type="checkbox" data-k={`c${i}`} id={`c${p}${i}`} /><label for={`c${p}${i}`}>Crit</label></span>
+              <span class="chk g7only"><input type="checkbox" data-k={`z${i}`} id={`z${p}${i}`} /><label for={`z${p}${i}`}>Z</label></span>
+            </div>
+          ))}
+        </div>
+        <details class="more">
+          <summary>More</summary>
+          <div class="g2">
+            <label><span>Gender</span><select class="field" data-k="gen"><option value="">—</option><option value="M">Male</option><option value="F">Female</option></select></label>
+            <label class="g9"><span>Fainted allies</span><select class="field" data-k="faint" title="Supreme Overlord / Last Respects">{[0, 1, 2, 3, 4, 5].map((n) => <option>{n}</option>)}</select></label>
+            <label class="g9"><span>Boosted stat</span><select class="field" data-k="boosted" title="Protosynthesis / Quark Drive"><option value="">Auto</option>{STATS.slice(1).map(([k, l]) => <option value={k}>{l}</option>)}</select></label>
+          </div>
+        </details>
+      </section>
+    ))}
+
+    <section class="fld">
+      <h3>Field</h3>
+      <div class="fr"><span class="lab">Weather</span><div class="seg sm2" id="wx"></div></div>
+      <div class="fr g5"><span class="lab">Terrain</span><div class="seg sm2" id="ter">
+        <button type="button" data-v="" aria-pressed="true">None</button><button type="button" data-v="Electric" aria-pressed="false">Electric</button><button type="button" data-v="Grassy" aria-pressed="false">Grassy</button><button type="button" data-v="Psychic" aria-pressed="false" class="g7">Psychic</button><button type="button" data-v="Misty" aria-pressed="false">Misty</button>
+      </div></div>
+      <div class="fr"><div class="seg sm2 tg" id="ftog">
+        <button type="button" data-f="isGravity" aria-pressed="false">Gravity</button><button type="button" data-f="isMagicRoom" aria-pressed="false" class="g5">Magic Room</button><button type="button" data-f="isWonderRoom" aria-pressed="false" class="g5">Wonder Room</button>
+      </div></div>
+      <div class="fr g9"><span class="lab">Ruin</span><div class="seg sm2 tg" id="ruin">
+        <button type="button" data-f="isBeadsOfRuin" aria-pressed="false" title="Beads of Ruin: SpD ×0.75">Beads</button><button type="button" data-f="isSwordOfRuin" aria-pressed="false" title="Sword of Ruin: Def ×0.75">Sword</button><button type="button" data-f="isTabletsOfRuin" aria-pressed="false" title="Tablets of Ruin: Atk ×0.75">Tablets</button><button type="button" data-f="isVesselOfRuin" aria-pressed="false" title="Vessel of Ruin: SpA ×0.75">Vessel</button>
+      </div></div>
+      <table class="sides">
+        <thead><tr><th></th><th data-k="sl1">Left</th><th data-k="sl2">Right</th></tr></thead>
+        <tbody id="sides"></tbody>
+      </table>
+      <details class="more">
+        <summary>More field options</summary>
+        <table class="sides"><tbody id="sides2"></tbody></table>
+        <div class="fr g6"><div class="seg sm2 tg" id="aura">
+          <button type="button" data-f="isFairyAura" aria-pressed="false">Fairy Aura</button><button type="button" data-f="isDarkAura" aria-pressed="false">Dark Aura</button><button type="button" data-f="isAuraBreak" aria-pressed="false">Aura Break</button>
+        </div></div>
+      </details>
+    </section>
+  </div>
+  <p class="soft note">Damage math from <a href="https://github.com/smogon/damage-calc">@smogon/calc</a>, the engine behind the Showdown calculator. Your Pokémon and field settings are kept in this browser.</p>
+  </div>
+
+  <script define:vars={{ ART, ITEM_ICON }}>
+    window.__CALC = { ART, ITEM_ICON };
+  </script>
+  <script>
+    import { Generations, Pokemon, Move, Field, Side, calculate } from '@smogon/calc';
+    import { autocomplete, CAT_SVG } from '../../lib/ac';
+    import { parseShowdown } from '../../lib/showdown';
+    const { ART, ITEM_ICON } = (window as any).__CALC as { ART: Record<string, string>; ITEM_ICON: Record<string, string> };
+    const SPR = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites';
+    const STAT = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as const;
+    const SN: Record<string, string> = { hp: 'HP', atk: 'Atk', def: 'Def', spa: 'SpA', spd: 'SpD', spe: 'Spe' };
+    type SK = (typeof STAT)[number];
+    const toID = (s: string) => String(s ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const esc = (s: string) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+    const slug = (s: string) => toID(s.replace(/[ ']/g, '-')).length ? s.toLowerCase().replace(/[’']/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : '';
+    const $ = (id: string) => document.getElementById(id)!;
+
+    // ---------- state ----------
+    type MoveS = { name: string; crit: boolean; hits: number; z: boolean; bp: number | null };
+    type Mon = { sp: string; lv: number; nat: string; ab: string; abOn: boolean; it: string; tera: string; teraOn: boolean; dmax: boolean; st: string;
+      ivs: Record<SK, number>; evs: Record<SK, number>; bo: Record<SK, number>; hpPct: number; moves: MoveS[]; gender: string; faint: number; boosted: string };
+    type SideS = Record<string, boolean | number>;
+    type State = { byGen?: Record<number, [Mon, Mon]>; gen: number; gt: 'Singles' | 'Doubles'; mons: [Mon, Mon]; wx: string; ter: string; f: Record<string, boolean>; sides: [SideS, SideS]; sel: [number, number] };
+    const six = (v: number) => Object.fromEntries(STAT.map((k) => [k, v])) as Record<SK, number>;
+    const emptyMon = (sp: string): Mon => ({ sp, lv: 50, nat: 'Serious', ab: '', abOn: false, it: '', tera: '', teraOn: false, dmax: false, st: '', ivs: six(31), evs: six(0), bo: six(0), hpPct: 100,
+      moves: [0, 1, 2, 3].map(() => ({ name: '', crit: false, hits: 0, z: false, bp: null })), gender: '', faint: 0, boosted: '' });
+    const DEFAULTS = [
+      'Flutter Mane @ Choice Specs\nAbility: Protosynthesis\nLevel: 50\nTera Type: Fairy\nEVs: 4 HP / 252 SpA / 252 Spe\nTimid Nature\n- Moonblast\n- Shadow Ball\n- Dazzling Gleam\n- Icy Wind',
+      'Incineroar @ Sitrus Berry\nAbility: Intimidate\nLevel: 50\nTera Type: Ghost\nEVs: 236 HP / 4 Atk / 100 Def / 156 SpD / 12 Spe\nCareful Nature\n- Fake Out\n- Flare Blitz\n- Parting Shot\n- Knock Off',
+    ];
+    const SAVE = 'ardex-calc';
+    let S: State;
+    let gen = Generations.get(9);
+
+    // ---------- helpers on the gen data ----------
+    const spOf = (name: string) => gen.species.get(toID(name) as any);
+    const mvOf = (name: string) => (name ? gen.moves.get(toID(name) as any) : undefined);
+    const itOf = (name: string) => (name ? gen.items.get(toID(name) as any) : undefined);
+    const abOf = (name: string) => (name ? gen.abilities.get(toID(name) as any) : undefined);
+    const typesOf = (m: Mon) => (spOf(m.sp)?.types ?? []) as string[];
+    const chip = (t: string) => `<a class="chip" data-type="${t}" href="/types/${t.toLowerCase()}/">${t}</a>`;
+    const listCache: Record<string, any> = {};
+    const list = (kind: 'species' | 'moves' | 'items' | 'abilities') => (listCache[gen.num + kind] ??= [...(gen as any)[kind]].map((x: any) => x.name).sort());
+
+    const fromText = (text: string): Mon | null => {
+      const [p] = parseShowdown(text, (n) => !!mvOf(n), (n) => !!spOf(n));
+      if (!p || !spOf(p.species)) return null;
+      const m = emptyMon(spOf(p.species)!.name);
+      m.it = itOf(p.item)?.name ?? ''; m.ab = abOf(p.ability)?.name ?? ''; m.lv = p.level ?? (gen.num >= 9 ? 50 : 100);
+      m.nat = p.nature && gen.natures.get(toID(p.nature) as any) ? gen.natures.get(toID(p.nature) as any)!.name : 'Serious';
+      if (p.evs) STAT.forEach((k, i) => (m.evs[k] = p.evs![i]));
+      if (p.ivs) STAT.forEach((k, i) => (m.ivs[k] = p.ivs![i]));
+      m.tera = p.tera || ''; m.gender = p.gender || '';
+      p.moves.slice(0, 4).forEach((n, i) => (m.moves[i].name = mvOf(n)?.name ?? ''));
+      return m;
+    };
+    const fixMon = (m: Mon) => {
+      // make a Pokémon valid for the current gen (species, ability, moves, tera)
+      const s = spOf(m.sp) ?? spOf('Pikachu')!;
+      m.sp = s.name;
+      const abs = Object.values(s.abilities ?? {}) as string[];
+      if (gen.num >= 3 && (!m.ab || !abOf(m.ab))) m.ab = abs[0] ?? '';
+      if (gen.num < 3) m.ab = '';
+      if (m.it && !itOf(m.it)) m.it = '';
+      m.moves.forEach((x) => { if (x.name && !mvOf(x.name)) Object.assign(x, { name: '', bp: null, hits: 0 }); });
+      if (!m.tera || !gen.types.get(toID(m.tera) as any)) m.tera = s.types[0];
+      if (gen.num <= 2) STAT.forEach((k) => (m.evs[k] = 252));
+      return m;
+    };
+
+    const load = () => {
+      try { const v = JSON.parse(localStorage.getItem(SAVE) ?? 'null'); if (v && v.mons?.length === 2) return v as State; } catch {}
+      return null;
+    };
+    const fresh = (): State => ({ gen: 9, gt: 'Doubles', mons: [fromText(DEFAULTS[0])!, fromText(DEFAULTS[1])!], wx: '', ter: '', f: {}, sides: [{}, {}], sel: [0, 0] });
+    let saveT = 0;
+    const save = () => { clearTimeout(saveT); saveT = window.setTimeout(() => { try { localStorage.setItem(SAVE, JSON.stringify(S)); } catch {} }, 300); };
+
+    // ---------- calc objects ----------
+    const calcMon = (m: Mon) => {
+      const s = spOf(m.sp)!;
+      const opts: any = { level: m.lv, nature: m.nat, evs: { ...m.evs }, ivs: { ...m.ivs }, boosts: { ...m.bo, hp: undefined } };
+      if (gen.num >= 3 && m.ab) { opts.ability = m.ab; opts.abilityOn = m.abOn; }
+      if (gen.num >= 2 && m.it) opts.item = m.it;
+      if (m.st) opts.status = m.st;
+      if (gen.num === 9 && m.teraOn && m.tera) opts.teraType = m.tera;
+      if (gen.num === 8 && m.dmax) opts.isDynamaxed = true;
+      if (m.gender) opts.gender = m.gender;
+      if (m.faint) opts.alliesFainted = m.faint;
+      if (m.boosted) opts.boostedStat = m.boosted;
+      const p = new Pokemon(gen, s.name, opts);
+      p.originalCurHP = Math.max(1, Math.round((p.maxHP() * m.hpPct) / 100));
+      return p;
+    };
+    const calcMove = (m: Mon, x: MoveS) => {
+      const mv = mvOf(x.name); if (!mv) return null;
+      const o: any = { isCrit: x.crit, species: m.sp, ability: m.ab || undefined, item: m.it || undefined };
+      if (x.hits) o.hits = x.hits;
+      if (gen.num === 7 && x.z) o.useZ = true;
+      if (gen.num === 8 && m.dmax) o.useMax = true;
+      if (x.bp != null && x.bp !== mv.basePower) o.overrides = { basePower: x.bp };
+      return new Move(gen, mv.name, o);
+    };
+    const SIDE_KEYS = ['isSR', 'spikes', 'isReflect', 'isLightScreen', 'isAuroraVeil', 'isHelpingHand', 'isFriendGuard', 'isTailwind', 'isProtected',
+      'isSeeded', 'isSaltCured', 'isForesight', 'isBattery', 'isPowerSpot', 'isFlowerGift', 'isSteelySpirit', 'isCharge', 'isSwitching'];
+    const side = (s: SideS) => { const o: any = {}; for (const k of SIDE_KEYS) if (s[k]) o[k === 'isSwitching' ? 'isSwitching' : k] = k === 'isSwitching' ? 'out' : s[k]; return new Side(o); };
+    const field = (atk: 0 | 1) => new Field({ gameType: S.gt, weather: (S.wx || undefined) as any, terrain: (S.ter || undefined) as any, ...S.f,
+      attackerSide: side(S.sides[atk]), defenderSide: side(S.sides[1 - atk]) } as any);
+
+    // ---------- results ----------
+    const pctTxt = (n: number) => n.toFixed(2);
+    let results: any[][] = [[], []];
+    const compute = () => {
+      const pk = S.mons.map(calcMon);
+      results = [0, 1].map((a) => S.mons[a].moves.map((x) => {
+        const mv = calcMove(S.mons[a], x); if (!mv) return null;
+        try {
+          const r = calculate(gen, pk[a], pk[1 - a], mv, field(a as 0 | 1));
+          const [lo, hi] = r.range(); const max = pk[1 - a].maxHP();
+          let desc = ''; try { desc = r.desc(); } catch { desc = `${mv.name} does no damage.`; }
+          const flat = ([] as number[]).concat(...([r.damage] as any).flat(2));
+          return { lo: (lo * 100) / max, hi: (hi * 100) / max, desc, rolls: flat, status: mv.category === 'Status' };
+        } catch (e) { return { lo: 0, hi: 0, desc: `Couldn't calculate ${mv.name}.`, rolls: [], status: false }; }
+      }));
+      for (const a of [0, 1]) {
+        $('rl' + (a + 1)).textContent = S.mons[a].sp;
+        $('r' + (a + 1)).innerHTML = S.mons[a].moves.map((x, i) => {
+          const r = results[a][i];
+          if (!x.name) return `<button type="button" class="mb empty" disabled><span>—</span></button>`;
+          const on = S.sel[0] === a && S.sel[1] === i;
+          return `<button type="button" class="mb${on ? ' on' : ''}" data-a="${a}" data-i="${i}" aria-pressed="${on}"><span class="mbn">${esc(x.name)}</span>` +
+            `<span class="mbp">${r && !r.status && r.hi > 0 ? `${pctTxt(r.lo)} – ${pctTxt(r.hi)}%` : r?.status ? 'Status' : '0%'}</span></button>`;
+        }).join('');
+      }
+      let [a, i] = S.sel; if (!results[a][i]) { const k = results[0].findIndex(Boolean); S.sel = k >= 0 ? [0, k] : [1, Math.max(0, results[1].findIndex(Boolean))]; [a, i] = S.sel; }
+      const r = results[a][i];
+      $('main').textContent = r ? r.desc : 'Pick a move.';
+      $('rolls').textContent = r && r.rolls.length ? `(${r.rolls.join(', ')})` : '—';
+      for (const p of [0, 1]) for (const k of ['sl1', 'sl2']) document.querySelectorAll(`[data-k="${k}"]`).forEach((e) => (e.textContent = S.mons[k === 'sl1' ? 0 : 1].sp));
+      save();
+    };
+
+    // ---------- panels ----------
+    const pans = [$('p1'), $('p2')];
+    const q = (p: number, k: string) => pans[p].querySelector(`[data-k="${k}"]`) as any;
+    const statsOf = (m: Mon) => { try { const pk = calcMon(m); return { raw: pk.rawStats, max: pk.maxHP() }; } catch { return null; } };
+
+    const drawStats = (p: number) => {
+      const m = S.mons[p], s = spOf(m.sp)!, st = statsOf(m);
+      for (const k of STAT) {
+        q(p, `b-${k}`).textContent = (s.baseStats as any)[k] ?? '';
+        q(p, `s-${k}`).textContent = st ? (st.raw as any)[k] : '';
+        const [up, dn] = (() => { const n = gen.natures.get(toID(m.nat) as any); return n ? [n.plus, n.minus] : ['', '']; })();
+        q(p, `s-${k}`).className = 'n tot' + (up !== dn && k === up ? ' up' : up !== dn && k === dn ? ' dn' : '');
+      }
+      const used = STAT.reduce((a, k) => a + (+m.evs[k] || 0), 0);
+      q(p, 'evleft').textContent = gen.num >= 3 ? `${510 - used} EVs left` : '';
+      if (st) { q(p, 'max').textContent = `/ ${st.max}`; q(p, 'cur').value = Math.max(1, Math.round((st.max * m.hpPct) / 100)); q(p, 'pct').value = m.hpPct; }
+    };
+    const drawMove = (p: number, i: number) => {
+      const x = S.mons[p].moves[i], mv = mvOf(x.name);
+      q(p, `m${i}`).value = x.name;
+      q(p, `mt${i}`).innerHTML = mv ? `<span class="tchip" data-type="${mv.type}">${mv.type}</span>${gen.num >= 4 ? `<span class="cat" title="${mv.category}">${CAT_SVG[mv.category] ?? ''}</span>` : ''}` : '';
+      q(p, `bp${i}`).value = mv ? (x.bp ?? mv.basePower) : '';
+      q(p, `bp${i}`).disabled = !mv;
+      const mh = mv?.multihit; const h = q(p, `h${i}`) as HTMLSelectElement;
+      if (Array.isArray(mh)) {
+        h.hidden = false; const opts = []; for (let n = mh[0]; n <= mh[1]; n++) opts.push(n);
+        h.innerHTML = opts.map((n) => `<option value="${n}"${(x.hits || (mh[1] === 5 ? 3 : mh[1])) === n ? ' selected' : ''}>×${n}</option>`).join('');
+      } else h.hidden = true;
+      q(p, `c${i}`).checked = x.crit; q(p, `z${i}`).checked = x.z;
+    };
+    const drawPanel = (p: number) => {
+      const m = S.mons[p], s = spOf(m.sp)!;
+      q(p, 'sp').value = s.name;
+      const art = ART[s.id] ?? ART[toID(s.baseSpecies ?? s.name)];
+      const img = q(p, 'img') as HTMLImageElement; img.onerror = () => { img.onerror = null; img.src = `${SPR}/pokemon/${art}.png`; }; img.src = art ? `${SPR}/pokemon/versions/generation-vii/icons/${art}.png` : ''; img.style.visibility = art ? '' : 'hidden';
+      (q(p, 'pic') as HTMLAnchorElement).href = `/pokemon/${slug(s.baseSpecies ?? s.name)}/`;
+      q(p, 'tys').innerHTML = typesOf(m).map(chip).join('');
+      q(p, 'lv').value = m.lv;
+      (q(p, 'nat') as HTMLSelectElement).innerHTML = [...gen.natures].sort((a, b) => a.name.localeCompare(b.name)).map((n) =>
+        `<option value="${n.name}"${n.name === m.nat ? ' selected' : ''}>${n.name}${n.plus !== n.minus ? ` +${SN[n.plus]} -${SN[n.minus]}` : ''}</option>`).join('');
+      const own = [...new Set(Object.values(s.abilities ?? {}) as string[])];
+      (q(p, 'ab') as HTMLSelectElement).innerHTML = own.map((a) => `<option${a === m.ab ? ' selected' : ''}>${esc(a)}</option>`).join('') +
+        `<optgroup label="Other abilities">${list('abilities').filter((a: string) => !own.includes(a)).map((a: string) => `<option${a === m.ab ? ' selected' : ''}>${esc(a)}</option>`).join('')}</optgroup>`;
+      q(p, 'abon').checked = m.abOn;
+      q(p, 'it').value = m.it; const ic = ITEM_ICON[m.it]; const ii = q(p, 'itimg') as HTMLImageElement; ii.src = ic ? `${SPR}/items/${ic}.png` : ''; ii.style.visibility = ic ? '' : 'hidden';
+      (q(p, 'tera') as HTMLSelectElement).innerHTML = [...gen.types].filter((t) => t.name !== '???').map((t) => t.name).concat(gen.num === 9 ? ['Stellar'] : []).map((t) => `<option${t === m.tera ? ' selected' : ''}>${t}</option>`).join('');
+      q(p, 'teraon').checked = m.teraOn; q(p, 'dmax').checked = m.dmax; q(p, 'st').value = m.st;
+      q(p, 'gen').value = m.gender; q(p, 'faint').value = String(m.faint); q(p, 'boosted').value = m.boosted;
+      for (const k of STAT) {
+        const iv = q(p, `iv-${k}`) as HTMLInputElement, ev = q(p, `ev-${k}`) as HTMLInputElement;
+        if (gen.num <= 2) { iv.max = '15'; iv.value = String(Math.floor(m.ivs[k] / 2)); } else { iv.max = '31'; iv.value = String(m.ivs[k]); }
+        ev.value = String(m.evs[k]);
+        const bo = q(p, `bo-${k}`); if (bo) bo.value = String(m.bo[k]);
+      }
+      // gen 1 has one Special stat: hide SpD
+      (pans[p].querySelector('tr[data-s="spd"]') as HTMLElement).hidden = gen.num === 1;
+      q(p, 'ivh').textContent = gen.num <= 2 ? 'DVs' : 'IVs';
+      [0, 1, 2, 3].forEach((i) => drawMove(p, i));
+      drawStats(p);
+    };
+
+    // ---------- field ----------
+    const SIDE_ROWS: [string, string, (g: number) => boolean, boolean?][] = [
+      ['isSR', 'Stealth Rock', (g) => g >= 4], ['spikes', 'Spikes', (g) => g >= 2], ['isReflect', 'Reflect', () => true], ['isLightScreen', 'Light Screen', () => true],
+      ['isAuroraVeil', 'Aurora Veil', (g) => g >= 7], ['isHelpingHand', 'Helping Hand', (g) => g >= 3, true], ['isFriendGuard', 'Friend Guard', (g) => g >= 5, true],
+      ['isTailwind', 'Tailwind', (g) => g >= 4], ['isProtected', 'Protect', () => true],
+    ];
+    const SIDE_MORE: [string, string, (g: number) => boolean, boolean?][] = [
+      ['isSeeded', 'Leech Seed', () => true], ['isSaltCured', 'Salt Cure', (g) => g >= 9], ['isForesight', 'Foresight', (g) => g >= 2], ['isCharge', 'Charge', (g) => g >= 3],
+      ['isBattery', 'Battery', (g) => g >= 7, true], ['isPowerSpot', 'Power Spot', (g) => g >= 8, true], ['isSteelySpirit', 'Steely Spirit', (g) => g >= 8, true],
+      ['isFlowerGift', 'Flower Gift', (g) => g >= 4], ['isSwitching', 'Switching out', (g) => g >= 2],
+    ];
+    const drawSides = () => {
+      const row = ([k, l, ok, dbl]: [string, string, (g: number) => boolean, boolean?]) => {
+        if (!ok(gen.num) || (dbl && S.gt === 'Singles')) return '';
+        const cell = (s: number) => k === 'spikes'
+          ? `<td><select class="field sk" data-side="${s}" data-key="${k}" aria-label="${l}">${[0, 1, 2, 3].map((n) => `<option${(S.sides[s][k] || 0) === n ? ' selected' : ''}>${n}</option>`).join('')}</select></td>`
+          : `<td><input type="checkbox" data-side="${s}" data-key="${k}" aria-label="${l} (${S.mons[s].sp})"${S.sides[s][k] ? ' checked' : ''} /></td>`;
+        return `<tr><th>${l}</th>${cell(0)}${cell(1)}</tr>`;
+      };
+      $('sides').innerHTML = SIDE_ROWS.map(row).join('');
+      $('sides2').innerHTML = SIDE_MORE.map(row).join('');
+    };
+    const drawField = () => {
+      document.querySelectorAll<HTMLElement>('#gen button').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.v! === S.gen)));
+      document.querySelectorAll<HTMLElement>('#gt button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === S.gt)));
+      const wx = [['', 'None'], ['Sun', 'Sun'], ['Rain', 'Rain'], ['Sand', 'Sand'], [gen.num >= 9 ? 'Snow' : 'Hail', gen.num >= 9 ? 'Snow' : 'Hail']]
+        .concat(gen.num >= 5 ? [['Harsh Sunshine', 'Harsh Sun'], ['Heavy Rain', 'Heavy Rain'], ['Strong Winds', 'Strong Winds']] : []);
+      if (gen.num < 3) wx.splice(3); if (gen.num === 1) wx.splice(1);
+      if (!wx.some(([v]) => v === S.wx)) S.wx = '';
+      $('wx').innerHTML = wx.map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${v === S.wx}">${l}</button>`).join('');
+      if (gen.num < 5) S.ter = '';
+      document.querySelectorAll<HTMLElement>('#ter button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === S.ter)));
+      document.querySelectorAll<HTMLElement>('[data-f]').forEach((b) => b.setAttribute('aria-pressed', String(!!S.f[b.dataset.f!])));
+      // show only what exists in this gen
+      const show = (sel: string, ok: boolean) => document.querySelectorAll<HTMLElement>(sel).forEach((e) => (e.hidden = !ok));
+      show('.g9', gen.num === 9); show('.g8only', gen.num === 8); show('.g7only', gen.num === 7); show('.g7', gen.num >= 7); show('.g6', gen.num >= 6); show('.g5', gen.num >= 5);
+      document.querySelectorAll<HTMLElement>('.ev').forEach((e) => (e.hidden = gen.num <= 2));
+      drawSides();
+    };
+    const drawAll = () => { gen = Generations.get(S.gen as any); S.mons.forEach(fixMon); drawField(); drawPanel(0); drawPanel(1); compute(); };
+
+    // ---------- events ----------
+    // switching gens keeps each gen's Pokémon: going back to Gen 9 brings back what you had there
+    $('gen').addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest('button'); if (!b || +b.dataset.v! === S.gen) return;
+      S.byGen ??= {}; S.byGen[S.gen] = JSON.parse(JSON.stringify(S.mons));
+      const next = +b.dataset.v!, kept = S.byGen[next];
+      S.mons = kept ?? JSON.parse(JSON.stringify(S.mons)).map((m: Mon) => ({ ...m, lv: next >= 8 ? m.lv : m.lv === 50 ? 100 : m.lv, teraOn: false, dmax: false }));
+      S.gen = next; S.sel = [0, 0]; drawAll();
+    });
+    $('gt').addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest('button'); if (!b) return; S.gt = b.dataset.v as any; drawField(); compute(); });
+    $('wx').addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest('button'); if (!b) return; S.wx = b.dataset.v!; drawField(); compute(); });
+    $('ter').addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest('button'); if (!b) return; S.ter = b.dataset.v!; drawField(); compute(); });
+    document.querySelectorAll<HTMLElement>('[data-f]').forEach((b) => b.addEventListener('click', () => { S.f[b.dataset.f!] = !S.f[b.dataset.f!]; drawField(); compute(); }));
+    document.querySelector('.fld')!.addEventListener('change', (e) => {
+      const t = e.target as HTMLInputElement; if (!t.dataset.key) return;
+      S.sides[+t.dataset.side!][t.dataset.key] = t.type === 'checkbox' ? t.checked : +t.value; compute();
+    });
+    $('swap').addEventListener('click', () => { S.mons.reverse(); S.sides.reverse(); S.sel = [1 - S.sel[0], S.sel[1]]; S.byGen = {}; drawAll(); });
+    $('reset').addEventListener('click', () => { S = fresh(); drawAll(); });
+    ['r1', 'r2'].forEach((id) => $(id).addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest('button[data-a]') as HTMLElement | null; if (!b) return;
+      S.sel = [+b.dataset.a!, +b.dataset.i!]; compute();
+    }));
+
+    // the sets menu: most common sets from our usage data, your saved teams, or a paste
+    const setsCache: Record<number, Promise<Record<string, [string, string][]>>> = {};
+    const setsFor = (g: number) => (setsCache[g] ??= (g === 8 || g === 9) ? fetch(`/calc/sets-${g}.json`).then((r) => r.json()).catch(() => ({})) : Promise.resolve({}));
+    const spToEv = (sp: number) => (sp > 0 ? Math.min(252, 4 + 8 * (sp - 1)) : 0);
+    const teamSets = () => {
+      try {
+        const teams = JSON.parse(localStorage.getItem('ardex-teams') ?? '[]') as any[];
+        return teams.flatMap((t) => (t.mons ?? []).filter((m: any) => m.sp).map((m: any) => {
+          const s = spOf(m.sp); if (!s) return null;
+          const evs = (m.evs ?? []).map((v: number) => (t.fmt === 'champ' ? spToEv(v) : v));
+          const text = [`${s.name}${m.item ? ` @ ${m.item}` : ''}`, m.ab ? `Ability: ${m.ab}` : '', `Level: ${t.fmt === 'champ' ? 50 : m.level ?? 50}`, m.tera ? `Tera Type: ${m.tera}` : '',
+            `EVs: ${evs.map((v: number, k: number) => `${v} ${['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'][k]}`).join(' / ')}`,
+            `IVs: ${(m.ivs ?? []).map((v: number, k: number) => `${v} ${['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'][k]}`).join(' / ')}`,
+            `${m.nature || 'Serious'} Nature`, ...(m.moves ?? []).filter(Boolean).map((x: string) => `- ${x}`)].filter(Boolean).join('\n');
+          return { label: s.name, team: t.name || 'Untitled team', text };
+        })).filter(Boolean) as { label: string; team: string; text: string }[];
+      } catch { return []; }
+    };
+    const closeMenus = () => pans.forEach((_, p) => { q(p, 'menu').hidden = true; q(p, 'load').setAttribute('aria-expanded', 'false'); });
+    const use = (p: number, text: string) => {
+      const m = fromText(text); if (!m) return false;
+      m.hpPct = 100; S.mons[p] = fixMon(m); drawPanel(p); compute(); return true;
+    };
+    pans.forEach((pan, p) => {
+      q(p, 'load').addEventListener('click', async (e: Event) => {
+        e.stopPropagation();
+        const menu = q(p, 'menu') as HTMLElement; if (!menu.hidden) return closeMenus(); closeMenus();
+        const sets = (await setsFor(gen.num))[S.mons[p].sp] ?? [];
+        const mine = teamSets();
+        menu.innerHTML = (sets.length ? `<div class="mh">Most common sets (usage data)</div>` + sets.map(([l], i) => `<button type="button" data-set="${i}">${esc(l)}</button>`).join('') : `<div class="mh soft">No usage sets for ${esc(S.mons[p].sp)} in Gen ${gen.num}</div>`) +
+          (mine.length ? `<div class="mh">Your teams</div>` + mine.map((x, i) => `<button type="button" data-mine="${i}">${esc(x.label)} <i>${esc(x.team)}</i></button>`).join('') : '') +
+          `<div class="mh"></div><button type="button" data-paste="1">Paste a set…</button>`;
+        menu.hidden = false; q(p, 'load').setAttribute('aria-expanded', 'true');
+        menu.onclick = (ev: Event) => {
+          const b = (ev.target as HTMLElement).closest('button') as HTMLElement | null; if (!b) return;
+          if (b.dataset.set) use(p, sets[+b.dataset.set][1]);
+          else if (b.dataset.mine) use(p, mine[+b.dataset.mine].text);
+          else { q(p, 'pastebox').hidden = false; (q(p, 'pastetxt') as HTMLTextAreaElement).focus(); }
+          closeMenus();
+        };
+      });
+      q(p, 'pastego').addEventListener('click', () => {
+        if (use(p, q(p, 'pastetxt').value)) { q(p, 'pastebox').hidden = true; q(p, 'pastetxt').value = ''; q(p, 'pastemsg').textContent = ''; }
+        else q(p, 'pastemsg').textContent = "Couldn't read a Pokémon from that.";
+      });
+      q(p, 'pastex').addEventListener('click', () => (q(p, 'pastebox').hidden = true));
+
+      autocomplete(q(p, 'sp'), () => list('species').map((n: string) => ({ label: n, type: spOf(n)!.types.join('/') })), (it) => {
+        const m = emptyMon(it.label); m.lv = gen.num >= 8 ? 50 : 100; S.mons[p] = fixMon(m); drawPanel(p); compute();
+      });
+      autocomplete(q(p, 'it'), () => [{ label: '(none)' }, ...list('items').map((n: string) => ({ label: n }))], (it) => {
+        S.mons[p].it = it.label === '(none)' ? '' : it.label; drawPanel(p); compute();
+      }, 12, true);
+      [0, 1, 2, 3].forEach((i) => autocomplete(q(p, `m${i}`), () => [{ label: '(none)' }, ...list('moves').map((n: string) => { const mv = mvOf(n)!; return { label: n, type: mv.type, cat: mv.category }; })], (it) => {
+        Object.assign(S.mons[p].moves[i], { name: it.label === '(none)' ? '' : it.label, bp: null, hits: 0, crit: false, z: false }); drawMove(p, i); compute();
+      }, 12, true));
+
+      pan.addEventListener('change', (e) => {
+        const t = e.target as HTMLInputElement, k = t.dataset.k ?? '', m = S.mons[p];
+        if (!k) return;
+        if (k === 'lv') m.lv = Math.min(100, Math.max(1, +t.value || 1));
+        else if (k === 'nat') m.nat = t.value;
+        else if (k === 'ab') { m.ab = t.value; m.abOn = false; q(p, 'abon').checked = false; }
+        else if (k === 'abon') m.abOn = t.checked;
+        else if (k === 'tera') m.tera = t.value;
+        else if (k === 'teraon') m.teraOn = t.checked;
+        else if (k === 'dmax') m.dmax = t.checked;
+        else if (k === 'st') m.st = t.value;
+        else if (k === 'gen') m.gender = t.value;
+        else if (k === 'faint') m.faint = +t.value;
+        else if (k === 'boosted') m.boosted = t.value;
+        else if (k === 'cur') { const st = statsOf(m); if (st) m.hpPct = Math.min(100, Math.max(0, (+t.value / st.max) * 100)); }
+        else if (k === 'pct') m.hpPct = Math.min(100, Math.max(0, +t.value || 0));
+        else if (k.startsWith('iv-')) { const s = k.slice(3) as SK; const v = Math.max(0, +t.value || 0); m.ivs[s] = gen.num <= 2 ? Math.min(15, v) * 2 + 1 : Math.min(31, v); if (gen.num <= 2 && v >= 15) m.ivs[s] = 31; }
+        else if (k.startsWith('ev-')) { const s = k.slice(3) as SK; m.evs[s] = Math.min(252, Math.max(0, Math.floor((+t.value || 0) / 4) * 4)); t.value = String(m.evs[s]); }
+        else if (k.startsWith('bo-')) m.bo[k.slice(3) as SK] = +t.value;
+        else if (/^bp\d$/.test(k)) m.moves[+k[2]].bp = t.value === '' ? null : +t.value;
+        else if (/^h\d$/.test(k)) m.moves[+k[1]].hits = +t.value;
+        else if (/^c\d$/.test(k)) m.moves[+k[1]].crit = t.checked;
+        else if (/^z\d$/.test(k)) m.moves[+k[1]].z = t.checked;
+        else return;
+        drawStats(p); compute();
+      });
+    });
+    document.addEventListener('click', (e) => { if (!(e.target as HTMLElement).closest('.ld')) closeMenus(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenus(); });
+
+    S = load() ?? fresh();
+    S.sides ??= [{}, {}]; S.f ??= {}; S.sel ??= [0, 0];
+    drawAll();
+  </script>
+</Base>
+
+<style is:global>
+  /* everything is under .calc: much of the page is drawn by script, which scoped styles would miss */
+  .calc .cbar { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .6rem; margin-bottom: .6rem; }
+  .calc .lab { font-size: .8rem; color: var(--ink-soft); }
+  .calc .seg.sm2 button, .calc .cbar .seg button { font-size: .78rem; padding: .18rem .5rem; border-width: 1px; margin: 0 -1px -1px 0; }
+  .calc .seg button:hover { background: var(--petal-deep); }
+  .calc .seg button:active { box-shadow: inset 0 2px 3px rgb(0 0 0 / .25); }
+  .calc .seg button[aria-pressed='true']:hover { background: var(--ink); }
+  .calc .seg button:focus-visible, .calc .mb:focus-visible, .calc .menu button:focus-visible { outline: 2px solid #2b7bd6; outline-offset: 1px; }
+
+  /* results: every move of both sides, the picked one spelled out below */
+  .calc .res { border: 1px solid var(--line-2); border-radius: 4px; background: var(--card); padding: .5rem .6rem; margin-bottom: .8rem; }
+  .calc .rrow { display: grid; grid-template-columns: 9rem 1fr; align-items: center; gap: .5rem; margin-bottom: .35rem; }
+  .calc .rlab { font-weight: 600; font-size: .85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .calc .mvb { display: grid; grid-template-columns: repeat(4, 1fr); gap: .35rem; }
+  .calc .mb { display: flex; justify-content: space-between; gap: .4rem; font: inherit; font-size: .8rem; padding: .3rem .5rem; border: 1px solid var(--line-2); border-radius: 3px; background: var(--card); color: var(--ink); cursor: pointer; min-width: 0; text-align: left; }
+  .calc .mb .mbn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .calc .mb .mbp { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink-soft); }
+  .calc .mb:hover { background: var(--petal-deep); }
+  .calc .mb:active { box-shadow: inset 0 2px 3px rgb(0 0 0 / .25); }
+  .calc .mb.on { border-color: #2b7bd6; background: #dbe9fb; box-shadow: inset 0 0 0 1px #2b7bd6; }
+  html[data-theme='dark'] .calc .mb.on { background: #1f3550; }
+  .calc .mb.empty { cursor: default; opacity: .45; }
+  .calc .main { margin: .5rem 0 .2rem; font-size: .9rem; line-height: 1.45; }
+  .calc .rolls summary { font-size: .78rem; color: var(--ink-soft); cursor: pointer; }
+  .calc .rolls p { margin: .3rem 0 0; font-size: .78rem; font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+
+  .calc .cols { display: grid; grid-template-columns: 1fr 250px 1fr; gap: .8rem; align-items: start; }
+  .calc #p1 { order: 1; } .calc .fld { order: 2; } .calc #p2 { order: 3; }
+  .calc .pan, .calc .fld { border: 1px solid var(--line-2); border-radius: 4px; background: var(--card); padding: .5rem .6rem; min-width: 0; }
+  .calc .phead { display: flex; align-items: center; gap: .4rem; }
+  .calc .pic img { display: block; image-rendering: pixelated; }
+  .calc .pn { flex: 1; min-width: 0; }
+  .calc .pn .sp { width: 100%; font-weight: 600; }
+  .calc .tys { display: flex; gap: .25rem; margin-top: .25rem; min-height: 16px; }
+  .calc .ld { position: relative; align-self: flex-start; }
+  .calc .menu { position: absolute; right: 0; top: calc(100% + 2px); z-index: 20; width: 270px; max-height: 340px; overflow: auto; background: var(--card); border: 1px solid var(--line-2); border-radius: 3px; box-shadow: 0 4px 12px rgb(0 0 0 / .2); }
+  .calc .menu .mh { font-size: .72rem; color: var(--ink-soft); padding: .35rem .5rem .15rem; border-top: 1px solid var(--line); }
+  .calc .menu .mh:first-child { border-top: 0; }
+  .calc .menu button { display: block; width: 100%; text-align: left; font: inherit; font-size: .8rem; padding: .28rem .5rem; background: none; border: 0; color: var(--link); cursor: pointer; }
+  .calc .menu button i { color: var(--ink-soft); font-size: .72rem; }
+  .calc .menu button:hover { background: var(--petal-deep); }
+  .calc .menu button:active { box-shadow: inset 0 2px 3px rgb(0 0 0 / .2); }
+  .calc .paste { margin-top: .4rem; } .calc .paste textarea { width: 100%; font-family: ui-monospace, monospace; }
+
+  .calc .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: .3rem .6rem; margin-top: .5rem; }
+  .calc .g2 > label { display: flex; align-items: center; gap: .35rem; font-size: .8rem; min-width: 0; }
+  .calc .g2 > label > span:first-child { width: 3.6rem; flex: none; color: var(--ink-soft); }
+  .calc .g2 > label.wide { grid-column: 1 / -1; }
+  .calc .g2 .field { flex: 1; min-width: 0; }
+  .calc .g2 [hidden] { display: none; }
+  .calc .itw { display: flex; align-items: center; gap: .25rem; flex: 1; min-width: 0; }
+  .calc .itw img { flex: none; }
+  .calc .chk { display: inline-flex; align-items: center; gap: .2rem; font-size: .78rem; white-space: nowrap; }
+  .calc .chk label { cursor: pointer; }
+  .calc .chk[hidden] { display: none; }
+
+  .calc .stt { width: 100%; border-collapse: collapse; margin-top: .5rem; font-size: .8rem; table-layout: fixed; }
+  .calc .stt th, .calc .stt td { padding: 1px 3px; height: 26px; }
+  .calc .stt thead th { font-weight: 600; color: var(--ink-soft); font-size: .72rem; border-bottom: 1px solid var(--line-2); }
+  .calc .stt tbody th { text-align: left; font-weight: 600; width: 2.6rem; }
+  .calc .stt .n { text-align: right; font-variant-numeric: tabular-nums; }
+  .calc .stt td.n:nth-child(2) { color: var(--ink-soft); }
+  .calc .stt .num { width: 100%; text-align: right; }
+  .calc .stt .tot { font-weight: 600; }
+  .calc .stt .tot.up { color: #d4572a; } .calc .stt .tot.dn { color: #2b7bd6; }
+  .calc .stt .bst { width: 100%; padding-right: 1.2rem !important; }
+  .calc .stt [hidden] { display: none; }
+  /* no spin arrows: they eat the space the number needs */
+  .calc .num { -moz-appearance: textfield; appearance: textfield; }
+  .calc .num::-webkit-inner-spin-button, .calc .num::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  .calc .hpr { display: flex; justify-content: space-between; align-items: center; gap: .5rem; margin-top: .4rem; font-size: .8rem; }
+  .calc .hpw { display: inline-flex; align-items: center; gap: .3rem; }
+  .calc .hpw .num { width: 4.2rem; text-align: right; } .calc .hpw .pct { width: 3.6rem; }
+
+  .calc .mvs { margin-top: .5rem; display: grid; gap: .3rem; }
+  /* fixed columns so every row lines up; the hits box keeps its space even when the move isn't multi-hit */
+  .calc .mv { display: grid; grid-template-columns: minmax(0, 1fr) 104px 4.4rem 3.4rem auto auto; align-items: center; gap: .3rem; }
+  .calc .mv .mt { display: flex; align-items: center; gap: .2rem; }
+  .calc .mv .mt .cat svg { width: 20px; height: 14px; display: block; }
+  .calc .mv .bp { text-align: right; }
+  .calc .mv .hits { width: 100%; padding-right: 1.3rem !important; }
+  .calc .mv .hits[hidden] { display: block; visibility: hidden; }
+  .calc .more { margin-top: .5rem; }
+  .calc .more summary { font-size: .78rem; color: var(--link); cursor: pointer; }
+
+  .calc .fld h3 { margin: 0 0 .4rem; font-size: .9rem; }
+  .calc .fr { margin-bottom: .45rem; }
+  .calc .fr .lab { display: block; margin-bottom: .15rem; }
+  .calc .fr[hidden] { display: none; }
+  .calc .seg [hidden] { display: none; }
+  .calc .sides { width: 100%; border-collapse: collapse; font-size: .78rem; table-layout: fixed; }
+  .calc .sides th, .calc .sides td { padding: 2px 3px; height: 24px; }
+  .calc .sides thead th { font-size: .7rem; color: var(--ink-soft); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; border-bottom: 1px solid var(--line-2); }
+  .calc .sides thead th:first-child { width: 46%; }
+  .calc .sides tbody th { text-align: left; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .calc .sides td { text-align: center; }
+  .calc .sides tbody tr:nth-child(odd) { background: var(--zebra); }
+  .calc .sides .sk { width: 3.2rem; padding-right: 1rem !important; }
+  .calc .fld .more .sides { margin-top: .3rem; }
+  .calc .note { font-size: .78rem; margin-top: .8rem; }
+
+  @media (max-width: 1000px) {
+    .calc .cols { grid-template-columns: 1fr 1fr; }
+    .calc .fld { order: 3; grid-column: 1 / -1; } .calc #p2 { order: 2; }
+  }
+  @media (max-width: 640px) {
+    .calc .cols { grid-template-columns: 1fr; }
+    .calc #p2 { order: 3; } .calc .fld { order: 2; }
+    .calc .rrow { grid-template-columns: 1fr; gap: .2rem; }
+    .calc .mvb { grid-template-columns: 1fr; gap: .25rem; }
+    .calc .g2 { grid-template-columns: 1fr; }
+    .calc .mv { grid-template-columns: minmax(0, 1fr) 90px 3.8rem 3rem auto; }
+    .calc .mv .g7only { display: none; }
+  }
+</style>
