@@ -51,3 +51,4 @@
 - 2026-11-27: Pokémon moves "By how it learns": each table (level up, TM, egg, tutor…) sorts on its own by clicking a heading; power sorts correctly for multi-hit moves
 - 2026-11-27: Pokémon pages: VGC usage section listing every format the Pokémon shows up in (usage %, rank), each linking to it on the usage page
 - 2026-11-27: All usage percentages show two decimals; Pokémon usage table hides Source on phones
+- 2026-11-27: Pokémon pages: VGC usage section says so when a Pokémon has no recorded usage (instead of disappearing)

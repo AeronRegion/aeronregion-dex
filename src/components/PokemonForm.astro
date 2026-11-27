@@ -139,6 +139,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
       </table>
       {usage.length > 6 && <button type="button" class="sm umorebtn" onclick="const t=this.previousElementSibling.querySelector('.umore');t.hidden=!t.hidden;this.textContent=t.hidden?'Show all formats':'Show fewer'">Show all formats</button>}
     </>}
+    {usage.length === 0 && <><h3 class="sec">VGC usage</h3><p class="soft">Not used in any recorded VGC format.</p></>}
 
     <h3 class="sec">Where to find</h3>
     <table class="loc">

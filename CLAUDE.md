@@ -59,7 +59,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Evolution: the stage you're on is a plain box, not a link.
 - Damage taken includes abilities (e.g. Levitate shows Ground 0, "Includes Levitate").
   Multiple relevant abilities get toggle buttons. No "Before abilities" note.
-- "VGC usage" section on the Overview (before Where to find), only when the Pokémon appears in usage data: Format | Source | When | Usage | Rank, current formats first, 6 rows + "Show all formats"; each format links to that Pokémon on the usage page.
+- "VGC usage" section on the Overview (before Where to find), only when the Pokémon appears in usage data: Format | Source | When | Usage | Rank, current formats first, 6 rows + "Show all formats"; each format links to that Pokémon on the usage page. Pokémon with no data show "Not used in any recorded VGC format."
 - Move category icons are PokemonDB-style (CAT_SVG in src/lib/ac.ts): Physical red-outlined white burst, Special blue tilted rings, Status grey tilted pill with a dark left half.
 - Moves tab: one list sorted Physical > Special > Status, with a "How" column
   (Lv / TM / Egg / Tutor). "By how it learns" view: one table per method, each sortable on its own by clicking a heading (level up starts sorted by level). Priority is a column (green +, red -).
