@@ -1,0 +1,25 @@
+name: VGC usage data
+# Weekly: pulls VGC usage (Showdown ladder stats, Limitless tournament teams, official majors' team lists)
+# into src/data/usage/ and commits if anything changed (the push redeploys the site).
+# Run it by hand from the Actions tab too.
+on:
+  schedule:
+    - cron: '17 9 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  usage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/usage.mjs
+      - name: Commit changes
+        run: |
+          git config user.name "AeronRegion"
+          git config user.email "AeronRegion@users.noreply.github.com"
+          git add src/data/usage
+          git diff --cached --quiet || (git commit -m "Update VGC usage data" && git push)
