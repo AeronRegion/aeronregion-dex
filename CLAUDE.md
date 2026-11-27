@@ -60,7 +60,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
   Multiple relevant abilities get toggle buttons. No "Before abilities" note.
 - Move category icons are PokemonDB-style (CAT_SVG in src/lib/ac.ts): Physical red-outlined white burst, Special blue tilted rings, Status grey tilted pill with a dark left half.
 - Moves tab: one list sorted Physical > Special > Status, with a "How" column
-  (Lv / TM / Egg / Tutor). "Split by how it learns" button. Priority is a column (green +, red -).
+  (Lv / TM / Egg / Tutor). "By how it learns" view: one table per method, each sortable on its own by clicking a heading (level up starts sorted by level). Priority is a column (green +, red -).
 
 ### Moves / abilities / items / types
 - Move pages: PokemonDB-style data table, effect text from Showdown, target diagram

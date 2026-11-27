@@ -48,3 +48,4 @@
 - 2026-11-26: Coverage Defense colors restored in dark mode; usage dropdown rows always one line; team-sheet names cleaned (typos, casing, placeholders merged); names without a page shown unlinked; cosmetic-form evolution links (Vivillon-Fancy etc.) go to the base page; new npm run check:links
 - 2026-11-27: Teambuilder: picking an item/move/ability from the list can no longer be overwritten by the half-typed text when you leave the box (e.g. "char" turning into Charcoal)
 - 2026-11-27: VGC usage remembers your spot (format, month, rating, Pokémon, set builder open/closed) and keeps the Pokémon when switching format; sets added from usage or imported are converted to the team's format (EVs <-> Stat Points)
+- 2026-11-27: Pokémon moves "By how it learns": each table (level up, TM, egg, tutor…) sorts on its own by clicking a heading; power sorts correctly for multi-hit moves

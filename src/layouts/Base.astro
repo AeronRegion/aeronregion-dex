@@ -102,23 +102,23 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
       document.addEventListener('click', (e) => { document.querySelectorAll('.more.open').forEach((d) => { if (!d.contains(e.target as Node)) d.classList.remove('open'); }); });
       // Any <table class="data sortable">: click a header with data-sort to sort by it.
       // Cells can carry data-v for the sort value; numbers sort high→low first.
-      document.querySelectorAll<HTMLTableElement>('table.sortable').forEach((table) => {
-        table.querySelectorAll<HTMLTableCellElement>('th[data-sort]').forEach((th) => {
-          th.addEventListener('click', () => {
-            const i = [...th.parentElement!.children].indexOf(th);
-            const num = th.dataset.sort === 'num';
-            const asc = th.classList.contains('sorted') ? !th.classList.contains('asc') : !num;
-            table.querySelectorAll('th').forEach((h) => h.classList.remove('sorted', 'asc'));
-            th.classList.add('sorted'); if (asc) th.classList.add('asc');
-            const body = table.tBodies[0];
-            const val = (r: HTMLTableRowElement) => { const c = r.cells[i]; const v = c?.dataset.v ?? c?.textContent?.trim() ?? ''; return num ? (v === '' || v === '—' ? -Infinity : +v) : v.toLowerCase(); };
-            const rows = [...body.rows].filter((r) => !r.classList.contains('group'));
-            rows.sort((a, b) => { const x = val(a), y = val(b); return (x < y ? -1 : x > y ? 1 : 0) * (asc ? 1 : -1); });
-            body.querySelectorAll('tr.group').forEach((g) => g.remove());
-            rows.forEach((r) => body.appendChild(r));
-            table.dispatchEvent(new CustomEvent('sorted'));
-          });
-        });
+      // (delegated, so tables drawn later, like a Pokémon's "By how it learns" tables, sort too)
+      document.addEventListener('click', (e) => {
+        const th = (e.target as HTMLElement).closest<HTMLTableCellElement>('table.sortable th[data-sort]');
+        if (!th) return;
+        const table = th.closest('table')!;
+        const i = [...th.parentElement!.children].indexOf(th);
+        const num = th.dataset.sort === 'num';
+        const asc = th.classList.contains('sorted') ? !th.classList.contains('asc') : !num;
+        table.querySelectorAll('th').forEach((h) => h.classList.remove('sorted', 'asc'));
+        th.classList.add('sorted'); if (asc) th.classList.add('asc');
+        const body = table.tBodies[0];
+        const val = (r: HTMLTableRowElement) => { const c = r.cells[i]; const v = c?.dataset.v ?? c?.textContent?.trim() ?? ''; return num ? (v === '' || v === '—' ? -Infinity : +v) : v.toLowerCase(); };
+        const rows = [...body.rows].filter((r) => !r.classList.contains('group'));
+        rows.sort((a, b) => { const x = val(a), y = val(b); return (x < y ? -1 : x > y ? 1 : 0) * (asc ? 1 : -1); });
+        body.querySelectorAll('tr.group').forEach((g) => g.remove());
+        rows.forEach((r) => body.appendChild(r));
+        table.dispatchEvent(new CustomEvent('sorted'));
       });
     </script>
     <script>

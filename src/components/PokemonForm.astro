@@ -204,7 +204,7 @@ const spawns = s.cobbleverse?.spawns ?? [];
             <td><a href={moveUrl(m)}>{m.name}</a></td>
             <td data-v={m.type}><Type type={m.type} small /></td>
             <td data-v={catOrder[m.cat]}><Cat cat={m.cat} /></td>
-            <td class="n">{m.power ?? '—'}{m.hits && <small class="hx" title={`Hits ${m.hits} times`}>×{m.hits}</small>}</td>
+            <td class="n" data-v={m.power ?? ""}>{m.power ?? "—"}{m.hits && <small class="hx" title={`Hits ${m.hits} times`}>×{m.hits}</small>}</td>
             <td class="n">{m.acc ?? '—'}</td>
             <td class="n">{m.pp}</td>
             <td class={`n pri ${priClass(m.pri)}`} data-v={m.pri}>{pri(m.pri)}</td>
@@ -287,18 +287,20 @@ const spawns = s.cobbleverse?.spawns ?? [];
         for (const r of rows) {
           if (r.hidden) continue;
           const [mv, ty, ca, pw, ac] = q2(r);
-          const tail = `<td>${mv}</td><td>${ty}</td><td class="c">${ca}</td><td class="n">${pw}</td><td class="n">${ac}</td>`;
+          const dv = (k: number) => { const v = r.cells[k].dataset.v; return v !== undefined ? ` data-v="${v}"` : ''; };
+          const tail = `<td>${mv}</td><td${dv(1)}>${ty}</td><td class="c"${dv(2)}>${ca}</td><td class="n"${dv(3)}>${pw}</td><td class="n"${dv(4)}>${ac}</td>`;
           const h = howFor(r.dataset.src!.split(','));
           const seen = new Set<number>();
           for (const x of h) {
-            if (x.group === 0) lvRows.push([x.sort, `<tr><td class="n lv">${x.sort === 0 ? 'Evo' : x.sort}</td>${tail}</tr>`]);
+            if (x.group === 0) lvRows.push([x.sort, `<tr><td class="n lv" data-v="${x.sort}">${x.sort === 0 ? 'Evo' : x.sort}</td>${tail}</tr>`]);
             else if (!seen.has(x.group)) { seen.add(x.group); (by[x.group] ??= []).push(`<tr>${tail}</tr>`); }
           }
         }
         const lvSeen = new Set<string>();
         by[0] = lvRows.sort((a, b) => a[0] - b[0]).map((x) => x[1]).filter((x) => !lvSeen.has(x) && lvSeen.add(x));
-        const head = (g: number) => `<thead><tr>${g === 0 ? '<th class="n">Lv.</th>' : ''}<th>Move</th><th>Type</th><th class="c">Cat.</th><th class="n">Power</th><th class="n">Acc.</th></tr></thead>`;
-        const block = (g: number) => by[g]?.length ? `<div class="mgrp"><h4>${names[g]} <span>${by[g].length}</span></h4><table class="data mini">${head(g)}<tbody>${by[g].join('')}</tbody></table></div>` : '';
+        // each table sorts on its own (click a heading); level up starts sorted by level
+        const head = (g: number) => `<thead><tr>${g === 0 ? '<th class="n sorted asc" data-sort="num">Lv.</th>' : ''}<th data-sort="text"${g ? ' class="sorted asc"' : ''}>Move</th><th data-sort="text">Type</th><th class="c" data-sort="num">Cat.</th><th class="n" data-sort="num">Power</th><th class="n" data-sort="num">Acc.</th></tr></thead>`;
+        const block = (g: number) => by[g]?.length ? `<div class="mgrp"><h4>${names[g]} <span>${by[g].length}</span></h4><table class="data mini sortable">${head(g)}<tbody>${by[g].join('')}</tbody></table></div>` : '';
         msplit.innerHTML = `<div>${block(0)}${block(2)}</div><div>${block(1)}${block(3)}${block(4)}${block(5)}</div>`;
       } else msplit.innerHTML = '';
       form.querySelector('.mcount')!.textContent = `${n} moves`;

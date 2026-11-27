@@ -57,7 +57,7 @@ const SHIELD = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentCol
             <td><a href={moveUrl(m)}>{m.name}</a></td>
             <td><Type type={m.type} small /></td>
             <td data-v={catOrder[m.cat]}><Cat cat={m.cat} /></td>
-            <td class="n">{m.power ?? '—'}{m.hits && <small class="hx" title={`Hits ${m.hits} times`}>×{m.hits}</small>}</td><td class="n">{m.acc ?? '—'}</td><td class="n">{m.pp}</td>
+            <td class="n" data-v={m.power ?? ""}>{m.power ?? "—"}{m.hits && <small class="hx" title={`Hits ${m.hits} times`}>×{m.hits}</small>}</td><td class="n">{m.acc ?? '—'}</td><td class="n">{m.pp}</td>
             <td class={`n pri ${m.pri > 0 ? 'pos' : m.pri < 0 ? 'neg' : 'zero'}`} data-v={m.pri}>{m.pri > 0 ? `+${m.pri}` : m.pri}</td>
             <td class="tgt">{m.target}</td><td class="tgt">{m.short}</td>
           </tr>
