@@ -1,11 +1,11 @@
 ---
 import Base from '../../layouts/Base.astro';
 import Usage from '../../components/Usage.astro';
-import { formats } from '../../lib/usage';
+import { formats, monthName } from '../../lib/usage';
 export const getStaticPaths = () => formats.map((f) => ({ params: { fmt: f.id }, props: { f } }));
 const { f } = Astro.props as { f: any };
 ---
 <Base title={`${f.name} usage`} description={`VGC usage for ${f.name}: most used Pokémon, moves, items, spreads and teammates.`}>
-  <h1>{f.name} <em class="kind">(usage{f.def ? "" : `, ${f.period}, ${f.cutoff}+`})</em></h1>
+  <h1>{f.name} <em class="kind">(usage{f.def ? "" : `, ${monthName(f.period)}, ${f.cutoff}+`})</em></h1>
   <Usage id={f.id} />
 </Base>
