@@ -53,7 +53,7 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
           <textarea class="field" data-k="pastetxt" rows="8" placeholder="Paste one Pokémon in Showdown format"></textarea>
           <div><button class="sm" data-k="pastego" type="button">Use this set</button> <button class="sm" data-k="pastex" type="button">Cancel</button> <span class="soft" data-k="pastemsg"></span></div>
         </div>
-        <div class="g2">
+        <div class="g2 top">
           <label><span>Level</span><input class="field num lvn" data-k="lv" type="number" min="1" max="100" value="50" /></label>
           <label class="g9"><span>Tera</span><select class="field" data-k="tera"></select><span class="chk"><input type="checkbox" data-k="teraon" id={`teraon${p}`} /><label for={`teraon${p}`}>On</label></span></label>
           <label class="g8only"><span>Dynamax</span><span class="chk"><input type="checkbox" data-k="dmax" id={`dmax${p}`} /><label for={`dmax${p}`}>Dynamaxed</label></span></label>
@@ -79,8 +79,8 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
           <label><span>Status</span><select class="field" data-k="st">
             <option value="">Healthy</option><option value="brn">Burned</option><option value="par">Paralyzed</option><option value="psn">Poisoned</option><option value="tox">Badly poisoned</option><option value="slp">Asleep</option><option value="frz">Frozen</option>
           </select></label>
-          <label class="wide"><span>Ability</span><select class="field" data-k="ab"></select><span class="chk" data-k="abonw"><input type="checkbox" data-k="abon" id={`abon${p}`} /><label for={`abon${p}`}>Active</label></span></label>
-          <label class="wide"><span>Item</span><span class="itw"><img alt="" width="24" height="24" data-k="itimg" /><input class="field" data-k="it" placeholder="(none)" /></span></label>
+          <label><span>Ability</span><select class="field" data-k="ab"></select><span class="chk" data-k="abonw"><input type="checkbox" data-k="abon" id={`abon${p}`} /><label for={`abon${p}`}>Active</label></span></label>
+          <label><span>Item</span><span class="itw"><img alt="" width="24" height="24" data-k="itimg" /><input class="field" data-k="it" placeholder="(none)" /></span></label>
         </div>
         <div class="hpr">
           <span class="ev soft" data-k="evleft"></span>
@@ -251,6 +251,8 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
 
     // ---------- results ----------
     const pctTxt = (n: number) => n.toFixed(2);
+    const effTag = (e: number | null | undefined) => e == null || e === 1 ? '<span class="eff"></span>'
+      : `<span class="eff ${e >= 4 ? 'x4' : e >= 2 ? 'x2' : e === 0 ? 'x0' : e <= 0.25 ? 'xq' : 'xh'}">${e >= 4 ? 'Extremely effective' : e >= 2 ? 'Super effective' : e === 0 ? 'No effect' : e <= 0.25 ? 'Mostly ineffective' : 'Not very effective'}</span>`;
     let results: any[][] = [[], []];
     const compute = () => {
       const pk = S.mons.map(calcMon);
@@ -261,7 +263,11 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
           const [lo, hi] = r.range(); const max = pk[1 - a].maxHP();
           let desc = ''; try { desc = r.desc(); } catch { desc = `${mv.name} does no damage.`; }
           const flat = ([] as number[]).concat(...([r.damage] as any).flat(2));
-          return { lo: (lo * 100) / max, hi: (hi * 100) / max, desc, rolls: flat, status: mv.category === 'Status' };
+          // type effectiveness from the move's final type (after Tera, -ate abilities…) against the defender's types (Tera if on)
+          const d = S.mons[1 - a], defT: string[] = gen.num === 9 && d.teraOn && d.tera && d.tera !== 'Stellar' ? [d.tera] : typesOf(d);
+          const mt = gen.types.get(toID((r.move as any).type) as any) as any;
+          const eff = mv.category === 'Status' || !mt ? null : defT.reduce((x, t) => x * (mt.effectiveness[t] ?? 1), 1);
+          return { lo: (lo * 100) / max, hi: (hi * 100) / max, desc, rolls: flat, status: mv.category === 'Status', eff };
         } catch (e) { return { lo: 0, hi: 0, desc: `Couldn't calculate ${mv.name}.`, rolls: [], status: false }; }
       }));
       for (const a of [0, 1]) {
@@ -271,7 +277,7 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
           if (!x.name) return '';
           const on = S.sel[0] === a && S.sel[1] === i;
           return `<div class="mrow"><button type="button" class="mb${on ? ' on' : ''}" data-a="${a}" data-i="${i}" aria-pressed="${on}">${esc(x.name)}</button>` +
-            `<span class="mbp">${r && !r.status && r.hi > 0 ? `${pctTxt(r.lo)} – ${pctTxt(r.hi)}%` : '0 – 0%'}</span></div>`;
+            `<span class="mbp">${r && !r.status && r.hi > 0 ? `${pctTxt(r.lo)} – ${pctTxt(r.hi)}%` : '0 – 0%'}</span>${effTag(r?.eff)}</div>`;
         }).join('');
       }
       let [a, i] = S.sel; if (!results[a][i]) { const k = results[0].findIndex(Boolean); S.sel = k >= 0 ? [0, k] : [1, Math.max(0, results[1].findIndex(Boolean))]; [a, i] = S.sel; }
@@ -293,7 +299,7 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
         q(p, `b-${k}`).textContent = (s.baseStats as any)[k] ?? '';
         q(p, `s-${k}`).textContent = st ? (st.raw as any)[k] : '';
         const v = st ? (st.raw as any)[k] * 100 / (m.lv || 100) : 0, ki = STAT.indexOf(k);
-        q(p, `bar-${k}`).setAttribute('style', `width:${Math.min(59, Math.floor(v * 60 / (ki ? 504 : 704)))}px;background:hsl(${Math.min(360, Math.floor(v * 180 / 714))}, 85%, 45%)`);
+        q(p, `bar-${k}`).setAttribute('style', `width:${Math.min(100, v * 100 / (ki ? 504 : 704))}%;background:hsl(${Math.min(360, Math.floor(v * 180 / 714))}, 85%, 45%)`);
         const r = q(p, `evr-${k}`) as HTMLInputElement; r.value = String(m.evs[k]); r.style.setProperty('--fill', `${(m.evs[k] / 252) * 100}%`);
         (q(p, `ev-${k}`) as HTMLInputElement).value = String(m.evs[k]);
         const [up, dn] = (() => { const n = gen.natures.get(toID(m.nat) as any); return n ? [n.plus, n.minus] : ['', '']; })();
@@ -547,12 +553,15 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
   /* results: every move of both sides, the picked one spelled out below */
   .calc .res { border: 1px solid var(--line-2); border-radius: 4px; background: var(--card); padding: .5rem .6rem; margin-bottom: .8rem; }
   .calc .rcols { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem 2rem; }
-  .calc .mrow { display: grid; grid-template-columns: 9.5rem auto; align-items: center; gap: .6rem; margin-top: 3px; }
+  .calc .mrow { display: grid; grid-template-columns: 9.5rem 8.6rem auto; align-items: center; gap: .6rem; margin-top: 3px; }
+  .calc .eff { font-size: .72rem; white-space: nowrap; }
+  .calc .eff.x4 { color: #1f8a3a; font-weight: 600; } .calc .eff.x2 { color: #2e9a48; } .calc .eff.xh { color: #c26a12; } .calc .eff.xq { color: #c0392b; } .calc .eff.x0 { color: var(--ink-soft); }
+  html[data-theme='dark'] .calc .eff.x4, html[data-theme='dark'] .calc .eff.x2 { color: #6fd38a; } html[data-theme='dark'] .calc .eff.xh { color: #f0a050; } html[data-theme='dark'] .calc .eff.xq { color: #ff7a6e; }
   .calc .rlab { font-weight: 600; font-size: .82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
 
   .calc .mb { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: inherit; font-size: .8rem; padding: .2rem .5rem; border: 1px solid var(--line-2); border-radius: 3px; background: var(--card); color: var(--ink); cursor: pointer; min-width: 0; text-align: left; }
   .calc .mb .mbn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .calc .mbp { font-size: .85rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .calc .mbp { font-size: .85rem; font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
   .calc .mb:hover { background: var(--petal-deep); }
   .calc .mb:active { box-shadow: inset 0 2px 3px rgb(0 0 0 / .25); }
   .calc .mb.on { border-color: #2b7bd6; background: #dbe9fb; box-shadow: inset 0 0 0 1px #2b7bd6; }
@@ -590,6 +599,13 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
   .calc .g2 > label { display: flex; align-items: center; gap: .35rem; font-size: .8rem; min-width: 0; }
   .calc .g2 > label > span:first-child { width: 3.6rem; flex: none; color: var(--ink-soft); }
   .calc .g2 > label.wide { grid-column: 1 / -1; }
+  /* Level + Tera on one short row: small level box, Tera box wide enough for "Fighting" / "Electric" */
+  .calc .g2.top { display: flex; flex-wrap: wrap; gap: .3rem 1rem; }
+  .calc .g2.top > label { flex: none; }
+  .calc .g2.top > label > span:first-child { width: auto; }
+  .calc .g2.top .lvn, .calc .g2.top [data-k='lv'] { flex: none; width: 3.4rem; text-align: right; }
+  .calc .g2.top [data-k='tera'] { flex: none; width: 7.6rem; }
+  .calc .g2 > label > span:first-child { width: 3rem; }
   .calc .g2 .field { flex: 1; min-width: 0; }
   .calc .g2 [hidden] { display: none; }
   .calc .itw { display: flex; align-items: center; gap: .25rem; flex: 1; min-width: 0; }
@@ -604,8 +620,9 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
   .calc .pn .sp { height: 26px; font-size: .9rem; }
   .calc textarea.field { height: auto; }
   .calc .stt { width: 100%; border-collapse: collapse; margin-top: .5rem; font-size: .8rem; table-layout: fixed; }
-  .calc .stt .sbar { width: 64px; padding-left: 4px; } .calc .stt .sbar i { display: block; height: 9px; }
-  .calc .stt .evc { width: 22%; } .calc .evr { width: 100%; accent-color: #59c4fb; margin: 0; }
+  /* big stat bars (Showdown's formula, 130px at the top): they visibly move with EVs, IVs, nature and level */
+  .calc .stt th:nth-child(3) { width: 136px; } .calc .stt .sbar { padding-left: 4px; overflow: hidden; } .calc .stt .sbar i { display: block; height: 10px; transition: width .12s; }
+  .calc .stt .evc { width: 15%; } .calc .evr { width: 100%; accent-color: #59c4fb; margin: 0; }
   .calc .stt th:nth-child(2) { width: 2.2rem; } .calc .stt th:nth-child(4), .calc .stt th:nth-child(6) { width: 2.9rem; } .calc .stt th:nth-child(7) { width: 2.4rem; } .calc .stt th:nth-child(8) { width: 3.3rem; }
   .calc .stt th, .calc .stt td { padding: 1px 3px; height: 26px; }
   .calc .stt thead th { font-weight: 600; color: var(--ink-soft); font-size: .72rem; border-bottom: 1px solid var(--line-2); }
@@ -665,6 +682,9 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
     .calc .g2 { grid-template-columns: 1fr; }
     .calc .mv { grid-template-columns: minmax(0, 1fr) 90px 3.8rem 3rem auto; }
     .calc .mv .g7only { display: none; }
+    .calc .stt th:nth-child(3) { width: 56px; }
+    .calc .mrow { grid-template-columns: minmax(0, 1fr) 7.6rem 4.6rem; gap: .35rem; }
+    .calc .eff { white-space: normal; line-height: 1.1; }
     .calc .stt .evc, .calc .stt thead th:nth-child(5) { display: none; }
   }
 </style>

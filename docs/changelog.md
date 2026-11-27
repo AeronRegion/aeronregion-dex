@@ -65,3 +65,5 @@
 - 2026-11-27: Damage calc: Level 100/50/5 for both Pokémon in the field column, Showdown-style move results, Showdown panel order; Teambuilder 'Damage calc' and usage 'Send to damage calc' buttons
 - 2026-11-27: Damage calc: Teambuilder-style EV rows (stat bar, EV slider), smaller boxes, centered field column
 - 2026-11-27: Damage calc: no 510 EV total cap; EVs left shows negative in red
+- 2026-11-27: Damage calc: bigger stat bars that move more with EVs
+- 2026-11-27: Damage calc: type effectiveness labels on move results, bigger stat bars, small Level box, Tera box fits every type, Nature/Status/Ability/Item in 2x2
