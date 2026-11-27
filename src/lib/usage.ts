@@ -36,11 +36,16 @@ export const abilityName = (x: string) => abBy.get(toID(x)) ?? x;
 
 // readable format names
 const regLabel = (r: string) => (r.length === 2 ? `${r[0]}-${r[1]}` : r).toUpperCase();
+const GAME: Record<string, string> = { '8': 'Sword & Shield', '9': 'Scarlet & Violet' };
 export const formatName = (f: any) => {
   if (f.id.startsWith('sd-')) {
-    const m = f.label.match(/^gen(\d)(champions)?vgc(\d{4})reg([a-z]+?)(bo3)?$/);
-    if (m) return `${m[2] ? 'Champions' : 'Scarlet & Violet'} Reg ${regLabel(m[4])}${m[5] ? ' (Bo3)' : ' (Bo1)'}`;
-    return f.label;
+    const m = f.label.match(/^gen(\d)(champions)?vgc(\d{4})(.*?)(bo3)?$/);
+    if (!m) return f.label;
+    const game = m[2] ? 'Champions' : GAME[m[1]] ?? `Gen ${m[1]}`;
+    const rest = m[4];
+    const reg = rest.match(/^reg(?:ulation)?([a-z]{1,2})$/), ser = rest.match(/^series(\d+)$/);
+    const what = reg ? `Reg ${regLabel(reg[1])}` : ser ? `VGC ${m[3]} Series ${ser[1]}` : rest ? `VGC ${m[3]} ${rest}` : `VGC ${m[3]}`;
+    return `${game} ${reg ? `${m[3]} ` : ''}${what}${m[5] ? ' (Bo3)' : ''}`.replace(/Champions \d{4} /, 'Champions ');
   }
   if (f.id.startsWith('lt-')) {
     const code = f.label.replace(/^Reg /, '');
@@ -57,6 +62,7 @@ export const GROUPS = [
 export const formats = (idx.formats as any[])
   .filter((f) => !/custom/i.test(f.label) && (f.total ?? 0) >= 100)
   .map((f) => ({ ...f, name: formatName(f), group: f.id.slice(0, 2) }))
-  .sort((a, b) => GROUPS.findIndex((g) => g.key === a.group) - GROUPS.findIndex((g) => g.key === b.group) || (a.group === 'pd' ? b.id.localeCompare(a.id) : b.period.localeCompare(a.period)) || b.total - a.total);
+  .map((f) => ({ ...f, current: f.group !== 'sd' || f.current !== false }))
+  .sort((a, b) => GROUPS.findIndex((g) => g.key === a.group) - GROUPS.findIndex((g) => g.key === b.group) || Number(b.current) - Number(a.current) || (a.group === 'pd' ? b.id.localeCompare(a.id) : b.period.localeCompare(a.period)) || b.total - a.total);
 export const updated = idx.updated as string;
 export const loadFormat = (id: string) => get(id);

@@ -50,9 +50,12 @@ try {
     for (const [fmt, f] of hi) {
       const cur = month === latest;
       const old = seen.get(fmt);
-      if (cur || !old || (!old.current && f.size > old.size)) seen.set(fmt, { month, cut: f.cut, size: f.size, current: cur });
+      if (!old || f.size > old.size || cur) seen.set(fmt, { month, cut: f.cut, size: f.size, current: cur, best: Math.max(old?.best ?? 0, f.size), bestMonth: !old || f.size > (old.best ?? 0) ? month : old.bestMonth });
     }
   }
+  // a format still on the ladder but nearly dead (e.g. an old regulation kept as a side ladder) counts as finished:
+  // use its busiest month instead of the latest one
+  for (const [fmt, c] of seen) if (c.current && c.size < c.best * 0.25) seen.set(fmt, { ...c, month: c.bestMonth, current: false });
   for (const [fmt, c] of seen) {
     const id = `sd-${fmt}`;
     const prev = fs.existsSync(`${OUT}/${id}.json`) ? JSON.parse(fs.readFileSync(`${OUT}/${id}.json`, 'utf8')) : null;
