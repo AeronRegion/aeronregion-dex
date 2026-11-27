@@ -31,7 +31,7 @@ export function autocomplete(input: HTMLInputElement, getItems: () => Promise<Ac
     box.innerHTML = shown.map((it, i) => `<div class="ac-row${i === active ? ' on' : ''}" role="option" data-i="${i}">` +
       `<span class="ac-l">${esc(it.label)}</span>` +
       (it.sub ? `<span class="ac-s">${esc(it.sub)}</span>` : '') +
-      (it.type ? `<span class="ac-t" style="background:${TC[it.type]};color:#fff">${it.type}</span>` : '') +
+      (it.type ? `<span class="ac-t" data-type="${it.type}" style="background:${TC[it.type]};color:#fff">${it.type}</span>` : '') +
       (it.cat ? `<span class="ac-c" title="${it.cat}"><svg viewBox="0 0 28 14" width="30" height="15" aria-label="${it.cat}" role="img">${CAT_SVG[it.cat] ?? ''}</svg></span>` : '') +
       (it.move ? `<span class="ac-n"><small>Pow</small>${it.move.pow ?? '—'}</span><span class="ac-n"><small>Acc</small>${it.move.acc === true ? '—' : it.move.acc ?? '—'}</span><span class="ac-n"><small>PP</small>${it.move.pp}</span><span class="ac-d">${esc(it.move.desc)}</span>` : '') +
       `</div>`).join('');

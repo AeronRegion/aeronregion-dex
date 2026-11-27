@@ -7,7 +7,7 @@ const hex = bg.replace('#', '');
 const [r, g, b] = [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16));
 const light = (r * 299 + g * 587 + b * 114) / 1000 > 150;
 ---
-<Tag href={link ? `/types/${type.toLowerCase()}/` : undefined} class:list={['chip', { small }]} style={`--c:${bg};--t:#fff`}>{type}</Tag>
+<Tag href={link ? `/types/${type.toLowerCase()}/` : undefined} class:list={['chip', { small }]} data-type={type} style={`--c:${bg};--t:#fff`}>{type}</Tag>
 <style>
   .chip { display: inline-block; font-weight: 700; font-size: .8rem; padding: .05rem .55rem; background: var(--c); color: var(--t) !important; border: 2px solid rgb(0 0 0 / .3); white-space: nowrap; text-decoration: none !important; }
   .chip.small { font-size: .7rem; padding: 0 .4rem; border-width: 1px; }

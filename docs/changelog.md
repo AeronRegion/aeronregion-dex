@@ -38,3 +38,4 @@
 - 2026-11-26: VGC usage: larger cards closer to Pikalytics (fixed-height boxes, taller rows, bigger text and icons)
 - 2026-11-26: VGC usage: battle counts shown in the format/month/event dropdowns; move, item and ability names link to their pages again; no category icon in the moves card; rule added: every name links to its page except in the Teambuilder
 - 2026-11-26: Move tables: multi-hit count (×2–5) sits on the same line as the power so rows keep one height
+- 2026-11-26: Type labels are now PokeAPI's rounded Scarlet & Violet type icons (80x16 everywhere); VGC usage dropdowns redesigned (name / month / light italic battle count in aligned columns); spreads no longer cut off on narrower screens; all buttons and dropdowns show hover, press and focus states; rule added for interaction states

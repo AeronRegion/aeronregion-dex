@@ -1,0 +1,72 @@
+---
+// Link dropdown with three aligned columns per option: name | detail (muted) | count (light, italic, right-aligned).
+// Used by the VGC usage pickers instead of a native <select>, which can't style parts of an option.
+type Item = { href: string; a: string; b?: string; c?: string; on?: boolean };
+type Group = { label?: string; items: Item[] };
+const { label, groups, minWidth = '16rem' } = Astro.props as { label: string; groups: Group[]; minWidth?: string };
+const cur = groups.flatMap((g) => g.items).find((x) => x.on) ?? groups[0]?.items[0];
+---
+<div class="dd" data-dd style={`--ddw:${minWidth}`}>
+  <button type="button" class="field ddbtn" aria-haspopup="listbox" aria-expanded="false" aria-label={label}>
+    <span class="a">{cur?.a}</span>{cur?.b && <span class="b">{cur.b}</span>}{cur?.c && <span class="c">{cur.c}</span>}<span class="car" aria-hidden="true">▾</span>
+  </button>
+  <div class="ddlist" role="listbox" aria-label={label} hidden>
+    {groups.map((g) => (
+      <>
+        {g.label && <div class="ddg">{g.label}</div>}
+        {g.items.map((x) => <a role="option" aria-selected={x.on ? 'true' : 'false'} class:list={['ddo', { on: x.on }]} href={x.href}><span class="a">{x.a}</span><span class="b">{x.b}</span><span class="c">{x.c}</span></a>)}
+      </>
+    ))}
+  </div>
+</div>
+
+<script>
+  const closeAll = (except?: Element) => document.querySelectorAll<HTMLElement>('[data-dd]').forEach((d) => {
+    if (d === except) return;
+    (d.querySelector('.ddlist') as HTMLElement).hidden = true; d.querySelector('.ddbtn')!.setAttribute('aria-expanded', 'false');
+  });
+  document.querySelectorAll<HTMLElement>('[data-dd]').forEach((d) => {
+    const btn = d.querySelector('.ddbtn') as HTMLButtonElement, list = d.querySelector('.ddlist') as HTMLElement;
+    const opts = () => [...list.querySelectorAll<HTMLAnchorElement>('.ddo')];
+    const open = () => {
+      closeAll(d); list.hidden = false; btn.setAttribute('aria-expanded', 'true');
+      const on = list.querySelector<HTMLElement>('.ddo.on') ?? opts()[0];
+      if (on) { list.scrollTop = on.offsetTop - list.clientHeight / 2; on.focus({ preventScroll: true }); }
+    };
+    btn.addEventListener('click', (e) => { e.stopPropagation(); list.hidden ? open() : closeAll(); });
+    btn.addEventListener('keydown', (e) => { if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); open(); } });
+    list.addEventListener('keydown', (e) => {
+      const o = opts(), i = o.indexOf(document.activeElement as HTMLAnchorElement);
+      if (e.key === 'ArrowDown') { e.preventDefault(); o[Math.min(o.length - 1, i + 1)]?.focus(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); o[Math.max(0, i - 1)]?.focus(); }
+      else if (e.key === 'Escape') { closeAll(); btn.focus(); }
+    });
+  });
+  document.addEventListener('click', (e) => { if (!(e.target as HTMLElement).closest('[data-dd]')) closeAll(); });
+</script>
+
+<style>
+  .dd { position: relative; display: inline-block; }
+  .ddbtn { display: inline-flex; align-items: baseline; gap: .5rem; min-width: var(--ddw); text-align: left; cursor: pointer; padding-right: 1.6rem; position: relative; }
+  .ddbtn .car { position: absolute; right: .55rem; top: 50%; transform: translateY(-50%); font-size: .7rem; color: var(--ink-soft); }
+  .a { color: var(--ink); }
+  .b { color: var(--ink-soft); font-size: .85em; }
+  .c { color: var(--ink-soft); opacity: .75; font-style: italic; font-size: .8em; margin-left: auto; white-space: nowrap; }
+  .ddlist { position: absolute; z-index: 40; top: calc(100% + 3px); left: 0; min-width: max(100%, 21rem); max-height: 60vh; overflow-y: auto; background: var(--card); border: 1px solid var(--line-2); border-radius: 4px; box-shadow: 0 6px 18px rgb(0 0 0 / .18); padding: .2rem 0; }
+  .ddg { padding: .45rem .75rem .2rem; font-size: .75rem; font-weight: 700; color: var(--ink-soft); border-top: 1px solid var(--line); }
+  .ddg:first-child { border-top: 0; }
+  .ddo { display: grid; grid-template-columns: minmax(6rem, auto) 1fr 6rem; align-items: baseline; gap: .6rem; padding: .3rem .75rem .3rem 1.2rem; text-decoration: none !important; }
+  .ddo .c { text-align: right; font-variant-numeric: tabular-nums; }
+  .ddo:hover, .ddo:focus { background: rgb(74 144 217 / .12); outline: none; }
+  .ddo.on { background: #dfe9f6; }
+  .ddo.on .a { font-weight: 600; }
+  :global(html[data-theme='dark']) .ddo.on { background: #2f353d; }
+  @media (max-width: 640px) {
+    .dd, .ddbtn { width: 100%; min-width: 0; }
+    .ddlist { min-width: 100%; max-width: calc(100vw - 2.5rem); }
+    /* name on top, detail under it, count on the right */
+    .ddo { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'a c' 'b c'; gap: 0 .6rem; }
+    .ddo .a { grid-area: a; } .ddo .b { grid-area: b; } .ddo .c { grid-area: c; align-self: center; }
+    .ddo .b:empty { display: none; }
+  }
+</style>

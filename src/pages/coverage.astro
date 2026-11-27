@@ -77,7 +77,7 @@ import { GAMES, meta } from '../lib/data';
     const SPR = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
     const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
     const toID = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const chip = (t: string) => `<span class="tchip" style="background:${COLORS[t]}">${t}</span>`;
+    const chip = (t: string) => `<span class="tchip" data-type="${t}" style="background:${COLORS[t]}">${t}</span>`;
     const mult = (atk: string, defs: string[]) => defs.reduce((m, d) => m * (CHART[atk][d] ?? 1), 1);
     // damage taken, including abilities like Levitate, Flash Fire or Thick Fat
     const defMult = (atk: string, defs: string[], ability: string) => {

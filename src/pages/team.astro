@@ -55,7 +55,7 @@ import { GAMES, meta } from '../lib/data';
     const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
     const toID = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
     const SPR = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/';
-    const chip = (t: string) => `<span class="tchip" style="background:${COLORS[t] ?? '#888'}">${t}</span>`;
+    const chip = (t: string) => `<span class="tchip" data-type="${t}" style="background:${COLORS[t] ?? '#888'}">${t}</span>`;
     const STAT = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'];
     const STATNAME = ['HP', 'Attack', 'Defense', 'Sp. Atk.', 'Sp. Def.', 'Speed'];
     // nature -> [raised stat index, lowered stat index] (1..5); neutral natures have equal indexes

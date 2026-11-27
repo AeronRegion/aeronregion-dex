@@ -19,6 +19,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Verify on the live site after deploy (hard refresh: Ctrl+Shift+R).
 - Table rows keep one height: extra info (multi-hit ×2–5, notes) goes inline on the same line, never stacked under a value.
 - Review every new or changed page for alignment before pushing: numbers right-aligned with tabular figures, columns lined up row to row (fixed widths, not content-sized), labels and values on the same baseline, no bars or chips that shift per row. Look at the screenshot at desktop width and at 390px.
+- Every clickable box (buttons, dropdowns, toggles, selectable rows) must show interaction: hover (border/background change), press (inset), and keyboard focus (blue outline). Check each new control by hovering and clicking it before pushing; a button that looks the same on hover is a bug.
 - Click every button and link you add (in the local build) and confirm it does what its label says before pushing. A button that only toggles a row or opens a tab without showing anything new is a bug.
 - Pages that are mostly data (tables, usage) may use the wide container (1500px); everything else stays 1180px.
 
@@ -27,7 +28,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Look: light-blue, Showdown-like utility style (thin 1px borders, little bold). Body text Segoe UI/system; the "ARdex" logo text stays heavy Rubik. Site must not look AI-built.
 - Dark mode: neutral grays, toggled in the header; the `theme` cookie on .aeronregion.net is shared with the main site.
 - Links are blue. Underlined only inside sentences; elsewhere underline on hover. Pokémon names are never underlined.
-- Type labels: one fixed size everywhere, white text, centered (PokemonDB style). Pokémon cards show types as colored text ("#0131 / Water · Ice").
+- Type labels: the rounded Scarlet & Violet type icons from PokeAPI (sprites/types/generation-ix/scarlet-violet/<id>.png, type symbol + name), 80x16 everywhere, via `data-type` on .chip/.tchip/.ac-t (CSS in global.css). Every new type label must carry data-type. Pokémon cards show types as colored text ("#0131 / Water · Ice").
 - Pokémon tables and cards use the small box icons (PokemonDB style).
 - Name is "ARdex" (header, tab titles, footer). "arDB" rebrand is undecided; don't change it.
 - Top bar on every page (blue in light mode, dark in dark mode): Pokémon ▾, Tools ▾, light/dark toggle, Aeron Region link, search. NO Home tab; the logo links home.

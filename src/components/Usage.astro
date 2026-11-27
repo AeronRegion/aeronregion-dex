@@ -5,6 +5,7 @@
 import { pokeUrl, boxIconUrl, iconUrl, moveUrl, itemUrl, abilityUrl, itemByName, itemIconUrl, moveById } from '../lib/data';
 import { formats, GROUPS, loadFormat, findSpecies, moveName, itemName, abilityName, updated, pickerGroups, twin, monthName, variants, fmtDate, fmtRange } from '../lib/usage';
 import { typeColors } from '../lib/types';
+import Dropdown from './Dropdown.astro';
 const { id } = Astro.props as { id: string };
 const f = formats.find((x) => x.id === id)!;
 const d = loadFormat(id);
@@ -54,11 +55,11 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
     {GROUPS.map((g) => { const first = pickerGroups(g.key)[0]?.items[0]; return first && <a href={`/usage/${first.id}/`} class:list={['segchip', { on: g.key === f.group }]} aria-current={g.key === f.group ? 'page' : undefined}>{({ sd: 'Showdown ladder', lt: 'Tournaments', pd: 'Official majors' } as any)[g.key]}</a>; })}
   </nav>
   <div class="upick">
-    <select class="field" id="ufmt" aria-label="Format">
-      {pickerGroups(f.group).map((g) => (
-        <optgroup label={g.game}>{g.items.map((x: any) => <option value={`/usage/${x.id}/`} selected={x.fam === f.fam || x.id === f.base}>{x.short}{x.group === 'sd' ? (x.current ? ' (current)' : ` · ${monthName(x.period)}`) : x.group === 'lt' ? ` · ${fmtRange(x.period)}` : ''}{` · ${short(x.group === 'sd' ? x.total : x.battles || x.total)} ${x.group === 'sd' || x.battles ? 'battles' : 'teams'}`}</option>)}</optgroup>
-      ))}
-    </select>
+    <Dropdown label="Format" minWidth="19rem" groups={pickerGroups(f.group).map((g) => ({ label: g.game, items: g.items.map((x: any) => ({
+      href: `/usage/${x.id}/`, on: x.fam === f.fam || x.id === f.base, a: x.short,
+      b: x.group === 'sd' ? (x.current ? 'current' : monthName(x.period)) : x.group === 'lt' ? fmtRange(x.period) : '',
+      c: `${short(x.group === 'sd' ? x.total : x.battles || x.total)} ${x.group === 'sd' || x.battles ? 'battles' : 'teams'}`,
+    })) }))} />
     {f.group === 'sd' && (twin(f)
       ? <span class="ubo" role="group" aria-label="Best of">{[false, true].map((b) => { const x = b === f.bo3 ? f : twin(f); return <a href={`/usage/${x.id}/`} class:list={['segchip', { on: b === f.bo3 }]}>{b ? 'Bo3' : 'Bo1'}</a>; })}</span>
       : <span class="ubo solo">{f.bo3 ? 'Bo3 only' : 'Bo1 only'}</span>)}
@@ -68,17 +69,14 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
       const cuts = [...new Set(vs.filter((x: any) => x.period === f.period).map((x: any) => x.cutoff))].sort();
       const pick = (month: string, cut: number) => vs.find((x: any) => x.period === month && x.cutoff === cut) ?? vs.find((x: any) => x.period === month);
       return <>
-        {months.length > 1 && <label class="usel">Month <select class="field ujump">{months.map((mo) => <option value={`/usage/${pick(mo, f.cutoff).id}/`} selected={mo === f.period}>{monthName(mo)}{vs.find((x: any) => x.period === mo && x.def) ? ' (default)' : ''} · {short(pick(mo, f.cutoff)?.total)} battles</option>)}</select></label>}
+        {months.length > 1 && <span class="usel">Month <Dropdown label="Month" minWidth="13rem" groups={[{ items: months.map((mo) => ({ href: `/usage/${pick(mo, f.cutoff).id}/`, on: mo === f.period, a: monthName(mo), b: vs.find((x: any) => x.period === mo && x.def) ? 'default' : '', c: `${short(pick(mo, f.cutoff)?.total)} battles` })) }]} /></span>}
         {cuts.length > 1
           ? <span class="ubo" role="group" aria-label="Rating">{cuts.map((c) => <a href={`/usage/${pick(f.period, c)!.id}/`} class:list={['segchip', { on: c === f.cutoff }]} title={`Games where players were rated ${c}+`}>{c}+</a>)}</span>
           : <span class="ubo solo">Rated {f.cutoff}+</span>}
       </>;
     })()}
     {parent?.events?.length > 0 && (
-      <label class="usel">Event <select class="field ujump">
-        <option value={`/usage/${parent.id}/`} selected={f.def}>All events ({parent.tours})</option>
-        {parent.events.map((e: any) => <option value={`/usage/${e.id}/`} selected={e.id === f.id}>{e.name} · {fmtDate(e.date)} · {fmtNum(e.players)} players · {short(e.battles)} battles</option>)}
-      </select></label>
+      <span class="usel">Event <Dropdown label="Event" minWidth="22rem" groups={[{ items: [{ href: `/usage/${parent.id}/`, on: !!f.def, a: `All events (${parent.tours})`, b: '', c: `${short(parent.battles || parent.total)} ${parent.battles ? 'battles' : 'teams'}` }] }, { label: 'By size', items: parent.events.map((e: any) => ({ href: `/usage/${e.id}/`, on: e.id === f.id, a: e.name, b: `${fmtDate(e.date)} · ${fmtNum(e.players)} players`, c: `${short(e.battles)} battles` })) }]} /></span>
     )}
   </div>
 </div>
@@ -125,13 +123,10 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   const SPR = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites';
   // same slugs as the site's pages (lib/data slug)
   const slug = (n: string) => n.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/♀/g, '-f').replace(/♂/g, '-m').replace(/['’.:%]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  const sel = document.getElementById('ufmt') as HTMLSelectElement;
-  sel.addEventListener('change', () => { location.href = sel.value; });
-  document.querySelectorAll<HTMLSelectElement>('.ujump').forEach((x) => x.addEventListener('change', () => { location.href = x.value; }));
   const STAT = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'], STATN = ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed'];
   const esc = (s: string) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
   const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
-  const chip = (t: string) => t ? `<a class="chip small" href="/types/${t.toLowerCase()}/" style="--c:${D.colors[t] ?? '#777'};--t:#fff">${t}</a>` : '';
+  const chip = (t: string) => t ? `<a class="chip small" data-type="${t}" href="/types/${t.toLowerCase()}/" style="--c:${D.colors[t] ?? '#777'};--t:#fff">${t}</a>` : '';
   const cat = (c: string) => c ? `<svg viewBox="0 0 28 14" width="26" height="13" role="img" aria-label="${c}"><title>${c}</title>${(CAT_SVG as any)[c] ?? ''}</svg>` : '';
   const ic = (src: string, fb = '') => src ? `<img class="sprite" src="${src}" data-fb="${fb}" onerror="if(this.dataset.fb&&this.src!==this.dataset.fb)this.src=this.dataset.fb" alt="" loading="lazy" width="32" height="24" />` : '';
   const card = (title: string, cls: string, head: string, rows: string[]) => `<div class="ucard ${cls}"><h3>${title}</h3>${head}<div class="ubody">${rows.length ? rows.join('') : '<p class="soft">No data</p>'}</div></div>`;
@@ -363,11 +358,18 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   .upanel :global(.c-sp .nat) { width: 5rem; }
   .upanel :global(.c-sp .sv) { width: 1.9rem; }
   .upanel :global(.sphead) { min-height: 28px; font-size: .78rem; }
+  /* spreads: a grid that shrinks with the card so the Spe column never gets cut off */
+  .upanel :global(.c-sp .urow .l) { display: grid; grid-template-columns: auto minmax(3.6rem, 1fr) repeat(6, minmax(1.45rem, 2rem)); gap: 0 .25rem; overflow: visible; }
+  .upanel:not(.building) :global(.c-sp .urow .l) { grid-template-columns: minmax(3.6rem, 1fr) repeat(6, minmax(1.45rem, 2rem)); }
+  .upanel :global(.c-sp .nat) { width: auto !important; overflow: hidden; text-overflow: ellipsis; }
+  .upanel :global(.c-sp .sv) { width: auto !important; }
+  .upanel :global(.c-sp .p) { width: 3.5rem !important; }
   @media (max-width: 1250px) { .upanel :global(.ugrid) { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 900px) {
     .uwrap { grid-template-columns: 1fr; }
     .usrc { width: 100%; } .usrc a { flex: 1; text-align: center; padding: .3rem .3rem; font-size: .8rem; }
     .upick select { flex: 1; min-width: 0; }
+    .usel { width: 100%; } .usel :global(.dd) { flex: 1; min-width: 0; } .upick :global(.dd) { flex: 1 1 100%; }
     .uside { position: static; }
     .ulist { max-height: 34vh; }
     .upanel :global(.uset) { margin-top: .7rem; border: 1px solid var(--line-2); border-radius: 4px; background: var(--card); padding: .5rem .7rem; }
