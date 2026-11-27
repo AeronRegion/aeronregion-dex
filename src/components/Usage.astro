@@ -129,7 +129,7 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   const chip = (t: string) => t ? `<a class="chip small" data-type="${t}" href="/types/${t.toLowerCase()}/" style="--c:${D.colors[t] ?? '#777'};--t:#fff">${t}</a>` : '';
   const cat = (c: string) => c ? `<svg viewBox="0 0 28 14" width="26" height="13" role="img" aria-label="${c}"><title>${c}</title>${(CAT_SVG as any)[c] ?? ''}</svg>` : '';
   const ic = (src: string, fb = '') => src ? `<img class="sprite" src="${src}" data-fb="${fb}" onerror="if(this.dataset.fb&&this.src!==this.dataset.fb)this.src=this.dataset.fb" alt="" loading="lazy" width="32" height="24" />` : '';
-  const card = (title: string, cls: string, head: string, rows: string[]) => `<div class="ucard ${cls}"><h3>${title}</h3>${head}<div class="ubody">${rows.length ? rows.join('') : '<p class="soft">No data</p>'}</div></div>`;
+  const card = (title: string, cls: string, head: string, rows: string[]) => `<div class="ucard ${cls}"><h3>${title}</h3><div class="ubody">${head}${rows.length ? rows.join('') : '<p class="soft">No data</p>'}</div></div>`;
   const row = (left: string, p: number, kind = '', i = -1) => `<div class="urow${kind ? ' pickable' : ''}"${kind ? ` data-kind="${kind}" data-i="${i}" role="button" tabindex="0"` : ''}><span class="l">${kind ? '<i class="tick" aria-hidden="true"></i>' : ''}${left}</span><span class="p">${pct(p)}</span></div>`;
   const bar = (v: number) => `<i style="width:${Math.min(100, (v / 255) * 100)}%;background:hsl(${Math.min(360, Math.floor((v * 180) / 255))},85%,45%)"></i>`;
   const byK = new Map(D.mons.map((m: any) => [m.k, m]));
@@ -357,7 +357,7 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   .upanel :global(.c-sp .urow) { font-size: .9rem; }
   .upanel :global(.c-sp .nat) { width: 5rem; }
   .upanel :global(.c-sp .sv) { width: 1.9rem; }
-  .upanel :global(.sphead) { min-height: 28px; font-size: .78rem; }
+  .upanel :global(.sphead) { min-height: 28px; font-size: .78rem; position: sticky; top: 0; z-index: 1; background: var(--card); }
   /* spreads: a grid that shrinks with the card so the Spe column never gets cut off */
   .upanel :global(.c-sp .urow .l) { display: grid; grid-template-columns: auto minmax(3.6rem, 1fr) repeat(6, minmax(1.45rem, 2rem)); gap: 0 .25rem; overflow: visible; }
   .upanel:not(.building) :global(.c-sp .urow .l) { grid-template-columns: minmax(3.6rem, 1fr) repeat(6, minmax(1.45rem, 2rem)); }

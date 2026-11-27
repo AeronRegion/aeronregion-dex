@@ -40,3 +40,4 @@
 - 2026-11-26: Move tables: multi-hit count (×2–5) sits on the same line as the power so rows keep one height
 - 2026-11-26: Type labels are now PokeAPI's rounded Scarlet & Violet type icons (80x16 everywhere); VGC usage dropdowns redesigned (name / month / light italic battle count in aligned columns); spreads no longer cut off on narrower screens; all buttons and dropdowns show hover, press and focus states; rule added for interaction states
 - 2026-11-26: Desktop scale: pages drawn 1.3x in a 940px column so ARdex matches PokemonDB at the same browser zoom (usage and Teambuilder excluded); new PokemonDB-style category icons (Physical burst, Special rings, Status half circle)
+- 2026-11-26: VGC usage: spread column headings sit inside the scrolling box (sticky) so they line up with the numbers
