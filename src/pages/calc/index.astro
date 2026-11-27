@@ -161,8 +161,8 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
       ivs: Record<SK, number>; evs: Record<SK, number>; bo: Record<SK, number>; hpPct: number; moves: MoveS[]; gender: string; faint: number; boosted: string };
     type SideS = Record<string, boolean | number>;
     type State = { byGen?: Record<number, [Mon, Mon]>; gen: number; gt: 'Singles' | 'Doubles'; mons: [Mon, Mon]; wx: string; ter: string; f: Record<string, boolean>; sides: [SideS, SideS]; sel: [number, number] };
-    // EVs can't go past 510 in total (Gen 3+): a stat gets at most what the others leave
-    const capEv = (m: Mon, s: SK, v: number) => gen.num <= 2 ? 252 : Math.max(0, Math.min(v, 252, 510 - STAT.reduce((a, k) => a + (k === s ? 0 : +m.evs[k] || 0), 0)));
+    // no 510 total cap: you can calc spreads you couldn't really have; "EVs left" just goes negative (in red)
+    const capEv = (m: Mon, s: SK, v: number) => (gen.num <= 2 ? 252 : Math.max(0, Math.min(v, 252)));
     const six = (v: number) => Object.fromEntries(STAT.map((k) => [k, v])) as Record<SK, number>;
     const emptyMon = (sp: string): Mon => ({ sp, lv: 50, nat: 'Serious', ab: '', abOn: false, it: '', tera: '', teraOn: false, dmax: false, st: '', ivs: six(31), evs: six(0), bo: six(0), hpPct: 100,
       moves: [0, 1, 2, 3].map(() => ({ name: '', crit: false, hits: 0, z: false, bp: null })), gender: '', faint: 0, boosted: '' });
@@ -300,7 +300,7 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
         q(p, `s-${k}`).className = 'n tot' + (up !== dn && k === up ? ' up' : up !== dn && k === dn ? ' dn' : '');
       }
       const used = STAT.reduce((a, k) => a + (+m.evs[k] || 0), 0);
-      q(p, 'evleft').textContent = gen.num >= 3 ? `${510 - used} EVs left` : '';
+      q(p, 'evleft').textContent = gen.num >= 3 ? `${510 - used} EVs left` : ''; q(p, 'evleft').classList.toggle('over', used > 510);
       if (st) { q(p, 'max').textContent = `/ ${st.max}`; q(p, 'cur').value = Math.max(1, Math.round((st.max * m.hpPct) / 100)); q(p, 'pct').value = m.hpPct; }
     };
     const drawMove = (p: number, i: number) => {
@@ -620,6 +620,7 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
   /* no spin arrows: they eat the space the number needs */
   .calc .num { -moz-appearance: textfield; appearance: textfield; }
   .calc .num::-webkit-inner-spin-button, .calc .num::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  .calc .evleft.over, .calc [data-k='evleft'].over { color: #d4572a; font-weight: 600; }
   .calc .hpr { display: flex; justify-content: space-between; align-items: center; gap: .5rem; margin-top: .4rem; font-size: .8rem; }
   .calc .hpw { display: inline-flex; align-items: center; gap: .3rem; }
   .calc .hpw .num { width: 4.2rem; text-align: right; } .calc .hpw .pct { width: 3.6rem; }
