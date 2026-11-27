@@ -28,7 +28,8 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
   <section class="res" aria-live="polite">
     <div class="rrow"><span class="rlab" id="rl1"></span><div class="mvb" id="r1"></div></div>
     <div class="rrow"><span class="rlab" id="rl2"></span><div class="mvb" id="r2"></div></div>
-    <p class="main" id="main"></p>
+    <button type="button" class="main" id="main" title="Click to copy"></button>
+    <span class="copied soft" id="copied" hidden>Copied</span>
     <details class="rolls" id="rollsd"><summary>Possible damage amounts</summary><p id="rolls"></p></details>
   </section>
 
@@ -51,7 +52,7 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
           <div><button class="sm" data-k="pastego" type="button">Use this set</button> <button class="sm" data-k="pastex" type="button">Cancel</button> <span class="soft" data-k="pastemsg"></span></div>
         </div>
         <div class="g2">
-          <label><span>Level</span><input class="field" data-k="lv" type="number" min="1" max="100" value="50" /></label>
+          <label><span>Level</span><input class="field num lvn" data-k="lv" type="number" min="1" max="100" value="50" /><span class="seg sm2 lvb" data-k="lvb"><button type="button" data-lv="50" aria-pressed="false">50</button><button type="button" data-lv="100" aria-pressed="false">100</button></span></label>
           <label><span>Nature</span><select class="field" data-k="nat"></select></label>
           <label class="wide"><span>Ability</span><select class="field" data-k="ab"></select><span class="chk" data-k="abonw"><input type="checkbox" data-k="abon" id={`abon${p}`} /><label for={`abon${p}`}>Active</label></span></label>
           <label class="wide"><span>Item</span><span class="itw"><img alt="" width="24" height="24" data-k="itimg" /><input class="field" data-k="it" placeholder="(none)" /></span></label>
@@ -310,6 +311,7 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
       (q(p, 'pic') as HTMLAnchorElement).href = `/pokemon/${slug(s.baseSpecies ?? s.name)}/`;
       q(p, 'tys').innerHTML = typesOf(m).map(chip).join('');
       q(p, 'lv').value = m.lv;
+      q(p, 'lvb').querySelectorAll('button').forEach((b: HTMLElement) => b.setAttribute('aria-pressed', String(+b.dataset.lv! === m.lv)));
       (q(p, 'nat') as HTMLSelectElement).innerHTML = [...gen.natures].sort((a, b) => a.name.localeCompare(b.name)).map((n) =>
         `<option value="${n.name}"${n.name === m.nat ? ' selected' : ''}>${n.name}${n.plus !== n.minus ? ` +${SN[n.plus]} -${SN[n.minus]}` : ''}</option>`).join('');
       const own = [...new Set(Object.values(s.abilities ?? {}) as string[])];
@@ -482,6 +484,18 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
         drawStats(p); compute();
       });
     });
+    // Level 50 / 100 buttons
+    pans.forEach((_, p) => q(p, 'lvb').addEventListener('click', (e: Event) => {
+      const b = (e.target as HTMLElement).closest('button') as HTMLElement | null; if (!b) return;
+      S.mons[p].lv = +b.dataset.lv!; drawPanel(p); compute();
+    }));
+    // click the result line to copy it
+    let copiedT = 0;
+    $('main').addEventListener('click', async () => {
+      const t = $('main').textContent ?? ''; if (!t || t === 'Pick a move.') return;
+      try { await navigator.clipboard.writeText(t); } catch { const r = document.createRange(); r.selectNodeContents($('main')); const sel = getSelection()!; sel.removeAllRanges(); sel.addRange(r); document.execCommand('copy'); sel.removeAllRanges(); }
+      $('copied').hidden = false; clearTimeout(copiedT); copiedT = window.setTimeout(() => ($('copied').hidden = true), 1500);
+    });
     document.addEventListener('click', (e) => { if (!(e.target as HTMLElement).closest('.ld')) closeMenus(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenus(); });
 
@@ -514,7 +528,14 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
   .calc .mb.on { border-color: #2b7bd6; background: #dbe9fb; box-shadow: inset 0 0 0 1px #2b7bd6; }
   html[data-theme='dark'] .calc .mb.on { background: #1f3550; }
   .calc .mb.empty { cursor: default; opacity: .45; }
-  .calc .main { margin: .5rem 0 .2rem; font-size: .9rem; line-height: 1.45; }
+  /* the result line is a button: click copies it */
+  .calc .main { display: inline-block; margin: .45rem 0 .2rem -.35rem; padding: .15rem .35rem; font: inherit; font-size: .9rem; line-height: 1.45; text-align: left; color: var(--ink); background: none; border: 1px solid transparent; border-radius: 3px; cursor: copy; }
+  .calc .main:hover { border-color: var(--line-2); background: var(--petal-deep); }
+  .calc .main:active { box-shadow: inset 0 2px 3px rgb(0 0 0 / .2); }
+  .calc .main:focus-visible { outline: 2px solid #2b7bd6; outline-offset: 1px; }
+  .calc .copied { font-size: .78rem; margin-left: .4rem; color: #2e8b3e; }
+  .calc .lvn { flex: 0 1 4rem !important; text-align: right; }
+  .calc .lvb { display: inline-flex; flex: none; }
   .calc .rolls summary { font-size: .78rem; color: var(--ink-soft); cursor: pointer; }
   .calc .rolls p { margin: .3rem 0 0; font-size: .78rem; font-variant-numeric: tabular-nums; color: var(--ink-soft); }
 
