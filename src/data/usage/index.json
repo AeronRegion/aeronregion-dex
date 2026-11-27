@@ -2,20 +2,130 @@
  "updated": "2026-11-27",
  "formats": [
   {
-   "id": "sd-gen9championsvgc2026regmc",
-   "label": "gen9championsvgc2026regmc",
+   "id": "sd-gen8vgc2020",
+   "label": "gen8vgc2020",
    "source": "Showdown ladder",
-   "period": "2026-10",
+   "period": "2020-08",
    "cutoff": 1760,
-   "total": 1649648
+   "total": 1558824,
+   "current": false
   },
   {
-   "id": "sd-gen9championsvgc2026regmcbo3",
-   "label": "gen9championsvgc2026regmcbo3",
+   "id": "sd-gen8vgc2021",
+   "label": "gen8vgc2021",
    "source": "Showdown ladder",
-   "period": "2026-10",
+   "period": "2020-11",
    "cutoff": 1760,
-   "total": 262609
+   "total": 1883573,
+   "current": false
+  },
+  {
+   "id": "sd-gen8vgc2021series9",
+   "label": "gen8vgc2021series9",
+   "source": "Showdown ladder",
+   "period": "2021-05",
+   "cutoff": 1760,
+   "total": 979375,
+   "current": false
+  },
+  {
+   "id": "sd-gen8vgc2021series10",
+   "label": "gen8vgc2021series10",
+   "source": "Showdown ladder",
+   "period": "2021-08",
+   "cutoff": 1760,
+   "total": 985337,
+   "current": false
+  },
+  {
+   "id": "sd-gen8vgc2021series11",
+   "label": "gen8vgc2021series11",
+   "source": "Showdown ladder",
+   "period": "2021-11",
+   "cutoff": 1760,
+   "total": 659293,
+   "current": false
+  },
+  {
+   "id": "sd-gen8vgc2022",
+   "label": "gen8vgc2022",
+   "source": "Showdown ladder",
+   "period": "2022-03",
+   "cutoff": 1760,
+   "total": 1042678,
+   "current": false
+  },
+  {
+   "id": "sd-gen9vgc2023series1",
+   "label": "gen9vgc2023series1",
+   "source": "Showdown ladder",
+   "period": "2022-12",
+   "cutoff": 1760,
+   "total": 3572556,
+   "current": false
+  },
+  {
+   "id": "sd-gen9vgc2023series2",
+   "label": "gen9vgc2023series2",
+   "source": "Showdown ladder",
+   "period": "2023-02",
+   "cutoff": 1760,
+   "total": 1878825,
+   "current": false
+  },
+  {
+   "id": "sd-gen9vgc2023regulationc",
+   "label": "gen9vgc2023regulationc",
+   "source": "Showdown ladder",
+   "period": "2023-04",
+   "cutoff": 1760,
+   "total": 1488248,
+   "current": false
+  },
+  {
+   "id": "sd-gen9vgc2023regulationd",
+   "label": "gen9vgc2023regulationd",
+   "source": "Showdown ladder",
+   "period": "2023-08",
+   "cutoff": 1760,
+   "total": 1400483,
+   "current": false
+  },
+  {
+   "id": "sd-gen9vgc2023regulatione",
+   "label": "gen9vgc2023regulatione",
+   "source": "Showdown ladder",
+   "period": "2023-09",
+   "cutoff": 1760,
+   "total": 1182190,
+   "current": false
+  },
+  {
+   "id": "sd-gen9vgc2023regulationebo3",
+   "label": "gen9vgc2023regulationebo3",
+   "source": "Showdown ladder",
+   "period": "2023-10",
+   "cutoff": 1760,
+   "total": 285793,
+   "current": false
+  },
+  {
+   "id": "sd-gen9vgc2024regf",
+   "label": "gen9vgc2024regf",
+   "source": "Showdown ladder",
+   "period": "2024-01",
+   "cutoff": 1760,
+   "total": 1648080,
+   "current": false
+  },
+  {
+   "id": "sd-gen9vgc2024regfbo3",
+   "label": "gen9vgc2024regfbo3",
+   "source": "Showdown ladder",
+   "period": "2024-01",
+   "cutoff": 1760,
+   "total": 307381,
+   "current": false
   },
   {
    "id": "sd-gen9vgc2024regg",
@@ -23,15 +133,196 @@
    "source": "Showdown ladder",
    "period": "2026-10",
    "cutoff": 1760,
-   "total": 1864
+   "total": 1864,
+   "current": true
+  },
+  {
+   "id": "sd-gen9vgc2024reggbo3",
+   "label": "gen9vgc2024reggbo3",
+   "source": "Showdown ladder",
+   "period": "2024-04",
+   "cutoff": 1760,
+   "total": 291080,
+   "current": false
+  },
+  {
+   "id": "sd-gen9vgc2024regh",
+   "label": "gen9vgc2024regh",
+   "source": "Showdown ladder",
+   "period": "2024-08",
+   "cutoff": 1760,
+   "total": 1454381,
+   "current": false
+  },
+  {
+   "id": "sd-gen9vgc2024reghbo3",
+   "label": "gen9vgc2024reghbo3",
+   "source": "Showdown ladder",
+   "period": "2024-08",
+   "cutoff": 1760,
+   "total": 305961,
+   "current": false
+  },
+  {
+   "id": "sd-gen9vgc2025regg",
+   "label": "gen9vgc2025regg",
+   "source": "Showdown ladder",
+   "period": "2025-03",
+   "cutoff": 1760,
+   "total": 1362956,
+   "current": false
+  },
+  {
+   "id": "sd-gen9vgc2025reggbo3",
+   "label": "gen9vgc2025reggbo3",
+   "source": "Showdown ladder",
+   "period": "2025-03",
+   "cutoff": 1760,
+   "total": 283498,
+   "current": false
+  },
+  {
+   "id": "sd-gen9vgc2025regi",
+   "label": "gen9vgc2025regi",
+   "source": "Showdown ladder",
+   "period": "2025-05",
+   "cutoff": 1760,
+   "total": 1298593,
+   "current": false
+  },
+  {
+   "id": "sd-gen9vgc2025regibo3",
+   "label": "gen9vgc2025regibo3",
+   "source": "Showdown ladder",
+   "period": "2025-05",
+   "cutoff": 1760,
+   "total": 338765,
+   "current": false
+  },
+  {
+   "id": "sd-gen9vgc2025regh",
+   "label": "gen9vgc2025regh",
+   "source": "Showdown ladder",
+   "period": "2025-09",
+   "cutoff": 1760,
+   "total": 875109,
+   "current": false
+  },
+  {
+   "id": "sd-gen9vgc2025reghbo3",
+   "label": "gen9vgc2025reghbo3",
+   "source": "Showdown ladder",
+   "period": "2025-09",
+   "cutoff": 1760,
+   "total": 281332,
+   "current": false
+  },
+  {
+   "id": "sd-gen9vgc2025regj",
+   "label": "gen9vgc2025regj",
+   "source": "Showdown ladder",
+   "period": "2025-09",
+   "cutoff": 1760,
+   "total": 749530,
+   "current": false
+  },
+  {
+   "id": "sd-gen9vgc2026regf",
+   "label": "gen9vgc2026regf",
+   "source": "Showdown ladder",
+   "period": "2026-01",
+   "cutoff": 1760,
+   "total": 950695,
+   "current": false
+  },
+  {
+   "id": "sd-gen9vgc2026regfbo3",
+   "label": "gen9vgc2026regfbo3",
+   "source": "Showdown ladder",
+   "period": "2026-01",
+   "cutoff": 1760,
+   "total": 327245,
+   "current": false
+  },
+  {
+   "id": "sd-gen9vgc2026regi",
+   "label": "gen9vgc2026regi",
+   "source": "Showdown ladder",
+   "period": "2026-04",
+   "cutoff": 1760,
+   "total": 623088,
+   "current": false
+  },
+  {
+   "id": "sd-gen9vgc2026regibo3",
+   "label": "gen9vgc2026regibo3",
+   "source": "Showdown ladder",
+   "period": "2026-03",
+   "cutoff": 1760,
+   "total": 142529,
+   "current": false
+  },
+  {
+   "id": "sd-gen9championsvgc2026regma",
+   "label": "gen9championsvgc2026regma",
+   "source": "Showdown ladder",
+   "period": "2026-04",
+   "cutoff": 1760,
+   "total": 3122222,
+   "current": false
+  },
+  {
+   "id": "sd-gen9championsvgc2026regmabo3",
+   "label": "gen9championsvgc2026regmabo3",
+   "source": "Showdown ladder",
+   "period": "2026-04",
+   "cutoff": 1760,
+   "total": 239230,
+   "current": false
+  },
+  {
+   "id": "sd-gen9championsvgc2026regmb",
+   "label": "gen9championsvgc2026regmb",
+   "source": "Showdown ladder",
+   "period": "2026-07",
+   "cutoff": 1760,
+   "total": 1764686,
+   "current": false
+  },
+  {
+   "id": "sd-gen9championsvgc2026regmbbo3",
+   "label": "gen9championsvgc2026regmbbo3",
+   "source": "Showdown ladder",
+   "period": "2026-07",
+   "cutoff": 1760,
+   "total": 200850,
+   "current": false
+  },
+  {
+   "id": "sd-gen9championsvgc2026regmc",
+   "label": "gen9championsvgc2026regmc",
+   "source": "Showdown ladder",
+   "period": "2026-10",
+   "cutoff": 1760,
+   "total": 1649648,
+   "current": true
+  },
+  {
+   "id": "sd-gen9championsvgc2026regmcbo3",
+   "label": "gen9championsvgc2026regmcbo3",
+   "source": "Showdown ladder",
+   "period": "2026-10",
+   "cutoff": 1760,
+   "total": 262609,
+   "current": true
   },
   {
    "id": "lt-m-c",
    "label": "Reg M-C",
    "source": "Limitless tournaments",
-   "period": "2026-11-10 to 2026-11-26",
+   "period": "2026-11-11 to 2026-11-26",
    "tours": 91,
-   "total": 4299
+   "total": 4435
   },
   {
    "id": "lt-svi",
