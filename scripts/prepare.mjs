@@ -251,7 +251,7 @@ const firstOfNum = new Map(); for (const s of out) if (!firstOfNum.has(s.num) ||
 const urlOf = (s) => { const b = firstOfNum.get(s.num); return `/pokemon/${sl(b.name)}/${b.id !== s.id && s.forme ? '#' + sl(s.forme) : ''}`; };
 fs.mkdirSync('public', { recursive: true });
 fs.writeFileSync('public/names.json', JSON.stringify([
-  ...out.map((s) => [s.name, urlOf(s), 'Pokémon', s.types[0]]),
+  ...out.map((s) => [s.name, urlOf(s), 'Pokémon', s.types.join('/')]),
   ...moves.map((m) => [m.name, `/moves/${sl(m.name)}/`, 'Move', m.type, m.cat]),
   ...abilities.map((a) => [a.name, `/abilities/${sl(a.name)}/`, 'Ability']),
   ...items.map((i) => [i.name, `/items/${sl(i.name)}/`, 'Item']),

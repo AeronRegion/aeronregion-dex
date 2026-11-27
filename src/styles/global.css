@@ -566,3 +566,7 @@ html[data-theme='dark'] .mx td.dc.w4 { background: #d9463a !important; color: #f
 html[data-theme='dark'] .mx td.dc.r2 { background: #c9e8b8 !important; color: #24561a !important; border-color: #a6d290 !important; }
 html[data-theme='dark'] .mx td.dc.r4 { background: #7cc35e !important; color: #10300a !important; border-color: #5fa843 !important; }
 html[data-theme='dark'] .mx td.dc.im { background: #3a3f46 !important; color: #fff !important; border-color: #3a3f46 !important; }
+
+/* Header search: dual-typed Pokémon show the two type symbols only (the left, round part of the SV icon), 16px each */
+html body .ac-ts { display: inline-flex; gap: 3px; width: 80px; justify-content: center; }
+html body .ac-t.sym[data-type]:not(.x0):not(.x1):not(.x2):not(.x3) { width: 16px !important; border-radius: 50% !important; background-size: auto 100% !important; background-position: left center !important; }

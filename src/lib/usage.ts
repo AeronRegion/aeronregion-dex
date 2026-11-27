@@ -1,8 +1,11 @@
 // VGC usage data (src/data/usage/, written weekly by scripts/usage.mjs) plus name lookups for the Usage pages.
 import { species, moves, items, abilities } from './data';
 
-const files = import.meta.glob('../data/usage/*.json', { eager: true }) as Record<string, any>;
-const get = (id: string) => files[`../data/usage/${id}.json`]?.default ?? files[`../data/usage/${id}.json`];
+// Read from disk one file at a time (build time only): bundling all usage JSON at once runs the build out of memory.
+import fs from 'node:fs';
+import path from 'node:path';
+const DIR = path.join(process.cwd(), 'src/data/usage');
+const get = (id: string) => { try { return JSON.parse(fs.readFileSync(path.join(DIR, `${id}.json`), 'utf8')); } catch { return null; } };
 const idx = get('index') ?? { updated: '', formats: [] };
 
 const toID = (s: string) => String(s ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -110,11 +113,12 @@ export const usageFor = (id: string) => {
     for (const f of formats as any[]) {
       if (!f.def || f.bo3) continue;
       const d = loadFormat(f.id); if (!d) continue;
+      const n = d.mons.length;
       d.mons.forEach((m: any, k: number) => {
         const s = findSpecies(m.name); if (!s) return;
         const key = String(s.name).toLowerCase().replace(/[^a-z0-9]/g, '');
         if (!byMonCache!.has(s.id)) byMonCache!.set(s.id, []);
-        byMonCache!.get(s.id)!.push({ href: `/usage/${f.id}/#${key}`, name: f.name, group: f.group, current: f.current, period: f.period, usage: m.usage, rank: k + 1, total: d.mons.length, tours: f.tours });
+        byMonCache!.get(s.id)!.push({ href: `/usage/${f.id}/#${key}`, name: f.name, group: f.group, current: f.current, period: f.period, usage: m.usage, rank: k + 1, total: n, tours: f.tours });
       });
     }
     for (const rows of byMonCache.values()) rows.sort((a, b) => Number(b.current) - Number(a.current) || String(b.period).localeCompare(String(a.period)));

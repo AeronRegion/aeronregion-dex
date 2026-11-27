@@ -35,7 +35,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Type labels: the rounded Scarlet & Violet type icons from PokeAPI (sprites/types/generation-ix/scarlet-violet/<id>.png, type symbol + name), 80x16 everywhere, via `data-type` on .chip/.tchip/.ac-t (CSS in global.css). Every new type label must carry data-type. Pokémon cards show types as colored text ("#0131 / Water · Ice").
 - Pokémon tables and cards use the small box icons (PokemonDB style).
 - Name is "ARdex" (header, tab titles, footer). "arDB" rebrand is undecided; don't change it.
-- Top bar on every page (blue in light mode, dark in dark mode): Pokémon ▾, Tools ▾, light/dark toggle, Aeron Region link, search (short box, 190px, "Search…"; its suggestion list opens leftwards when there's no room). NO Home tab; the logo links home.
+- Top bar on every page (blue in light mode, dark in dark mode): Pokémon ▾, Tools ▾, light/dark toggle, Aeron Region link, search (short box, 190px, "Search…"; its suggestion list opens leftwards when there's no room; dual-typed Pokémon show two small round type symbols instead of one label). NO Home tab; the logo links home.
 - Percentages always show two decimals (56.60%, 9.00%).
 - Dates are written "07 NOV 2026" (two-digit day, capital month, spaces), or "APR 2024" without a day (fmtDate in src/lib/usage.ts).
 - Every Pokémon, move, item, ability and type name shown on the site links to its own page (tools included, e.g. VGC usage cards). Only exception: the Teambuilder's editor and pick list, where the data is already shown and a link would pull you off your team.
@@ -82,6 +82,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Showdown formats: every month with a real ladder at 1500+ and 1760+ (Month dropdown + rating toggle); the default view is the last full month at 1760+ (matches Pikalytics).
 - Tournaments and majors show how much data is behind them (events, team sheets, battles). No event dropdown. Official majors have an "Events in this data" table sorted by battles (each event links to its own page); Limitless tournaments are never listed or given pages by name (grassroots names look like spam). Each Pokémon shows its team count.
 - "Add set to Teambuilder ▾" opens a list of your saved teams (plus "+ New team") and adds the set to the one you pick; "Copy as Showdown text".
+- The Pokémon list never moves when you click in it (it only scrolls to a Pokémon picked from elsewhere that is out of view).
 - Remembers your spot (localStorage): /usage/ and the Tools link reopen the last format, month, rating and Pokémon; switching format, month or rating keeps the same Pokémon; the set builder stays open or closed as you left it.
 - Smogon tiers tab (sm- files, same Showdown stats source): gen 9 and gen 8 Ubers, OU, UU, RU, NU, PU, LC, Monotype, Doubles OU; last 12 months (gen 9) / 6 months (gen 8) at 1500+ and the top cutoff (1825+ for OU/DOU). Sets copy at Level 100 (LC 5).
 - Data refreshes weekly via GitHub Actions (.github/workflows/usage.yml). No Smogon analyses or Pikalytics scraping.

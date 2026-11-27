@@ -55,3 +55,6 @@
 - 2026-11-27: Usage page title label uses the date format (JAN 2024)
 - 2026-11-27: Usage: 'Usage in every format' link under the selected Pokémon; searching a Pokémon not in the format says where to look
 - 2026-11-27: Usage: Smogon tiers tab (gen 9 + gen 8 Ubers/OU/UU/RU/NU/PU/LC/Monotype/Doubles OU) from the Showdown ladder stats; Pokémon page section renamed Usage
+- 2026-11-27: Usage: removed the 'Usage in every format' link under the selected Pokémon
+- 2026-11-27: Usage: the Pokémon list no longer jumps when you click a name; build reads usage files from disk one at a time (the bundled set ran out of memory)
+- 2026-11-27: Header search: dual-typed Pokémon show both types as small round type symbols
