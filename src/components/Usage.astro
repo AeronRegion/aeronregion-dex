@@ -53,7 +53,7 @@ const regRange = (x: any) => { const ms = [...new Set(variants(x).map((v: any) =
 const short = (n: number) => !n ? '' : n >= 1e6 ? `${+(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${Math.round(n / 1e3)}k` : String(n);
 // tournaments and majors: the whole set, or one event of it
 const parent: any = f.group === 'sd' ? null : f.def ? f : formats.find((x) => x.id === f.base);
-const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
+const pct = (p: number) => (p ?? 0).toFixed(2) + '%';
 ---
 <div class="ufmt">
   <nav class="usrc" aria-label="Data source">
@@ -128,7 +128,7 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   const slug = (n: string) => n.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/♀/g, '-f').replace(/♂/g, '-m').replace(/['’.:%]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const STAT = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'], STATN = ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed'];
   const esc = (s: string) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
-  const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
+  const pct = (p: number) => (p ?? 0).toFixed(2) + '%';
   const chip = (t: string) => t ? `<a class="chip small" data-type="${t}" href="/types/${t.toLowerCase()}/" style="--c:${D.colors[t] ?? '#777'};--t:#fff">${t}</a>` : '';
   const cat = (c: string) => c ? `<svg viewBox="0 0 28 14" width="26" height="13" role="img" aria-label="${c}"><title>${c}</title>${(CAT_SVG as any)[c] ?? ''}</svg>` : '';
   const ic = (src: string, fb = '') => src ? `<img class="sprite" src="${src}" data-fb="${fb}" onerror="if(this.dataset.fb&&this.src!==this.dataset.fb)this.src=this.dataset.fb" alt="" loading="lazy" width="32" height="24" />` : '';

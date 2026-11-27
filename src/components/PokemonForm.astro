@@ -5,9 +5,12 @@ import { abilityUrl, abilityByName, moveById, pokeUrl, moveUrl, artUrl, STATS, s
 import { TYPES, typeColors, effWith, effText, effBg, effFg, dbTypeColors, ABILITY_DEF } from '../lib/types';
 const LIGHT = new Set(['Normal', 'Electric', 'Grass', 'Ice', 'Ground', 'Flying', 'Bug', 'Rock', 'Steel', 'Fairy']);
 import learnData from '../data/learn.json';
+import { usageFor, monthName, fmtRange } from '../lib/usage';
 
 const { s, first } = Astro.props as { s: any; first: boolean };
 const learn = (learnData as Record<string, [string, string[]][]>)[s.id] ?? [];
+const usage = usageFor(s.id);
+const SRC: Record<string, string> = { sd: 'Showdown ladder', lt: 'Tournaments', pd: 'Official majors' };
 
 // one game per generation for the sprite table at the bottom of the overview
 const SPRITE_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
@@ -125,6 +128,16 @@ const spawns = s.cobbleverse?.spawns ?? [];
           ))}</div>
         </>)}
       </div>
+    </>}
+
+    {usage.length > 0 && <>
+      <h3 class="sec">VGC usage <span class="soft ucount">{usage.length} format{usage.length > 1 ? 's' : ''}</span></h3>
+      <table class="data ustat">
+        <thead><tr><th>Format</th><th>Source</th><th>When</th><th class="n">Usage</th><th class="n">Rank</th></tr></thead>
+        <tbody>{usage.slice(0, 6).map((u: any) => <tr><td><a href={u.href}>{u.name.replace(' (official majors)', '')}</a></td><td>{SRC[u.group]}</td><td>{u.group === 'sd' ? monthName(u.period) : u.group === 'lt' ? fmtRange(u.period) : `${u.tours} events`}</td><td class="n">{u.usage.toFixed(2)}%</td><td class="n">#{u.rank}</td></tr>)}</tbody>
+        {usage.length > 6 && <tbody class="umore" hidden>{usage.slice(6).map((u: any) => <tr><td><a href={u.href}>{u.name.replace(' (official majors)', '')}</a></td><td>{SRC[u.group]}</td><td>{u.group === 'sd' ? monthName(u.period) : u.group === 'lt' ? fmtRange(u.period) : `${u.tours} events`}</td><td class="n">{u.usage.toFixed(2)}%</td><td class="n">#{u.rank}</td></tr>)}</tbody>}
+      </table>
+      {usage.length > 6 && <button type="button" class="sm umorebtn" onclick="const t=this.previousElementSibling.querySelector('.umore');t.hidden=!t.hidden;this.textContent=t.hidden?'Show all formats':'Show fewer'">Show all formats</button>}
     </>}
 
     <h3 class="sec">Where to find</h3>
@@ -403,6 +416,10 @@ const spawns = s.cobbleverse?.spawns ?? [];
   .mtable td:nth-child(3), .mtable th:nth-child(3) { text-align: center; }
   .mtable th:nth-child(n+4):nth-child(-n+6) { text-align: right; } .mtable th:nth-child(7), .mtable td:nth-child(7) { text-align: center; }
   .mtable tbody tr:nth-child(even) { background: var(--zebra); }
+  .ustat { margin-bottom: .4rem; }
+  @media (max-width: 640px) { .ustat th:nth-child(2), .ustat td:nth-child(2), .ustat th:nth-child(3), .ustat td:nth-child(3) { display: none; } }
+  .ucount { font-size: .8rem; font-weight: 400; margin-left: .3rem; }
+  .umorebtn { margin-bottom: 1.2rem; }
   .msplit { display: grid; grid-template-columns: 1fr 1fr; gap: 0 2.4rem; align-items: start; }
   .msplit:empty { display: none; }
   .msplit > :global(div) { min-width: 0; }

@@ -94,3 +94,23 @@ export const pickerGroups = (src: string) => {
 };
 export const updated = idx.updated as string;
 export const loadFormat = (id: string) => get(id);
+
+// Pokémon id -> where it shows up in VGC usage (one row per format, default views only), for the Pokémon pages
+let byMonCache: Map<string, any[]> | null = null;
+export const usageFor = (id: string) => {
+  if (!byMonCache) {
+    byMonCache = new Map();
+    for (const f of formats as any[]) {
+      if (!f.def || f.bo3) continue;
+      const d = loadFormat(f.id); if (!d) continue;
+      d.mons.forEach((m: any, k: number) => {
+        const s = findSpecies(m.name); if (!s) return;
+        const key = String(s.name).toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (!byMonCache!.has(s.id)) byMonCache!.set(s.id, []);
+        byMonCache!.get(s.id)!.push({ href: `/usage/${f.id}/#${key}`, name: f.name, group: f.group, current: f.current, period: f.period, usage: m.usage, rank: k + 1, total: d.mons.length, tours: f.tours });
+      });
+    }
+    for (const rows of byMonCache.values()) rows.sort((a, b) => Number(b.current) - Number(a.current) || String(b.period).localeCompare(String(a.period)));
+  }
+  return byMonCache.get(id) ?? [];
+};
