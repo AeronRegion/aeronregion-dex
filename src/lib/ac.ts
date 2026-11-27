@@ -4,9 +4,9 @@ const TC: Record<string, string> = { Normal: '#999870', Fire: '#e0701f', Water: 
 const LIGHT = new Set(['Normal', 'Electric', 'Grass', 'Ice', 'Ground', 'Flying', 'Bug', 'Rock', 'Steel', 'Fairy']);
 // same category icons as the rest of the site (components/Cat.astro)
 export const CAT_SVG: Record<string, string> = {
-  Physical: '<path d="M14 .6l1.6 3.4 3.6-1.5-1.1 3.7 3.7 1.3-3.5 1.6 1.6 3.5-3.7-1.1L14 14.6l-1.2-3.1-3.7 1.1 1.6-3.5-3.5-1.6 3.7-1.3-1.1-3.7 3.6 1.5z" fill="#e8562a"/><circle cx="14" cy="7.6" r="2.6" fill="#ffd24a"/>',
-  Special: '<circle cx="14" cy="7" r="6.3" fill="#5b79c9"/><circle cx="14" cy="7" r="4.1" fill="none" stroke="#e4ebff" stroke-width="1.3"/><circle cx="14" cy="7" r="1.7" fill="#e4ebff"/>',
-  Status: '<circle cx="14" cy="7" r="6.3" fill="#9a9a9a"/><circle cx="14" cy="7" r="4.2" fill="#f4f4f4"/><path d="M14 2.8a4.2 4.2 0 0 1 0 8.4z" fill="#9a9a9a"/>',
+  Physical: '<path d="M14.00,0.40L15.24,3.20L17.88,1.66L17.24,4.65L20.28,4.96L18.00,7.00L20.28,9.04L17.24,9.35L17.88,12.34L15.24,10.80L14.00,13.60L12.76,10.80L10.12,12.34L10.76,9.35L7.72,9.04L10.00,7.00L7.72,4.96L10.76,4.65L10.12,1.66L12.76,3.20Z" fill="#f6a04a" stroke="#c8331d" stroke-width="1.1" stroke-linejoin="round"/><path d="M14.00,3.80L14.73,5.24L16.26,4.74L15.76,6.27L17.20,7.00L15.76,7.73L16.26,9.26L14.73,8.76L14.00,10.20L13.27,8.76L11.74,9.26L12.24,7.73L10.80,7.00L12.24,6.27L11.74,4.74L13.27,5.24Z" fill="#fff1b8"/>',
+  Special: '<g transform="rotate(-12 14 7)" fill="none" stroke="#3a64cf" stroke-width="1.25"><ellipse cx="14" cy="7" rx="8.6" ry="5"/><ellipse cx="14" cy="7" rx="5.6" ry="3.2"/><ellipse cx="14" cy="7" rx="2.6" ry="1.5" fill="#3a64cf"/></g>',
+  Status: '<circle cx="14" cy="7" r="5.6" fill="#e2e2e2" stroke="#6f6f6f" stroke-width="1.1"/><path d="M14 1.4a5.6 5.6 0 0 0 0 11.2a3.4 5.6 0 0 1 0-11.2z" fill="#7a7a7a"/>',
 };
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
 

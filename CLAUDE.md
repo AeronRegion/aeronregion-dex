@@ -21,7 +21,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Review every new or changed page for alignment before pushing: numbers right-aligned with tabular figures, columns lined up row to row (fixed widths, not content-sized), labels and values on the same baseline, no bars or chips that shift per row. Look at the screenshot at desktop width and at 390px.
 - Every clickable box (buttons, dropdowns, toggles, selectable rows) must show interaction: hover (border/background change), press (inset), and keyboard focus (blue outline). Check each new control by hovering and clicking it before pushing; a button that looks the same on hover is a bug.
 - Click every button and link you add (in the local build) and confirm it does what its label says before pushing. A button that only toggles a row or opens a tab without showing anything new is a bug.
-- Pages that are mostly data (tables, usage) may use the wide container (1500px); everything else stays 1180px.
+- Desktop scale (≥1100px): pages are drawn 1.3x (CSS `zoom` on body) in a 940px column, so ARdex at any browser zoom looks like PokemonDB at the same zoom (Grant browses at 75%). VGC usage and the Teambuilder are excluded and stay 1x (they need the whole screen; usage uses the 1500px wide container). Phones are unchanged. Media queries still see the real window width, so check zoomed pages at 1280 and 1920 wide.
 
 ## Locked decisions
 ### Global
@@ -53,6 +53,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Evolution: the stage you're on is a plain box, not a link.
 - Damage taken includes abilities (e.g. Levitate shows Ground 0, "Includes Levitate").
   Multiple relevant abilities get toggle buttons. No "Before abilities" note.
+- Move category icons are PokemonDB-style (CAT_SVG in src/lib/ac.ts): Physical orange burst with red outline, Special blue rings, Status grey half-shaded circle.
 - Moves tab: one list sorted Physical > Special > Status, with a "How" column
   (Lv / TM / Egg / Tutor). "Split by how it learns" button. Priority is a column (green +, red -).
 
