@@ -53,32 +53,40 @@ try {
       seen.get(fmt).push({ month, cut: f.cut, size: f.size, current: cur });
     }
   }
-  // Each format's last month that still had a full ladder (at least 40% of its busiest month), like Pikalytics.
-  // A format still listed this month but nearly dead (an old regulation kept as a side ladder) counts as finished.
+  // Every month of a format that had a real ladder (at least 10% of its busiest month), at two rating cutoffs
+  // (1500+ and the top one, 1760+). The default view is the last of those months at the top cutoff.
+  // Files: sd-<fmt>.json (default) and sd-<fmt>_<month>_<cutoff>.json (the rest). Finished months are
+  // only downloaded once; the current month is refreshed every run.
+  const CUTS = [1500, 1760];
+  const parse = (fmt, d) => Object.entries(d.data).map(([name, x]) => {
+    const total = Object.values(x.Abilities ?? {}).reduce((a, b) => a + b, 0) || 1;
+    return {
+      name, usage: round((x.usage ?? 0) * 100), n: x['Raw count'] ?? 0,
+      moves: top(x.Moves, total, 30, 0.3), items: top(x.Items, total, 20, 0.3), abilities: top(x.Abilities, total, 5, 0.3),
+      tera: top(x['Tera Types'], total, 18, 0.3), spreads: top(x.Spreads, total, 30, 0.3), mates: top(x.Teammates, total, 30, 0.5),
+    };
+  }).filter((m) => m.usage >= 0.5).sort((a, b) => b.usage - a.usage);
   for (const [fmt, ms] of seen) {
     const max = Math.max(...ms.map((x) => x.size));
-    const pick = ms.filter((x) => x.size >= max * 0.4).at(-1);
-    seen.set(fmt, { ...pick, current: pick.current });
-  }
-  for (const [fmt, c] of seen) {
-    const id = `sd-${fmt}`;
-    const prev = fs.existsSync(`${OUT}/${id}.json`) ? JSON.parse(fs.readFileSync(`${OUT}/${id}.json`, 'utf8')) : null;
-    if (prev && prev.period === c.month && prev.cutoff === c.cut && !c.current) { const { mons, ...meta } = prev; index.push({ ...meta, current: false }); continue; }
-    let d; try { d = await get(`${SD}/${c.month}/chaos/${fmt}-${c.cut}.json`); } catch (e) { console.error(e.message); if (prev) { const { mons, ...meta } = prev; index.push(meta); } continue; }
-    const battles = d.info?.['number of battles'] ?? 0;
-    if (battles < 500) continue; // too few games to mean anything
-    const mons = Object.entries(d.data).map(([name, x]) => {
-      const total = Object.values(x.Abilities ?? {}).reduce((a, b) => a + b, 0) || 1;
-      return {
-        name, usage: round((x.usage ?? 0) * 100), n: x['Raw count'] ?? 0,
-        moves: top(x.Moves, total, 30, 0.3), items: top(x.Items, total, 20, 0.3), abilities: top(x.Abilities, total, 5, 0.3),
-        tera: top(x['Tera Types'], total, 18, 0.3), spreads: top(x.Spreads, total, 30, 0.3), mates: top(x.Teammates, total, 30, 0.5),
-      };
-    }).filter((m) => m.usage >= 0.5).sort((a, b) => b.usage - a.usage);
-    const meta = { id, label: fmt, source: 'Showdown ladder', period: c.month, cutoff: c.cut, total: battles, current: c.current };
-    fs.writeFileSync(`${OUT}/${id}.json`, JSON.stringify({ ...meta, mons }));
-    index.push(meta);
-    console.log('showdown', fmt, c.month, c.cut, battles, mons.length);
+    const keep = ms.filter((x) => x.size >= max * 0.1);
+    const def = keep.at(-1);
+    const current = def.current && def.size >= max * 0.25;
+    for (const c of keep) for (const cut of CUTS) {
+      if (cut > c.cut) continue;
+      const isDef = c === def && cut === Math.min(1760, def.cut);
+      const id = isDef ? `sd-${fmt}` : `sd-${fmt}_${c.month}_${cut}`;
+      const meta0 = { id, base: `sd-${fmt}`, label: fmt, source: 'Showdown ladder', period: c.month, cutoff: cut, current, def: isDef };
+      const file = `${OUT}/${id}.json`;
+      const prev = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : null;
+      if (prev && prev.period === c.month && prev.cutoff === cut && !c.current) { index.push({ ...meta0, total: prev.total }); continue; }
+      let d; try { d = await get(`${SD}/${c.month}/chaos/${fmt}-${cut}.json`); } catch (e) { console.error(e.message); if (prev) index.push({ ...meta0, period: prev.period, total: prev.total }); continue; }
+      const battles = d.info?.['number of battles'] ?? 0;
+      if (battles < 500) continue; // too few games to mean anything
+      const meta = { ...meta0, total: battles };
+      fs.writeFileSync(file, JSON.stringify({ ...meta, mons: parse(fmt, d) }));
+      index.push(meta);
+      console.log('showdown', fmt, c.month, cut, battles);
+    }
   }
 } catch (e) { console.error('showdown failed:', e.message); }
 

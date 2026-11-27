@@ -3,7 +3,7 @@
 // (base stats, moves, teammates, items, abilities + Tera, spreads with nature and EVs together).
 // The page carries the data as JSON; the panel is drawn in the browser.
 import { pokeUrl, boxIconUrl, iconUrl, moveUrl, itemUrl, abilityUrl, itemByName, itemIconUrl, moveById } from '../lib/data';
-import { formats, GROUPS, loadFormat, findSpecies, moveName, itemName, abilityName, updated, pickerGroups, twin, monthName } from '../lib/usage';
+import { formats, GROUPS, loadFormat, findSpecies, moveName, itemName, abilityName, updated, pickerGroups, twin, monthName, variants } from '../lib/usage';
 import { typeColors } from '../lib/types';
 const { id } = Astro.props as { id: string };
 const f = formats.find((x) => x.id === id)!;
@@ -53,12 +53,24 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   <div class="upick">
     <select class="field" id="ufmt" aria-label="Format">
       {pickerGroups(f.group).map((g) => (
-        <optgroup label={g.game}>{g.items.map((x: any) => <option value={`/usage/${x.id}/`} selected={x.base === f.base}>{x.short}{x.group === 'sd' ? (x.current ? ' (current)' : ` · ${monthName(x.period)}`) : x.group === 'lt' ? ` · ${x.period}` : ''}</option>)}</optgroup>
+        <optgroup label={g.game}>{g.items.map((x: any) => <option value={`/usage/${x.id}/`} selected={x.fam === f.fam}>{x.short}{x.group === 'sd' ? (x.current ? ' (current)' : ` · ${monthName(x.period)}`) : x.group === 'lt' ? ` · ${x.period}` : ''}</option>)}</optgroup>
       ))}
     </select>
     {f.group === 'sd' && (twin(f)
       ? <span class="ubo" role="group" aria-label="Best of">{[false, true].map((b) => { const x = b === f.bo3 ? f : twin(f); return <a href={`/usage/${x.id}/`} class:list={['segchip', { on: b === f.bo3 }]}>{b ? 'Bo3' : 'Bo1'}</a>; })}</span>
       : <span class="ubo solo">{f.bo3 ? 'Bo3 only' : 'Bo1 only'}</span>)}
+    {f.group === 'sd' && (() => {
+      const vs = variants(f);
+      const months = [...new Set(vs.map((x: any) => x.period))].sort().reverse();
+      const cuts = [...new Set(vs.filter((x: any) => x.period === f.period).map((x: any) => x.cutoff))].sort();
+      const pick = (month: string, cut: number) => vs.find((x: any) => x.period === month && x.cutoff === cut) ?? vs.find((x: any) => x.period === month);
+      return <>
+        {months.length > 1 && <label class="usel">Month <select class="field ujump">{months.map((mo) => <option value={`/usage/${pick(mo, f.cutoff).id}/`} selected={mo === f.period}>{monthName(mo)}{vs.find((x: any) => x.period === mo && x.def) ? ' (default)' : ''}</option>)}</select></label>}
+        {cuts.length > 1
+          ? <span class="ubo" role="group" aria-label="Rating">{cuts.map((c) => <a href={`/usage/${pick(f.period, c)!.id}/`} class:list={['segchip', { on: c === f.cutoff }]} title={`Games where players were rated ${c}+`}>{c}+</a>)}</span>
+          : <span class="ubo solo">Rated {f.cutoff}+</span>}
+      </>;
+    })()}
   </div>
 </div>
 <p class="note">
@@ -95,6 +107,7 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   const D = JSON.parse(document.getElementById('udata')!.textContent!);
   const sel = document.getElementById('ufmt') as HTMLSelectElement;
   sel.addEventListener('change', () => { location.href = sel.value; });
+  document.querySelectorAll<HTMLSelectElement>('.ujump').forEach((x) => x.addEventListener('change', () => { location.href = x.value; }));
   const STAT = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'], STATN = ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed'];
   const esc = (s: string) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
   const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
@@ -178,6 +191,7 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   .usrc a:last-child, .ubo a:last-child { border-radius: 0 3px 3px 0; }
   .usrc a.on, .ubo a.on { background: #2f6db5; border-color: #24579a; color: #fff !important; position: relative; }
   .usrc a:not(.on):hover, .ubo a:not(.on):hover { background: rgb(74 144 217 / .12); }
+  .usel { display: inline-flex; align-items: center; gap: .35rem; font-size: .88rem; } .usel select { min-width: 0; }
   .ubo.solo { font-size: .8rem; color: var(--ink-soft); }
   .upick { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
   .upick select { min-width: 15rem; max-width: 100%; }

@@ -6,6 +6,6 @@ export const getStaticPaths = () => formats.map((f) => ({ params: { fmt: f.id },
 const { f } = Astro.props as { f: any };
 ---
 <Base title={`${f.name} usage`} description={`VGC usage for ${f.name}: most used Pokémon, moves, items, spreads and teammates.`}>
-  <h1>{f.name} <em class="kind">(usage)</em></h1>
+  <h1>{f.name} <em class="kind">(usage{f.def ? "" : `, ${f.period}, ${f.cutoff}+`})</em></h1>
   <Usage id={f.id} />
 </Base>
