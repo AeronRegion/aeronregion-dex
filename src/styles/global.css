@@ -483,8 +483,10 @@ html[data-theme='dark'] #ed.sd .detbox, html[data-theme='dark'] #ed.sd .c-sum, h
 @media (max-width: 640px) { #ed .mlist.inline { width: 100%; margin: .2rem 0 .4rem !important; } #ed .mlist.inline .mbody { max-height: 38vh !important; } }
 @media (max-width: 640px) { #ed .mlist.inline .mr { padding-top: .15rem !important; padding-bottom: .15rem !important; } #ed .mlist.inline .mr .d { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } }
 /* multi-hit moves show their hit count next to the power, e.g. 25 ×2–5 */
-table.data small.hx { display: inline; margin-left: .2rem; font-size: .68rem; font-weight: 600; color: var(--ink-soft); line-height: 1; white-space: nowrap; }
-table.data td:has(> small.hx) { white-space: nowrap; }
+/* multi-hit count sits at the left edge of the Power cell, out of the flow, so every power number stays right-aligned */
+table.data td:has(> small.hx) { position: relative; white-space: nowrap; }
+table.data small.hx { position: absolute; left: 3px; top: 50%; transform: translateY(-50%); font-size: .62rem; font-weight: 600; color: var(--ink-soft); line-height: 1; white-space: nowrap; pointer-events: none; }
+@media (max-width: 640px) { table.data small.hx { top: 2px; transform: none; font-size: .5rem; } }
 /* phones: PP is dropped so Priority fits */
 @media (max-width: 640px) {
   table.data .col-pp { display: none !important; }

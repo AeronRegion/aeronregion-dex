@@ -17,7 +17,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - After every change: add a line to docs/changelog.md, and if it was a design decision, add it below.
 - Before pushing any visual change: `npm run build && npm run check:mobile`. It opens the main pages at iPhone size (390px) and fails if anything runs off the screen or needs sideways scrolling; look at the screenshots it saves in .cache/mobile/ too. Don't push until it passes. New pages go in its PAGES list.
 - Verify on the live site after deploy (hard refresh: Ctrl+Shift+R).
-- Table rows keep one height: extra info (multi-hit ×2–5, notes) goes inline on the same line, never stacked under a value.
+- Table rows keep one height and numbers stay right-aligned: extra info (multi-hit ×2–5) sits at the left edge of the cell, out of the flow (absolute), never stacked under or pushed next to the value.
 - Review every new or changed page for alignment before pushing: numbers right-aligned with tabular figures, columns lined up row to row (fixed widths, not content-sized), labels and values on the same baseline, no bars or chips that shift per row. Look at the screenshot at desktop width and at 390px.
 - Every clickable box (buttons, dropdowns, toggles, selectable rows) must show interaction: hover (border/background change), press (inset), and keyboard focus (blue outline). Check each new control by hovering and clicking it before pushing; a button that looks the same on hover is a bug.
 - Click every button and link you add (in the local build) and confirm it does what its label says before pushing. A button that only toggles a row or opens a tab without showing anything new is a bug.
@@ -56,7 +56,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Evolution: the stage you're on is a plain box, not a link.
 - Damage taken includes abilities (e.g. Levitate shows Ground 0, "Includes Levitate").
   Multiple relevant abilities get toggle buttons. No "Before abilities" note.
-- Move category icons are PokemonDB-style (CAT_SVG in src/lib/ac.ts): Physical orange burst with red outline, Special blue rings, Status grey half-shaded circle.
+- Move category icons are PokemonDB-style (CAT_SVG in src/lib/ac.ts): Physical red-outlined white burst, Special blue tilted rings, Status grey tilted pill with a dark left half.
 - Moves tab: one list sorted Physical > Special > Status, with a "How" column
   (Lv / TM / Egg / Tutor). "Split by how it learns" button. Priority is a column (green +, red -).
 

@@ -43,3 +43,4 @@
 - 2026-11-26: VGC usage: spread column headings sit inside the scrolling box (sticky) so they line up with the numbers
 - 2026-11-26: Every page now uses the same 1.3x desktop scale and header width (Teambuilder and VGC usage included); types page: square picker tiles and a 32px square chart like the defense matchups, "Click a type"; coverage: Defense and Moveset tables start at the same height, same column order, light cells in dark mode; usage: regulation totals (all months) and month range in the format picker, larger battle counts
 - 2026-11-26: Removed the usage Event dropdown and the Limitless event list/pages (majors keep their events table); page filters are compact and centered
+- 2026-11-26: Category icons redrawn closer to PokemonDB (red-outlined white burst, blue tilted rings, grey/dark tilted pill); multi-hit count sits at the left edge of the Power cell so power numbers line up
