@@ -30,3 +30,4 @@
 - 2026-11-26: New VGC usage tool (Tools > VGC usage): Showdown ladder stats, Limitless tournament teams and official majors, refreshed weekly by GitHub Actions; sets can be added to the Teambuilder (/team/?add=)
 - 2026-11-26: VGC usage: newest season of official majors listed first
 - 2026-11-26: VGC usage redesigned Pikalytics-style (list on the left, full data on the right: base stats, moves, teammates, items, abilities, Tera, nature+EV spreads in one row); past formats since gen 8 (e.g. SV Reg F 2024); wide container; Tera card on every format
+- 2026-11-26: VGC usage: finished formats use their last full month on the ladder (matches Pikalytics), not their busiest month

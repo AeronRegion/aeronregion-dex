@@ -56,7 +56,7 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
 </div>
 <p class="note">
   {GROUPS.find((g) => g.key === f.group)!.label}: {f.group === 'sd'
-    ? <>{fmtNum(f.total)} battles in {f.period}, players rated {f.cutoff}+.{!f.current && ' This format has ended; this is its busiest month.'}</>
+    ? <>{fmtNum(f.total)} battles in {f.period}, players rated {f.cutoff}+.{!f.current && ' This format has ended; this is its last full month on the ladder.'}</>
     : f.group === 'lt'
       ? <>{fmtNum(f.total)} teams from {f.tours} tournaments, {f.period}.</>
       : <>{fmtNum(f.total)} teams from {f.tours} events.</>}

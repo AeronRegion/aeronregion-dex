@@ -33,14 +33,14 @@ const sheetMons = (F) => [...F.mons].map(([name, M]) => ({
 })).filter((m) => m.usage >= 0.5).sort((a, b) => b.usage - a.usage);
 
 // ---------- 1. Showdown ladder: every VGC format from gen 8 on ----------
-// Current formats (in the latest month) use the latest month. Finished formats use their busiest month
-// (largest file), and are only downloaded once: if the saved file already has that month, it's kept.
+// Each format uses its last full month (current formats: the latest month). Finished formats are only
+// downloaded once: if the saved file already has that month, it's kept.
 try {
   const SD = 'https://www.smogon.com/stats';
   const root = await get(`${SD}/`, 'text');
   const months = [...root.matchAll(/href="(\d{4}-\d{2})\/"/g)].map((m) => m[1]).filter((m) => m >= '2019-11').sort();
   const latest = months.at(-1);
-  const seen = new Map(); // fmt -> { month, cut, size, current }
+  const seen = new Map(); // fmt -> [{ month, cut, size, current }]
   for (const month of months) {
     let list; try { list = await get(`${SD}/${month}/chaos/`, 'text'); } catch { continue; }
     const files = [...list.matchAll(/href="([a-z0-9]+)-(\d+)\.json">[^<]*<\/a>\s+\S+\s+\S+\s+(\d+)/g)].map((m) => ({ fmt: m[1], cut: +m[2], size: +m[3] }))
@@ -49,13 +49,17 @@ try {
     for (const f of files) if (!hi.has(f.fmt) || f.cut > hi.get(f.fmt).cut) hi.set(f.fmt, f);
     for (const [fmt, f] of hi) {
       const cur = month === latest;
-      const old = seen.get(fmt);
-      if (!old || f.size > old.size || cur) seen.set(fmt, { month, cut: f.cut, size: f.size, current: cur, best: Math.max(old?.best ?? 0, f.size), bestMonth: !old || f.size > (old.best ?? 0) ? month : old.bestMonth });
+      if (!seen.has(fmt)) seen.set(fmt, []);
+      seen.get(fmt).push({ month, cut: f.cut, size: f.size, current: cur });
     }
   }
-  // a format still on the ladder but nearly dead (e.g. an old regulation kept as a side ladder) counts as finished:
-  // use its busiest month instead of the latest one
-  for (const [fmt, c] of seen) if (c.current && c.size < c.best * 0.25) seen.set(fmt, { ...c, month: c.bestMonth, current: false });
+  // Each format's last month that still had a full ladder (at least 40% of its busiest month), like Pikalytics.
+  // A format still listed this month but nearly dead (an old regulation kept as a side ladder) counts as finished.
+  for (const [fmt, ms] of seen) {
+    const max = Math.max(...ms.map((x) => x.size));
+    const pick = ms.filter((x) => x.size >= max * 0.4).at(-1);
+    seen.set(fmt, { ...pick, current: pick.current });
+  }
   for (const [fmt, c] of seen) {
     const id = `sd-${fmt}`;
     const prev = fs.existsSync(`${OUT}/${id}.json`) ? JSON.parse(fs.readFileSync(`${OUT}/${id}.json`, 'utf8')) : null;
