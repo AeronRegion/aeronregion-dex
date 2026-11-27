@@ -88,6 +88,21 @@ import { GAMES, meta } from '../lib/data';
     const champ = () => team().fmt === 'champ';
     const spToEv = (sp: number) => (sp > 0 ? Math.min(252, 4 + 8 * (sp - 1)) : 0);
     const evToSp = (ev: number) => (ev >= 4 ? Math.min(32, 1 + Math.floor((ev - 4) / 8)) : 0);
+    // Converting a set to the team's format: EVs -> Stat Points (Champions, 66 total / 32 per stat, Lv 50, 31 IVs) or back
+    const fitTo = (m: Mon, toChamp: boolean, isSp: boolean) => {
+      if (toChamp && !isSp) {
+        const sp = m.evs.map(evToSp);
+        while (sp.reduce((a, b) => a + b, 0) > 66) { const i = sp.indexOf(Math.max(...sp)); sp[i]--; }
+        m.evs = sp as Set6; m.level = 50; m.ivs = [31, 31, 31, 31, 31, 31]; return true;
+      }
+      if (!toChamp && isSp) {
+        const ev = m.evs.map(spToEv);
+        while (ev.reduce((a, b) => a + b, 0) > 510) { const i = ev.indexOf(Math.max(...ev)); ev[i] -= 4; }
+        m.evs = ev as Set6; return true;
+      }
+      if (toChamp) { m.level = 50; m.ivs = [31, 31, 31, 31, 31, 31]; }
+      return false;
+    };
     const CAP = () => (champ() ? { per: 32, total: 66, step: 1, label: 'Stat Points' } : { per: 252, total: 510, step: 4, label: 'EVs' });
     const statsOf = (m: Mon) => {
       const base = tb.stats[spIndex.get(m.sp) ?? 0]; const [u, d] = NAT[m.nature] ?? [1, 1];
@@ -506,8 +521,7 @@ import { GAMES, meta } from '../lib/data';
       const v = ($('imptext') as HTMLTextAreaElement).value.trim(); const { out, miss, looksSp } = parseTeam(fromLink(v) ?? v);
       if (!out.length) { say("Couldn't read any Pokémon from that. Paste the team in Showdown's export format."); return; }
       if (looksSp && !champ() && (!append || !team().mons.length)) { team().fmt = 'champ'; miss.unshift('__sp'); }
-      if (champ() && !looksSp) for (const m of out) m.evs = m.evs.map(evToSp) as Set6;
-      if (champ()) for (const m of out) { m.level = 50; m.ivs = [31, 31, 31, 31, 31, 31]; }
+      for (const m of out) fitTo(m, champ(), looksSp);
       let added = out.length, dropped = 0;
       if (append) { const room = 14 - team().mons.length; added = Math.min(room, out.length); dropped = out.length - added; team().mons.push(...out.slice(0, added)); sel = team().mons.length - 1; }
       else { team().mons = out; sel = 0; }
@@ -542,10 +556,12 @@ import { GAMES, meta } from '../lib/data';
             cur = to === 'new' || !teams[to !== null ? +to : last] ? (to === 'new' ? teams.length - 1 : 0) : to !== null ? +to : last;
             try { localStorage.setItem('ardex-cur', String(cur)); } catch {}
             const t = teams[cur]; const k = t.mons.findIndex((m) => isEmpty(m));
+            // an empty team takes the set's format; otherwise the set is converted to the team's format
+            if (!t.mons.some((m) => !isEmpty(m))) t.fmt = looksSp ? 'champ' : t.fmt === 'champ' ? 'all' : t.fmt;
+            const conv = fitTo(out[0], t.fmt === 'champ', looksSp);
             if (k >= 0) t.mons[k] = out[0]; else t.mons.push(out[0]);
             sel = k >= 0 ? k : t.mons.length - 1;
-            if (looksSp && t.fmt !== 'champ' && t.mons.length === 1) t.fmt = 'champ';
-            say(`Added ${spOf(out[0])[1]} to ${t.name || 'your team'}.`);
+            say(`Added ${spOf(out[0])[1]} to ${t.name || 'your team'}${conv ? (t.fmt === 'champ' ? ' (EVs converted to Stat Points)' : ' (Stat Points converted to EVs)') : ''}.`);
           }
         } catch { say("That set couldn't be read."); }
         history.replaceState(null, '', location.pathname);

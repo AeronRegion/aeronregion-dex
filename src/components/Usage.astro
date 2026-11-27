@@ -139,7 +139,8 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
   const panel = document.getElementById('upanel')!, list = document.getElementById('ulist')!;
   const baseTitle = document.title;
   // the set builder is opt-in: browsing never selects anything until you open it
-  let building = false;
+  // remembered between visits: set builder open or closed
+  let building = (() => { try { return localStorage.getItem('ardex-usage-build') === '1'; } catch { return false; } })();
   const draw = (k: string, scroll = false) => {
     const m: any = byK.get(k) ?? D.mons[0]; if (!m) { panel.innerHTML = '<p>No data.</p>'; return; }
     list.querySelectorAll('a.on').forEach((a) => a.classList.remove('on'));
@@ -226,7 +227,7 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
     });
     document.getElementById('ureset')!.addEventListener('click', () => { P.mv = m.mv.slice(0, 4).map((_: any, i: number) => i); P.it = m.it.length ? 0 : -1; P.ab = m.ab.length ? 0 : -1; P.te = m.te.length ? 0 : -1; P.sp = m.sp.length ? 0 : -1; P.na = m.na.length ? 0 : -1; msg.textContent = ''; sync(); });
     const setBuilding = (on: boolean) => {
-      building = on; panel.classList.toggle('building', on);
+      building = on; panel.classList.toggle('building', on); try { localStorage.setItem('ardex-usage-build', on ? '1' : '0'); } catch {}
       panel.querySelector<HTMLElement>('.uset')!.hidden = !on; panel.querySelector<HTMLElement>('.ubuild')!.hidden = on;
       panel.querySelectorAll<HTMLElement>('.pickable').forEach((r) => { r.tabIndex = on ? 0 : -1; on ? r.setAttribute('role', 'button') : r.removeAttribute('role'); });
     };
@@ -236,6 +237,11 @@ const pct = (p: number) => String(+p.toFixed(p >= 10 ? 1 : 2)) + '%';
     setBuilding(building);
     sync();
     document.title = `${m.n}: ${baseTitle}`;
+    // remember where you are (format, month, rating and Pokémon) and keep the same Pokémon when switching format
+    try { localStorage.setItem('ardex-usage-last', `${location.pathname}#${m.k}`); } catch {}
+    document.querySelectorAll<HTMLAnchorElement>('main a[href^="/usage/"]').forEach((a) => { a.href = a.getAttribute('href')!.split('#')[0] + '#' + m.k; });
+    const li = list.querySelector<HTMLElement>(`a[data-k="${m.k}"]`);
+    if (li && (li.offsetTop < list.scrollTop || li.offsetTop > list.scrollTop + list.clientHeight - li.offsetHeight)) list.scrollTop = li.offsetTop - list.offsetTop - list.clientHeight / 2;
     if (scroll && matchMedia('(max-width: 900px)').matches) panel.scrollIntoView({ block: 'start' });
   };
   document.addEventListener('click', (e) => { const mn = document.getElementById('umenu'); if (mn && !mn.hidden && !(e.target as HTMLElement).closest('.uadd')) { mn.hidden = true; document.getElementById('uadd')?.setAttribute('aria-expanded', 'false'); } });

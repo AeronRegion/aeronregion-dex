@@ -6,6 +6,10 @@ import { formats } from '../../lib/usage';
 const def = formats.filter((f) => f.group === 'sd' && f.def && f.current).sort((a, b) => b.period.localeCompare(a.period) || b.total - a.total)[0] ?? formats[0];
 ---
 <Base title="VGC usage" description="VGC usage stats: most used Pokémon, moves, items, spreads and teammates from Showdown, online tournaments and official majors.">
+  <script is:inline>
+    // back where you left off: last format/month/rating and Pokémon you looked at
+    try { const last = localStorage.getItem('ardex-usage-last'); if (last && !location.hash && last.split('#')[0] !== location.pathname) location.replace(last); } catch {}
+  </script>
   <h1>VGC usage <em class="kind">(tool)</em></h1>
   {def ? <Usage id={def.id} /> : <p>No usage data yet.</p>}
 </Base>

@@ -80,6 +80,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Showdown formats: every month with a real ladder at 1500+ and 1760+ (Month dropdown + rating toggle); the default view is the last full month at 1760+ (matches Pikalytics).
 - Tournaments and majors show how much data is behind them (events, team sheets, battles). No event dropdown. Official majors have an "Events in this data" table sorted by battles (each event links to its own page); Limitless tournaments are never listed or given pages by name (grassroots names look like spam). Each Pokémon shows its team count.
 - "Add set to Teambuilder ▾" opens a list of your saved teams (plus "+ New team") and adds the set to the one you pick; "Copy as Showdown text".
+- Remembers your spot (localStorage): /usage/ and the Tools link reopen the last format, month, rating and Pokémon; switching format, month or rating keeps the same Pokémon; the set builder stays open or closed as you left it.
 - Data refreshes weekly via GitHub Actions (.github/workflows/usage.yml). No Smogon analyses or Pikalytics scraping.
 
 ## Docs index
@@ -94,3 +95,4 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 - Stat bars use Showdown's formula, sized as at Lv. 100, and move with EVs/IVs/nature/level. Don't change how much they move.
 - Nature is set by typing + or - after a stat's EVs (no +/- buttons).
 - + adds an empty slot; changing a slot's Pokémon resets EVs, IVs and nature.
+- Sets added or imported are converted to the team's format: EVs -> Stat Points for Champions teams (66 total, 32 max, Lv 50, 31 IVs) and Stat Points -> EVs for other teams; an empty team takes the set's format. The message says when a set was converted.
