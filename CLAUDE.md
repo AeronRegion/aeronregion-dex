@@ -31,7 +31,7 @@ Neutral and non-salesy. Linked from aeronregion.net; lives in its own repo.
 
 ### Homepage
 - Heading: "Welcome to ARdex" (no "the Aeron Region Pokédex").
-- Logo: keep the current live logo exactly as it is. Do not change it.
+- No logo image on ARdex (it stays on aeronregion.net only); the header shows the "ARdex" text with the tagline "All data and tools in one place" (hidden on phones).
 - Background: Trick Room battle image, darkened.
 - Pokémon of the day: shows abilities (hidden marked), EV yield, Cobbleverse spawn, stats.
   The card is NOT one big link; the Pokémon name and each ability link separately.

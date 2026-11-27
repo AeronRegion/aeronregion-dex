@@ -41,7 +41,7 @@ const isOn = (m: { match: string[] }) => m.match.some((x) => path.startsWith(x))
   <body>
     <header class="site-header">
       <div class="wrap bar">
-        <a href="/" class="brand"><img src="/icon-96.png" alt="" width="40" height="40" />ARdex</a>
+        <a href="/" class="brand"><span class="bt">ARdex<small class="tag">All data and tools in one place</small></span></a>
         <nav class="nav" aria-label="Main">
           {menus.map((m) => m.items ? (
             <div class:list={['more', { on: isOn(m) }]}>

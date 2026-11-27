@@ -26,3 +26,4 @@
 - 2026-11-26: Teambuilder: when the move list is narrow (side by side with the EVs), each move's description shows as a second line instead of being hidden
 - 2026-11-26: Moves list: tag filter now includes every tag in the data (Let's Go exclusive, Z-Move, Max Move, G-Max Move), so tag links on move pages filter correctly
 - 2026-11-26: Type pages: removed the color square before the type name in the title
+- 2026-11-26: Header: removed the logo image (it stays on aeronregion.net only); added the tagline "All data and tools in one place" under ARdex (hidden on phones)

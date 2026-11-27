@@ -501,3 +501,7 @@ table.data small.hx { display: block; font-size: .68rem; font-weight: 600; color
   #ed.sd .mlist[data-kind='mv'] .mr > .d:nth-child(7) { display: block !important; grid-column: 1 / -1; margin-top: -.15rem; font-size: .74rem; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #ed.sd .mlist[data-kind='mv'] .mr { row-gap: 0 !important; }
 }
+/* tagline under the ARdex logo text */
+.brand .bt { display: flex; flex-direction: column; line-height: 1.05; font-weight: 800 !important; }
+.brand .tag { font-family: 'Segoe UI', system-ui, sans-serif; font-weight: 400; font-size: .68rem; letter-spacing: 0; opacity: .8; margin-top: 1px; }
+@media (max-width: 640px) { .brand .tag { display: none; } }
