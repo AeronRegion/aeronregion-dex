@@ -365,6 +365,7 @@ import { GAMES, meta } from '../lib/data';
       };
       const focusNext = (sel2: string) => (ed.querySelector<HTMLInputElement>(sel2))?.focus();
       const choose = (key: string) => {
+        if (field) field.dataset.picked = '1';
         if (kind === 'mv') { m.moves[slot] = key; save(); const next = slot + 1; drawEd(); if (next < 4) ed.querySelectorAll<HTMLInputElement>('.mvin')[next]?.focus(); return; }
         if (kind === 'sp') { const n = +key; t.mons[sel] = { ...newMon(n), level: m.level }; save(); drawTeams(); drawStrip(); drawEd(); focusNext('#f-ab'); return; }
         if (kind === 'ab') { m.ab = key; save(); drawEd(); focusNext('#f-item'); return; }
@@ -374,6 +375,9 @@ import { GAMES, meta } from '../lib/data';
       // No redraw here, so the click that caused the blur still lands where it was aimed.
       const best = (v: string, names: [string, string][]) => { const lv = v.toLowerCase(); return (names.find(([, n]) => n.toLowerCase() === lv) ?? names.find(([, n]) => n.toLowerCase().startsWith(lv)) ?? names.find(([, n]) => n.toLowerCase().includes(lv)))?.[0]; };
       const commit = (inp: HTMLInputElement, k: Kind, j: number) => {
+        // a box that was already replaced (picking from the list redraws the editor) fires a late 'change' with the
+        // half-typed text; ignore it, or it would overwrite the pick (e.g. "char" -> Charcoal instead of Charizardite Y)
+        if (!inp.isConnected || inp.dataset.picked) return;
         const v = inp.value.trim();
         if (k === 'mv') {
           const key = v ? best(v, movePool.map((x) => [x, idx.moves[x][0]])) : '';

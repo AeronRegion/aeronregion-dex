@@ -46,3 +46,4 @@
 - 2026-11-26: Category icons redrawn closer to PokemonDB (red-outlined white burst, blue tilted rings, grey/dark tilted pill); multi-hit count sits at the left edge of the Power cell so power numbers line up
 - 2026-11-26: Header search box shortened (190px, "Search…", list opens leftwards); type tiles, type chart and nature chart centered in the page
 - 2026-11-26: Coverage Defense colors restored in dark mode; usage dropdown rows always one line; team-sheet names cleaned (typos, casing, placeholders merged); names without a page shown unlinked; cosmetic-form evolution links (Vivillon-Fancy etc.) go to the base page; new npm run check:links
+- 2026-11-27: Teambuilder: picking an item/move/ability from the list can no longer be overwritten by the half-typed text when you leave the box (e.g. "char" turning into Charcoal)
