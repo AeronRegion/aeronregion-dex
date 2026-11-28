@@ -74,7 +74,7 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
             ))}
           </tbody>
         </table>
-        <div class="g2">
+        <div class="g2 one">
           <label><span>Nature</span><select class="field" data-k="nat"></select></label>
           <label><span>Status</span><select class="field" data-k="st">
             <option value="">Healthy</option><option value="brn">Burned</option><option value="par">Paralyzed</option><option value="psn">Poisoned</option><option value="tox">Badly poisoned</option><option value="slp">Asleep</option><option value="frz">Frozen</option>
@@ -599,6 +599,10 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
   .calc .g2 > label { display: flex; align-items: center; gap: .35rem; font-size: .8rem; min-width: 0; }
   .calc .g2 > label > span:first-child { width: 3.6rem; flex: none; color: var(--ink-soft); }
   .calc .g2 > label.wide { grid-column: 1 / -1; }
+  /* Nature, Status, Ability, Item: one column, boxes a fixed comfortable width (long names like "Protosynthesis" fit) */
+  .calc .g2.one { grid-template-columns: 1fr; }
+  .calc .g2.one .field { flex: none; width: 14rem; max-width: 100%; }
+  .calc .g2.one .itw { flex: none; }
   /* Level + Tera on one short row: small level box, Tera box wide enough for "Fighting" / "Electric" */
   .calc .g2.top { display: flex; flex-wrap: wrap; gap: .3rem 1rem; }
   .calc .g2.top > label { flex: none; }
@@ -609,7 +613,7 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
   .calc .g2 .field { flex: 1; min-width: 0; }
   .calc .g2 [hidden] { display: none; }
   .calc .itw { display: flex; align-items: center; gap: .25rem; flex: 1; min-width: 0; }
-  .calc .itw img { flex: none; }
+  .calc .itw img { flex: none; order: 2; } /* icon after the box so the box lines up with Nature/Status/Ability */
   .calc .chk { display: inline-flex; align-items: center; gap: .2rem; font-size: .78rem; white-space: nowrap; }
   .calc .chk label { cursor: pointer; }
   .calc .chk[hidden] { display: none; }
@@ -621,8 +625,8 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
   .calc textarea.field { height: auto; }
   .calc .stt { width: 100%; border-collapse: collapse; margin-top: .5rem; font-size: .8rem; table-layout: fixed; }
   /* big stat bars (Showdown's formula, 130px at the top): they visibly move with EVs, IVs, nature and level */
-  .calc .stt th:nth-child(3) { width: 136px; } .calc .stt .sbar { padding-left: 4px; overflow: hidden; } .calc .stt .sbar i { display: block; height: 10px; transition: width .12s; }
-  .calc .stt .evc { width: 15%; } .calc .evr { width: 100%; accent-color: #59c4fb; margin: 0; }
+  .calc .stt th:nth-child(3) { width: 92px; } .calc .stt .sbar { padding-left: 4px; overflow: hidden; } .calc .stt .sbar i { display: block; height: 10px; transition: width .12s; }
+  .calc .stt .evc { padding: 0 6px; } .calc .evr { width: 100%; accent-color: #59c4fb; margin: 0; }
   .calc .stt th:nth-child(2) { width: 2.2rem; } .calc .stt th:nth-child(4), .calc .stt th:nth-child(6) { width: 2.9rem; } .calc .stt th:nth-child(7) { width: 2.4rem; } .calc .stt th:nth-child(8) { width: 3.3rem; }
   .calc .stt th, .calc .stt td { padding: 1px 3px; height: 26px; }
   .calc .stt thead th { font-weight: 600; color: var(--ink-soft); font-size: .72rem; border-bottom: 1px solid var(--line-2); }

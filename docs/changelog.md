@@ -67,3 +67,4 @@
 - 2026-11-27: Damage calc: no 510 EV total cap; EVs left shows negative in red
 - 2026-11-27: Damage calc: bigger stat bars that move more with EVs
 - 2026-11-27: Damage calc: type effectiveness labels on move results, bigger stat bars, small Level box, Tera box fits every type, Nature/Status/Ability/Item in 2x2
+- 2026-11-28: Damage calc: wider EV sliders; Nature/Status/Ability/Item in one column so abilities aren't cut off
