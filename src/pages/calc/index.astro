@@ -32,6 +32,7 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
     </div>
     <button type="button" class="main" id="main" title="Click to copy"></button>
     <span class="copied soft" id="copied" hidden>Copied</span>
+    <p class="spd soft" id="spd"></p>
     <details class="rolls" id="rollsd"><summary>Possible damage amounts</summary><p id="rolls"></p></details>
   </section>
 
@@ -284,6 +285,17 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
       const r = results[a][i];
       $('main').textContent = r ? r.desc : 'Pick a move.';
       $('rolls').textContent = r && r.rolls.length ? `(${r.rolls.join(', ')})` : '—';
+      // who moves first: speed after boosts, Choice Scarf, paralysis and Tailwind (priority and Trick Room not counted)
+      const spe = [0, 1].map((k) => {
+        const m = S.mons[k]; let v = (pk[k].rawStats as any).spe; const b = m.bo.spe;
+        v = Math.floor(v * (b >= 0 ? (2 + b) / 2 : 2 / (2 - b)));
+        if (m.it === 'Choice Scarf') v = Math.floor(v * 1.5);
+        if (m.st === 'par') v = Math.floor(v * (gen.num >= 7 ? 0.5 : 0.25));
+        if (S.sides[k].isTailwind) v *= 2;
+        return v;
+      });
+      $('spd').textContent = `Speed: ${S.mons[0].sp} ${spe[0]}, ${S.mons[1].sp} ${spe[1]} — ` +
+        (spe[0] === spe[1] ? 'speed tie' : `${S.mons[spe[0] > spe[1] ? 0 : 1].sp} moves first`);
       for (const p of [0, 1]) for (const k of ['sl1', 'sl2']) document.querySelectorAll(`[data-k="${k}"]`).forEach((e) => (e.textContent = S.mons[k === 'sl1' ? 0 : 1].sp));
       save();
     };
@@ -568,10 +580,13 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
   html[data-theme='dark'] .calc .mb.on { background: #1f3550; }
   .calc .mb.empty { cursor: default; opacity: .45; }
   /* the result line is a button: click copies it */
-  .calc .main { display: inline-block; margin: .45rem 0 .2rem -.35rem; padding: .15rem .35rem; font: inherit; font-size: .9rem; line-height: 1.45; text-align: left; color: var(--ink); background: none; border: 1px solid transparent; border-radius: 3px; cursor: copy; }
-  .calc .main:hover { border-color: var(--line-2); background: var(--petal-deep); }
-  .calc .main:active { box-shadow: inset 0 2px 3px rgb(0 0 0 / .2); }
+  .calc .main { display: inline-block; margin: .45rem 0 .2rem -.35rem; padding: .15rem .35rem; font: inherit; font-size: .9rem; line-height: 1.45; text-align: left; color: var(--ink); background: none; border: 1px solid transparent; border-radius: 3px; }
+  /* like Showdown: hovering only changes the text color (pointer cursor), no box */
+  .calc .main { cursor: pointer; border: 0 !important; }
+  .calc .main:hover { color: var(--link); }
+  .calc .main:active { color: var(--link); opacity: .8; }
   .calc .main:focus-visible { outline: 2px solid #2b7bd6; outline-offset: 1px; }
+  .calc .spd { font-size: .8rem; margin: .1rem 0 .2rem; }
   .calc .copied { font-size: .78rem; margin-left: .4rem; color: #2e8b3e; }
 
   .calc .rolls summary { font-size: .78rem; color: var(--ink-soft); cursor: pointer; }
@@ -608,7 +623,7 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
   .calc .g2.top > label { flex: none; }
   .calc .g2.top > label > span:first-child { width: auto; }
   .calc .g2.top .lvn, .calc .g2.top [data-k='lv'] { flex: none; width: 3.4rem; text-align: right; }
-  .calc .g2.top [data-k='tera'] { flex: none; width: 7.6rem; }
+  .calc .g2.top [data-k='tera'] { flex: none; width: 8.6rem; }
   .calc .g2 > label > span:first-child { width: 3rem; }
   .calc .g2 .field { flex: 1; min-width: 0; }
   .calc .g2 [hidden] { display: none; }
@@ -627,7 +642,9 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
   /* big stat bars (Showdown's formula, 130px at the top): they visibly move with EVs, IVs, nature and level */
   .calc .stt th:nth-child(3) { width: 92px; } .calc .stt .sbar { padding-left: 4px; overflow: hidden; } .calc .stt .sbar i { display: block; height: 10px; transition: width .12s; }
   .calc .stt .evc { padding: 0 6px; } .calc .evr { width: 100%; accent-color: #59c4fb; margin: 0; }
-  .calc .stt th:nth-child(2) { width: 2.2rem; } .calc .stt th:nth-child(4), .calc .stt th:nth-child(6) { width: 2.9rem; } .calc .stt th:nth-child(7) { width: 2.4rem; } .calc .stt th:nth-child(8) { width: 3.3rem; }
+  .calc .stt th:nth-child(2) { width: 2.2rem; } .calc .stt th:nth-child(4) { width: 3.1rem; } .calc .stt th:nth-child(6) { width: 2.7rem; } .calc .stt th:nth-child(7) { width: 2.6rem; } .calc .stt th:nth-child(8) { width: 2.6rem; }
+  /* headers sit over their own column: EVs/IVs/Stat right-aligned like the numbers, Boost centered */
+  .calc .stt thead th:nth-child(4), .calc .stt thead th:nth-child(6), .calc .stt thead th:nth-child(7) { text-align: right; padding-right: 6px; } .calc .stt thead th:nth-child(8) { text-align: center; }
   .calc .stt th, .calc .stt td { padding: 1px 3px; height: 26px; }
   .calc .stt thead th { font-weight: 600; color: var(--ink-soft); font-size: .72rem; border-bottom: 1px solid var(--line-2); }
   .calc .stt tbody th { text-align: left; font-weight: 600; width: 2.6rem; }
@@ -636,7 +653,8 @@ const STATS = [['hp', 'HP'], ['atk', 'Atk'], ['def', 'Def'], ['spa', 'SpA'], ['s
   .calc .stt .num { width: 100%; text-align: right; }
   .calc .stt .tot { font-weight: 600; }
   .calc .stt .tot.up { color: #d4572a; } .calc .stt .tot.dn { color: #2b7bd6; }
-  .calc .stt .bst { width: 100%; padding-right: 1.2rem !important; }
+  /* small boost box: just the number, no arrow */
+  .calc .stt .bst { width: 100%; padding: 0 .2rem !important; background-image: none !important; text-align: center; text-align-last: center; -webkit-appearance: none; appearance: none; }
   .calc .stt [hidden] { display: none; }
   /* no spin arrows: they eat the space the number needs */
   .calc .num { -moz-appearance: textfield; appearance: textfield; }

@@ -68,3 +68,4 @@
 - 2026-11-27: Damage calc: bigger stat bars that move more with EVs
 - 2026-11-27: Damage calc: type effectiveness labels on move results, bigger stat bars, small Level box, Tera box fits every type, Nature/Status/Ability/Item in 2x2
 - 2026-11-28: Damage calc: wider EV sliders; Nature/Status/Ability/Item in one column so abilities aren't cut off
+- 2026-11-28: Damage calc: result line hover like Showdown (color only), speed comparison line, small boost boxes, aligned stat headers, Tera box fits Fighting
